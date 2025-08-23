@@ -16,17 +16,18 @@ import { LuBadgeCheck } from "react-icons/lu";
 const StyledDottedContainer = styled.div`
   position: relative;
   width: 100%;
-  min-width: 300px;
-  max-width: 500px;
-  border-radius: 15px;
-  height: 460px;
+  min-width: clamp(18.75rem, 50vw, 31.25rem);
+  max-width: clamp(31.25rem, 60vw, 37.5rem);
+  border-radius: 0.9375rem;
+  height: clamp(28.75rem, 60vw, 28.75rem);
+  aspect-ratio: 500 / 460;
 
   .jc {
     position: absolute;
     top: 0;
     left: 0;
-    padding: 12px;
-    border-radius: 15px;
+    padding: clamp(0.75rem, 1.5vw, 1rem);
+    border-radius: 0.9375rem;
     border: 1px solid #e0e0e0;
     background: #f3f3f3;
     --line-color-1: #e3e3e3;
@@ -42,21 +43,31 @@ const StyledDottedContainer = styled.div`
       -1px -1px,
       -1px -1px;
     background-size:
-      100px 100px,
-      100px 100px,
-      20px 20px,
-      20px 20px;
+      clamp(6.25rem, 12.5vw, 6.25rem) clamp(6.25rem, 12.5vw, 6.25rem),
+      clamp(6.25rem, 12.5vw, 6.25rem) clamp(6.25rem, 12.5vw, 6.25rem),
+      clamp(1.25rem, 2.5vw, 1.25rem) clamp(1.25rem, 2.5vw, 1.25rem),
+      clamp(1.25rem, 2.5vw, 1.25rem) clamp(1.25rem, 2.5vw, 1.25rem);
   }
 
-  @media only screen and (max-width: 1085px) {
+  @media only screen and (max-width: 67.8125rem) {
     display: none;
+  }
+
+  @media screen and (min-resolution: 144dpi) {
+    min-width: clamp(15rem, 45vw, 25rem);
+    height: clamp(23rem, 50vw, 23rem);
   }
 `;
 
 export const Section3 = () => {
   return (
-    <Container size="xl" py="80">
-      <Flex justify="center" gap="80" align="center">
+    <Container size="xl" py="clamp(3rem, 10vw, 5rem)">
+      <Flex
+        justify="center"
+        gap="clamp(2rem, 8vw, 5rem)"
+        align="center"
+        direction={{ base: "column", lg: "row" }}
+      >
         <StyledDottedContainer>
           <Image
             className="jc"

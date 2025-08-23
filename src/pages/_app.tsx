@@ -41,12 +41,54 @@ const theme = createTheme({
     ],
   },
   radius: {
-    lg: "12px",
+    lg: "0.75rem",
+  },
+  // Add responsive breakpoints
+  breakpoints: {
+    xs: "30em", // 480px
+    sm: "48em", // 768px
+    md: "64em", // 1024px
+    lg: "74em", // 1184px
+    xl: "90em", // 1440px
+  },
+  // Responsive font sizes
+  fontSizes: {
+    xs: "clamp(0.75rem, 1.5vw, 0.875rem)",
+    sm: "clamp(0.875rem, 2vw, 1rem)",
+    md: "clamp(1rem, 2.5vw, 1.125rem)",
+    lg: "clamp(1.125rem, 3vw, 1.25rem)",
+    xl: "clamp(1.25rem, 3.5vw, 1.5rem)",
+  },
+  // Responsive spacing
+  spacing: {
+    xs: "clamp(0.25rem, 1vw, 0.5rem)",
+    sm: "clamp(0.5rem, 1.5vw, 0.75rem)",
+    md: "clamp(0.75rem, 2vw, 1rem)",
+    lg: "clamp(1rem, 2.5vw, 1.5rem)",
+    xl: "clamp(1.5rem, 3vw, 2rem)",
   },
   components: {
     Button: {
       defaultProps: {
         fw: 500,
+      },
+      styles: {
+        root: {
+          fontSize: "clamp(0.875rem, 2vw, 1rem)",
+          padding: "clamp(0.5rem, 1.5vw, 0.75rem) clamp(1rem, 2.5vw, 1.5rem)",
+          minHeight: "2.75rem",
+        },
+      },
+    },
+    Container: {
+      defaultProps: {
+        size: "xl",
+      },
+      styles: {
+        root: {
+          maxWidth: "min(100vw - 2rem, 1400px)",
+          padding: "0 clamp(1rem, 2.5vw, 2rem)",
+        },
       },
     },
   },

@@ -18,24 +18,25 @@ const StyledDottedContainer = styled.div`
   position: relative;
   background-color: #f3f3f3;
   background-image: radial-gradient(#e0e0e0 3px, transparent 0);
-  background-size: 40px 40px;
+  background-size: clamp(2.5rem, 5vw, 2.5rem) clamp(2.5rem, 5vw, 2.5rem);
   border: 1px solid #e0e0e0;
 
   width: 100%;
-  min-width: 300px;
-  max-width: 500px;
-  border-radius: 15px;
-  height: 460px;
+  min-width: clamp(18.75rem, 50vw, 31.25rem);
+  max-width: clamp(31.25rem, 60vw, 37.5rem);
+  border-radius: 0.9375rem;
+  height: clamp(28.75rem, 60vw, 28.75rem);
+  aspect-ratio: 500 / 460;
 
   .jc {
     position: absolute;
     top: 0;
     left: 0;
-    padding: 12px;
-    border-radius: 15px;
-    transform: translate(-80px, 10%);
+    padding: clamp(0.75rem, 1.5vw, 1rem);
+    border-radius: 0.9375rem;
+    transform: translate(clamp(-5rem, -8vw, -5rem), 10%);
     border: 1px solid #000;
-    box-shadow: 0px 4px 0px 0px #000;
+    box-shadow: 0px 0.25rem 0px 0px #000;
     background: #f3f3f3;
     --line-color-1: #e3e3e3;
     --line-color-2: #e5e5e5;
@@ -50,10 +51,10 @@ const StyledDottedContainer = styled.div`
       -1px -1px,
       -1px -1px;
     background-size:
-      100px 100px,
-      100px 100px,
-      20px 20px,
-      20px 20px;
+      clamp(6.25rem, 12.5vw, 6.25rem) clamp(6.25rem, 12.5vw, 6.25rem),
+      clamp(6.25rem, 12.5vw, 6.25rem) clamp(6.25rem, 12.5vw, 6.25rem),
+      clamp(1.25rem, 2.5vw, 1.25rem) clamp(1.25rem, 2.5vw, 1.25rem),
+      clamp(1.25rem, 2.5vw, 1.25rem) clamp(1.25rem, 2.5vw, 1.25rem);
   }
 
   .jcode {
@@ -61,22 +62,32 @@ const StyledDottedContainer = styled.div`
     top: 0;
     left: 0;
     transform: translate(80%, 80%);
-    width: 273px;
-    border-radius: 15px;
+    width: clamp(17.0625rem, 35vw, 17.0625rem);
+    border-radius: 0.9375rem;
     border: 1px solid #000;
-    box-shadow: 0px 4px 0px 0px #000;
+    box-shadow: 0px 0.25rem 0px 0px #000;
     overflow: hidden;
   }
 
-  @media only screen and (max-width: 1085px) {
+  @media only screen and (max-width: 67.8125rem) {
     display: none;
+  }
+
+  @media screen and (min-resolution: 144dpi) {
+    min-width: clamp(15rem, 45vw, 25rem);
+    height: clamp(23rem, 50vw, 23rem);
   }
 `;
 
 export const Section2 = () => {
   return (
-    <Container size="xl" py="80">
-      <Flex justify="center" gap="80" align="center">
+    <Container size="xl" py="clamp(3rem, 10vw, 5rem)">
+      <Flex
+        justify="center"
+        gap="clamp(2rem, 8vw, 5rem)"
+        align="center"
+        direction={{ base: "column-reverse", lg: "row" }}
+      >
         <Stack maw={634}>
           <Title
             lh="1.1"
@@ -127,13 +138,14 @@ export const Section2 = () => {
         <StyledDottedContainer>
           <Image className="jc" src="/assets/diagram.svg" alt="diagram" loading="lazy" />
           <JsonInput
-            w={273}
+            w="clamp(17.0625rem, 35vw, 17.0625rem)"
             rows={12}
             className="jcode"
             styles={{
               input: {
                 border: "none",
-                fontSize: 12,
+                fontSize: "clamp(0.75rem, 1.5vw, 0.875rem)",
+                lineHeight: 1.4,
               },
             }}
             value={JSON.stringify(

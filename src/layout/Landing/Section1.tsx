@@ -12,8 +12,8 @@ const StyledImageWrapper = styled.div`
     height: 100%;
     top: 0;
     left: 0;
-    padding: 12px;
-    border-radius: 15px;
+    padding: clamp(0.75rem, 1.5vw, 1rem);
+    border-radius: 0.9375rem;
     border: 1px solid #e0e0e0;
     background: #f3f3f3;
     --line-color-1: #e3e3e3;
@@ -29,10 +29,10 @@ const StyledImageWrapper = styled.div`
       -1px -1px,
       -1px -1px;
     background-size:
-      100px 100px,
-      100px 100px,
-      20px 20px,
-      20px 20px;
+      clamp(6.25rem, 12.5vw, 6.25rem) clamp(6.25rem, 12.5vw, 6.25rem),
+      clamp(6.25rem, 12.5vw, 6.25rem) clamp(6.25rem, 12.5vw, 6.25rem),
+      clamp(1.25rem, 2.5vw, 1.25rem) clamp(1.25rem, 2.5vw, 1.25rem),
+      clamp(1.25rem, 2.5vw, 1.25rem) clamp(1.25rem, 2.5vw, 1.25rem);
   }
 
   img {
@@ -42,20 +42,20 @@ const StyledImageWrapper = styled.div`
 
 export const Section1 = () => {
   return (
-    <Container size="xl" py="80">
+    <Container size="xl" py="clamp(3rem, 10vw, 5rem)">
       <Title
         lh="1.1"
         fz={{
-          base: 26,
-          xs: 46,
-          sm: 52,
+          base: "clamp(1.625rem, 4vw, 2rem)",
+          xs: "clamp(2.25rem, 5vw, 2.875rem)",
+          sm: "clamp(2.625rem, 6vw, 3.25rem)",
         }}
-        maw="16ch"
+        maw="clamp(12ch, 90vw, 16ch)"
         ta="center"
         order={2}
         c="gray.9"
         mx="auto"
-        mb="15"
+        mb="clamp(0.9375rem, 3vw, 0.9375rem)"
       >
         Make working with JSON easy
       </Title>
@@ -63,12 +63,18 @@ export const Section1 = () => {
         order={3}
         fw={400}
         c="gray.7"
-        px="lg"
+        px="clamp(1rem, 3vw, 1.5rem)"
         mx="auto"
         ta="center"
-        mb={50}
-        fz={{ base: 16, sm: 18 }}
-        w={{ base: "100%", md: "600" }}
+        mb="clamp(3.125rem, 8vw, 3.125rem)"
+        fz={{
+          base: "clamp(1rem, 2.5vw, 1rem)",
+          sm: "clamp(1.125rem, 3vw, 1.125rem)",
+        }}
+        w={{
+          base: "100%",
+          md: "clamp(37.5rem, 80vw, 37.5rem)",
+        }}
       >
         JSON Crack eliminates the chaos of raw, messy data, making the complex appear simple and
         easy to understand.
@@ -80,12 +86,12 @@ export const Section1 = () => {
         }}
       >
         <Stack
-          p="lg"
-          m="lg"
-          maw="360"
+          p="clamp(1rem, 2.5vw, 1.5rem)"
+          m="clamp(1rem, 2.5vw, 1.5rem)"
+          maw="clamp(22.5rem, 90vw, 22.5rem)"
           mx="auto"
           style={{
-            borderRadius: "17px",
+            borderRadius: "clamp(1.0625rem, 2.5vw, 1.0625rem)",
             border: "1px solid #e0e0e0",
           }}
         >
@@ -100,12 +106,12 @@ export const Section1 = () => {
           </Text>
         </Stack>
         <Stack
-          p="lg"
-          m="lg"
-          maw="360"
+          p="clamp(1rem, 2.5vw, 1.5rem)"
+          m="clamp(1rem, 2.5vw, 1.5rem)"
+          maw="clamp(22.5rem, 90vw, 22.5rem)"
           mx="auto"
           style={{
-            borderRadius: "17px",
+            borderRadius: "clamp(1.0625rem, 2.5vw, 1.0625rem)",
             border: "1px solid #e0e0e0",
           }}
         >
@@ -121,12 +127,12 @@ export const Section1 = () => {
           </Text>
         </Stack>
         <Stack
-          p="lg"
-          m="lg"
-          maw="360"
+          p="clamp(1rem, 2.5vw, 1.5rem)"
+          m="clamp(1rem, 2.5vw, 1.5rem)"
+          maw="clamp(22.5rem, 90vw, 22.5rem)"
           mx="auto"
           style={{
-            borderRadius: "17px",
+            borderRadius: "clamp(1.0625rem, 2.5vw, 1.0625rem)",
             border: "1px solid #e0e0e0",
           }}
         >
