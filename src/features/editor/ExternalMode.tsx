@@ -132,7 +132,7 @@ const ExternalMode = () => {
       </Group>
       <Flex justify="center" align="center" gap="sm" mt="md">
         <Anchor
-          href="https://github.com/AykutSarac/jsoncrack.com"
+          href="https://github.com/codebydaksh/jsoncrack-enhanced"
           rel="noopener"
           target="_blank"
           fz="sm"

@@ -81,7 +81,7 @@ export const Footer = () => {
               </Anchor>
               <Anchor
                 aria-label="GitHub"
-                href="https://github.com/AykutSarac/jsoncrack.com"
+                href="https://github.com/codebydaksh/jsoncrack-enhanced"
                 fz="sm"
                 rel="noopener"
               >

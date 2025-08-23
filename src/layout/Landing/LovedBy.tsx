@@ -1,12 +1,7 @@
 import React from "react";
 import { Button, Container, Flex, Text } from "@mantine/core";
 import styled from "styled-components";
-import CountUp from "react-countup";
 import { FaGithub, FaHackerNews, FaLinkedin, FaProductHunt, FaXTwitter } from "react-icons/fa6";
-
-interface LovedByProps {
-  stars: number;
-}
 
 const StyledFeaturedItem = styled.a`
   display: flex;
@@ -21,18 +16,17 @@ const StyledFeaturedItem = styled.a`
   }
 `;
 
-const Featured = ({ stars }: LovedByProps) => {
+const Featured = () => {
   return (
     <Flex align="center" justify="center" gap="lg" wrap="wrap">
       <StyledFeaturedItem
-        href="https://github.com/AykutSarac/jsoncrack.com"
+        href="https://github.com/codebydaksh/jsoncrack-enhanced"
         target="_blank"
         rel="noopener"
       >
         <FaGithub color="black" size={28} />
         <Text fz="md" fw={600} c="gray.8">
-          <CountUp startVal={0} end={stars} enableScrollSpy scrollSpyOnce scrollSpyDelay={200} />{" "}
-          Stars
+          JSON Crack Enhanced
         </Text>
       </StyledFeaturedItem>
       <StyledFeaturedItem
@@ -59,10 +53,10 @@ const Featured = ({ stars }: LovedByProps) => {
   );
 };
 
-export const LovedBy = ({ stars }: LovedByProps) => {
+export const LovedBy = () => {
   return (
     <Container pos="relative" mx="auto" pb="20" pt={60}>
-      <Featured stars={stars} />
+      <Featured />
       <Flex wrap="wrap" justify="center" gap="md" mt="md">
         <Button
           component="a"

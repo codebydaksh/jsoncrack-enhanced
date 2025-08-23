@@ -1,9 +1,8 @@
 import React from "react";
 import { Oxygen } from "next/font/google";
-import Link from "next/link";
 import { Stack, Flex, Button } from "@mantine/core";
 import styled from "styled-components";
-import { FaChevronRight, FaGithub, FaStar } from "react-icons/fa6";
+import { FaChevronRight } from "react-icons/fa6";
 
 const oxygen = Oxygen({
   subsets: ["latin-ext"],
@@ -101,27 +100,21 @@ const StyledHeroText = styled.h2`
   }
 `;
 
-export const HeroSection = ({ stars = 0 }) => {
+export const HeroSection = () => {
   return (
     <StyledHeroSection>
       <StyledHeroSectionBody>
         <Stack flex="1" miw={250} mx="auto" align="center">
-          <Link href="https://github.com/AykutSarac/jsoncrack.com" target="_blank" rel="noopener">
-            <Button
-              variant="default"
-              radius="xl"
-              ta="left"
-              leftSection={<FaGithub size="18" />}
-              rightSection={
-                <Flex ml="sm" c="dimmed" align="center" gap="4">
-                  <FaStar />
-                  {stars.toLocaleString("en-US")}
-                </Flex>
-              }
-            >
-              GitHub
-            </Button>
-          </Link>
+          {/* JSON Crack Enhanced branding */}
+          <h1 style={{ 
+            fontSize: '1.5rem', 
+            fontWeight: 'bold', 
+            color: '#115fe6',
+            margin: '0 0 1rem 0',
+            textAlign: 'center'
+          }}>
+            JSON Crack Enhanced
+          </h1>
 
           <StyledHeroTitle>Visualize JSON into interactive graphs</StyledHeroTitle>
           <StyledHeroText>
