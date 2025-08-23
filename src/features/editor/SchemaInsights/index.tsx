@@ -17,6 +17,8 @@ import {
   Card,
   Loader,
   Center,
+  Switch,
+  Tooltip,
 } from "@mantine/core";
 import {
   FiInfo,
@@ -26,8 +28,11 @@ import {
   FiDatabase,
   FiChevronDown,
   FiChevronUp,
+  FiRefreshCw,
+  FiZap,
 } from "react-icons/fi";
 import { TbBraces, TbSpeedboat, TbBulb } from "react-icons/tb";
+import useJson from "../../../store/useJson";
 import useSchemaIntelligence from "../../../store/useSchemaIntelligence";
 import { PatternType, SuggestionSeverity } from "../../../types/schema";
 
@@ -36,11 +41,32 @@ interface SchemaInsightsProps {
 }
 
 export const SchemaInsights: React.FC<SchemaInsightsProps> = ({ onClose }) => {
-  const { currentAnalysis, isAnalyzing, analysisError, selectedSuggestionId, selectSuggestion } =
-    useSchemaIntelligence();
+  const {
+    currentAnalysis,
+    isAnalyzing,
+    analysisError,
+    selectedSuggestionId,
+    realTimeEnabled,
+    selectSuggestion,
+    toggleRealTime,
+    analyzeData,
+  } = useSchemaIntelligence();
+  const getJson = useJson(state => state.getJson);
 
   const [activeTab, setActiveTab] = useState("overview");
   const [expandedSections, setExpandedSections] = useState<string[]>(["structure"]);
+
+  const handleManualRefresh = async () => {
+    try {
+      const jsonData = getJson();
+      if (jsonData && jsonData.trim()) {
+        const parsedData = JSON.parse(jsonData);
+        await analyzeData(parsedData);
+      }
+    } catch (error) {
+      console.error("Manual analysis failed:", error);
+    }
+  };
 
   if (isAnalyzing) {
     return (
@@ -150,11 +176,39 @@ export const SchemaInsights: React.FC<SchemaInsightsProps> = ({ onClose }) => {
             {Math.round(currentAnalysis.confidence * 100)}% confidence
           </Badge>
         </Group>
-        {onClose && (
-          <ActionIcon variant="subtle" onClick={onClose} size="sm">
-            <FiChevronUp size={16} />
-          </ActionIcon>
-        )}
+        <Group gap="xs">
+          <Tooltip
+            label={realTimeEnabled ? "Real-time analysis enabled" : "Real-time analysis disabled"}
+          >
+            <Switch
+              size="sm"
+              checked={realTimeEnabled}
+              onChange={toggleRealTime}
+              thumbIcon={
+                realTimeEnabled ? (
+                  <FiZap size={12} color="orange" />
+                ) : (
+                  <FiZap size={12} color="gray" />
+                )
+              }
+            />
+          </Tooltip>
+          <Tooltip label="Refresh analysis">
+            <ActionIcon
+              variant="subtle"
+              onClick={handleManualRefresh}
+              loading={isAnalyzing}
+              size="sm"
+            >
+              <FiRefreshCw size={16} />
+            </ActionIcon>
+          </Tooltip>
+          {onClose && (
+            <ActionIcon variant="subtle" onClick={onClose} size="sm">
+              <FiChevronUp size={16} />
+            </ActionIcon>
+          )}
+        </Group>
       </Group>
 
       <Divider />
@@ -299,6 +353,12 @@ export const SchemaInsights: React.FC<SchemaInsightsProps> = ({ onClose }) => {
                   Quick Stats
                 </Text>
                 <Stack gap="xs">
+                  <Group justify="space-between">
+                    <Text size="xs">Real-time Analysis</Text>
+                    <Badge size="xs" color={realTimeEnabled ? "green" : "gray"} variant="light">
+                      {realTimeEnabled ? "Active" : "Disabled"}
+                    </Badge>
+                  </Group>
                   {currentAnalysis.patterns.length > 0 && (
                     <Group justify="space-between">
                       <Text size="xs">Detected Patterns</Text>

@@ -1,3 +1,4 @@
+import debounce from "lodash.debounce";
 import { create } from "zustand";
 import { SchemaAnalysisEngine } from "../lib/utils/schemaAnalysis";
 import type { SchemaAnalysisResult, SchemaAnalysisConfig } from "../types/schema";
@@ -8,6 +9,7 @@ interface SchemaIntelligenceState {
   currentAnalysis: SchemaAnalysisResult | null;
   isAnalyzing: boolean;
   analysisError: string | null;
+  lastAnalyzedData: string | null; // Track last analyzed data for optimization
 
   // Configuration
   config: SchemaAnalysisConfig;
@@ -17,14 +19,17 @@ interface SchemaIntelligenceState {
   selectedSuggestionId: string | null;
   appliedSuggestions: string[];
   dismissedSuggestions: string[];
+  realTimeEnabled: boolean; // Control real-time analysis
 
   // Analysis Engine
   engine: SchemaAnalysisEngine;
 
   // Actions
   analyzeData: (data: any) => Promise<void>;
+  analyzeDataDebounced: (data: any) => void;
   updateConfig: (config: Partial<SchemaAnalysisConfig>) => void;
   toggleInsights: () => void;
+  toggleRealTime: () => void;
   selectSuggestion: (id: string | null) => void;
   applySuggestion: (id: string) => void;
   dismissSuggestion: (id: string) => void;
@@ -37,16 +42,36 @@ const useSchemaIntelligence = create<SchemaIntelligenceState>((set, get) => ({
   currentAnalysis: null,
   isAnalyzing: false,
   analysisError: null,
+  lastAnalyzedData: null,
   config: DEFAULT_SCHEMA_CONFIG,
   showInsights: false,
   selectedSuggestionId: null,
   appliedSuggestions: [],
   dismissedSuggestions: [],
+  realTimeEnabled: true,
   engine: new SchemaAnalysisEngine(DEFAULT_SCHEMA_CONFIG),
 
   // Actions
   analyzeData: async (data: any) => {
-    set({ isAnalyzing: true, analysisError: null });
+    const currentDataString = JSON.stringify(data);
+
+    // Skip analysis if data hasn't changed (optimization)
+    if (get().lastAnalyzedData === currentDataString) {
+      return;
+    }
+
+    // Skip analysis if data is too large (performance optimization)
+    if (currentDataString.length > 500000) {
+      // 500KB limit
+      set({
+        analysisError:
+          "Data too large for real-time analysis (>500KB). Analysis skipped for performance.",
+        isAnalyzing: false,
+      });
+      return;
+    }
+
+    set({ isAnalyzing: true, analysisError: null, lastAnalyzedData: currentDataString });
 
     try {
       const { engine } = get();
@@ -86,6 +111,13 @@ const useSchemaIntelligence = create<SchemaIntelligenceState>((set, get) => ({
     }
   },
 
+  analyzeDataDebounced: debounce((data: any) => {
+    const state = get();
+    if (state.realTimeEnabled && state.showInsights) {
+      state.analyzeData(data).catch(console.warn);
+    }
+  }, 1000), // 1 second debounce for real-time analysis
+
   updateConfig: (newConfig: Partial<SchemaAnalysisConfig>) => {
     const updatedConfig = { ...get().config, ...newConfig };
     const newEngine = new SchemaAnalysisEngine(updatedConfig);
@@ -93,11 +125,23 @@ const useSchemaIntelligence = create<SchemaIntelligenceState>((set, get) => ({
     set({
       config: updatedConfig,
       engine: newEngine,
+      // Clear last analyzed data to force re-analysis with new config
+      lastAnalyzedData: null,
     });
   },
 
   toggleInsights: () => {
-    set(state => ({ showInsights: !state.showInsights }));
+    const newShowInsights = !get().showInsights;
+    set({ showInsights: newShowInsights });
+
+    // If insights are turned off, clear the analysis to free memory
+    if (!newShowInsights) {
+      set({ currentAnalysis: null, lastAnalyzedData: null });
+    }
+  },
+
+  toggleRealTime: () => {
+    set(state => ({ realTimeEnabled: !state.realTimeEnabled }));
   },
 
   selectSuggestion: (id: string | null) => {
@@ -123,6 +167,7 @@ const useSchemaIntelligence = create<SchemaIntelligenceState>((set, get) => ({
       currentAnalysis: null,
       analysisError: null,
       selectedSuggestionId: null,
+      lastAnalyzedData: null, // Clear cache when manually clearing
     });
   },
 

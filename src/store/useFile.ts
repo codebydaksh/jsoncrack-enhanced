@@ -10,6 +10,7 @@ import { contentToJson, jsonToContent } from "../lib/utils/jsonAdapter";
 import useConfig from "./useConfig";
 import useHistory from "./useHistory";
 import useJson from "./useJson";
+import useSchemaIntelligence from "./useSchemaIntelligence";
 
 const defaultJson = JSON.stringify(exampleJson, null, 2);
 
@@ -73,6 +74,17 @@ const debouncedUpdateJson = debounce((value: unknown) => {
 
   // Add to history for undo/redo (debounced to avoid too many history entries)
   useHistory.getState().pushToHistory(jsonString);
+
+  // Trigger debounced schema analysis for real-time updates
+  const { analyzeDataDebounced } = useSchemaIntelligence.getState();
+  try {
+    if (value && typeof value === "object") {
+      analyzeDataDebounced(value);
+    }
+  } catch (error) {
+    // Ignore analysis errors for real-time updates
+    console.debug("Schema analysis skipped for invalid data", error);
+  }
 }, 400);
 
 // Separate debounced function for history tracking to avoid circular updates
