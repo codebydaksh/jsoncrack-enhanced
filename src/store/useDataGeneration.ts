@@ -489,7 +489,7 @@ const generateObjectFromFields = (fields: MockField[]): any => {
   return obj;
 };
 
-const useDataGeneration = create<DataGenerationState & DataGenerationActions>((set, get) => ({
+const useDataGeneration = create<DataGenerationState & DataGenerationActions>((set, _get) => ({
   // State
   templates: DEFAULT_TEMPLATES,
   customTemplates: [],

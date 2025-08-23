@@ -635,7 +635,7 @@ const useExportTemplates = create<ExportTemplateState & ExportTemplateActions>((
       switch (transformation.type) {
         case "filter":
           if (Array.isArray(result)) {
-            result = result.filter(item => {
+            result = result.filter(_item => {
               // Simple filter implementation
               return true; // Placeholder
             });
@@ -653,7 +653,7 @@ const useExportTemplates = create<ExportTemplateState & ExportTemplateActions>((
 
         case "sort":
           if (Array.isArray(result)) {
-            result = [...result].sort((a, b) => {
+            result = [...result].sort((_a, _b) => {
               // Simple sort implementation
               return 0; // Placeholder
             });

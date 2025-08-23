@@ -217,9 +217,11 @@ export const DataGenerationModal = ({ opened, onClose }: ModalProps) => {
     deleteTemplate,
   } = useDataGeneration();
 
+  const _addCustomTemplate = addCustomTemplate;
+
   const [generateCount, setGenerateCount] = React.useState(100);
   const [showCustomTemplateEditor, setShowCustomTemplateEditor] = React.useState(false);
-  const [editingTemplate, setEditingTemplate] = React.useState<DataTemplate | null>(null);
+  const [_editingTemplate, setEditingTemplate] = React.useState<DataTemplate | null>(null);
 
   const allTemplates = [...templates, ...customTemplates];
 
@@ -466,7 +468,7 @@ export const DataGenerationModal = ({ opened, onClose }: ModalProps) => {
                         }}
                         onPreview={() => {
                           // Show first 3 items as preview
-                          const preview = dataset.data.slice(0, 3);
+                          const _preview = dataset.data.slice(0, 3);
                           // Set preview (you'd need to add this to the store)
                           toast.success("Preview feature coming soon!");
                         }}

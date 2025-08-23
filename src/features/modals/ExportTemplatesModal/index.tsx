@@ -249,7 +249,7 @@ export const ExportTemplatesModal = ({ opened, onClose }: ModalProps) => {
   const getJson = useJson(state => state.getJson);
   const [activeTab, setActiveTab] = React.useState("export");
   const [showTemplateEditor, setShowTemplateEditor] = React.useState(false);
-  const [editingTemplate, setEditingTemplate] = React.useState<ExportTemplate | null>(null);
+  const [_editingTemplate, setEditingTemplate] = React.useState<ExportTemplate | null>(null);
   const [customTitle, setCustomTitle] = React.useState("");
   const [customAuthor, setCustomAuthor] = React.useState("JSON Crack User");
 
@@ -269,7 +269,7 @@ export const ExportTemplatesModal = ({ opened, onClose }: ModalProps) => {
 
     try {
       const parsedData = JSON.parse(jsonData);
-      const result = await exportData(parsedData, selectedTemplate, {
+      const _result = await exportData(parsedData, selectedTemplate, {
         title: customTitle || `Export - ${selectedTemplate.name}`,
         author: customAuthor,
       });
