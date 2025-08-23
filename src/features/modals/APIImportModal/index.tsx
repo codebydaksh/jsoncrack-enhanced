@@ -108,7 +108,7 @@ export const APIImportModal = ({ opened, onClose }: ApiImportProps) => {
 
     const url = new URL(apiUrl);
     const name = prompt("Enter a name for this favorite:", url.hostname) || url.hostname;
-    
+
     const newFavorite: FavoriteApi = {
       id: `fav_${Date.now()}`,
       name,
@@ -158,7 +158,7 @@ export const APIImportModal = ({ opened, onClose }: ApiImportProps) => {
 
     try {
       const urlObj = new URL(url);
-      
+
       // Check protocol
       if (!["http:", "https:"].includes(urlObj.protocol)) {
         setUrlValidation({
@@ -250,7 +250,7 @@ export const APIImportModal = ({ opened, onClose }: ApiImportProps) => {
       // Step 2: Fetching data
       setProgress(40);
       setLoadingStep("Fetching data from API...");
-      
+
       // Prepare custom headers
       const customHeaders: Record<string, string> = {};
       headers
@@ -258,7 +258,7 @@ export const APIImportModal = ({ opened, onClose }: ApiImportProps) => {
         .forEach(h => {
           customHeaders[h.key.trim()] = h.value.trim();
         });
-      
+
       const response = await ApiImportService.fetchJson(apiUrl, {
         headers: customHeaders,
       });
@@ -492,11 +492,7 @@ export const APIImportModal = ({ opened, onClose }: ApiImportProps) => {
                   Optional
                 </Badge>
               </Group>
-              <Button
-                variant="subtle"
-                size="xs"
-                onClick={() => setShowHeaders(!showHeaders)}
-              >
+              <Button variant="subtle" size="xs" onClick={() => setShowHeaders(!showHeaders)}>
                 {showHeaders ? "Hide" : "Show"} Headers
               </Button>
             </Group>
