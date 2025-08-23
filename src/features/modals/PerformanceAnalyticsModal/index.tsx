@@ -121,7 +121,6 @@ export const PerformanceAnalyticsModal = ({ opened, onClose }: ModalProps) => {
     metrics,
     alerts,
     stats,
-    performanceThresholds,
     autoOptimize,
     showRealTimeGraph,
     setEnabled,
@@ -135,8 +134,6 @@ export const PerformanceAnalyticsModal = ({ opened, onClose }: ModalProps) => {
     getPerformanceTrend,
   } = usePerformanceAnalytics();
 
-  const _performanceThresholds = performanceThresholds;
-
   const [timeRange, setTimeRange] = React.useState<"hour" | "day" | "week">("hour");
   const [showSettings, setShowSettings] = React.useState(false);
 
@@ -147,7 +144,7 @@ export const PerformanceAnalyticsModal = ({ opened, onClose }: ModalProps) => {
   );
 
   const chartData = React.useMemo(() => {
-    return recentMetrics.map((metric, _index) => ({
+    return recentMetrics.map(metric => ({
       time: new Date(metric.timestamp).toLocaleTimeString(),
       parseTime: metric.parseTime,
       memoryUsage: Math.round(metric.memoryUsage / 1024 / 1024), // Convert to MB
@@ -532,7 +529,7 @@ export const PerformanceAnalyticsModal = ({ opened, onClose }: ModalProps) => {
                   {metrics
                     .slice(-10)
                     .reverse()
-                    .map((metric, _index) => (
+                    .map(metric => (
                       <tr key={metric.timestamp}>
                         <td style={{ padding: "8px" }}>
                           {new Date(metric.timestamp).toLocaleTimeString()}

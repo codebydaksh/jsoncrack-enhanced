@@ -249,7 +249,6 @@ export const ExportTemplatesModal = ({ opened, onClose }: ModalProps) => {
   const getJson = useJson(state => state.getJson);
   const [activeTab, setActiveTab] = React.useState("export");
   const [showTemplateEditor, setShowTemplateEditor] = React.useState(false);
-  const [_editingTemplate, setEditingTemplate] = React.useState<ExportTemplate | null>(null);
   const [customTitle, setCustomTitle] = React.useState("");
   const [customAuthor, setCustomAuthor] = React.useState("JSON Crack User");
 
@@ -269,7 +268,7 @@ export const ExportTemplatesModal = ({ opened, onClose }: ModalProps) => {
 
     try {
       const parsedData = JSON.parse(jsonData);
-      const _result = await exportData(parsedData, selectedTemplate, {
+      await exportData(parsedData, selectedTemplate, {
         title: customTitle || `Export - ${selectedTemplate.name}`,
         author: customAuthor,
       });
@@ -580,7 +579,6 @@ export const ExportTemplatesModal = ({ opened, onClose }: ModalProps) => {
                     size="xs"
                     leftSection={<FiPlus size={12} />}
                     onClick={() => {
-                      setEditingTemplate(null);
                       setShowTemplateEditor(true);
                     }}
                   >
@@ -592,8 +590,8 @@ export const ExportTemplatesModal = ({ opened, onClose }: ModalProps) => {
               {customTemplates.length === 0 ? (
                 <Alert icon={<FiInfo size={16} />} color="gray" variant="light">
                   <Text size="sm">
-                    No custom templates created yet. Click "Create Template" to build your own
-                    export format.
+                    No custom templates created yet. Click &quot;Create Template&quot; to build your
+                    own export format.
                   </Text>
                 </Alert>
               ) : (
@@ -610,7 +608,6 @@ export const ExportTemplatesModal = ({ opened, onClose }: ModalProps) => {
                           setActiveTab("export");
                         }}
                         onEdit={() => {
-                          setEditingTemplate(template);
                           setShowTemplateEditor(true);
                         }}
                         onDuplicate={() => {

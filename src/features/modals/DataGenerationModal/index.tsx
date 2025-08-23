@@ -213,15 +213,11 @@ export const DataGenerationModal = ({ opened, onClose }: ModalProps) => {
     clearPreview,
     deleteDataset,
     exportDataset,
-    addCustomTemplate,
     deleteTemplate,
   } = useDataGeneration();
 
-  const _addCustomTemplate = addCustomTemplate;
-
   const [generateCount, setGenerateCount] = React.useState(100);
   const [showCustomTemplateEditor, setShowCustomTemplateEditor] = React.useState(false);
-  const [_editingTemplate, setEditingTemplate] = React.useState<DataTemplate | null>(null);
 
   const allTemplates = [...templates, ...customTemplates];
 
@@ -347,7 +343,6 @@ export const DataGenerationModal = ({ opened, onClose }: ModalProps) => {
                         clearPreview();
                       }}
                       onEdit={() => {
-                        setEditingTemplate(template);
                         setShowCustomTemplateEditor(true);
                       }}
                       onDelete={() => {
@@ -468,7 +463,6 @@ export const DataGenerationModal = ({ opened, onClose }: ModalProps) => {
                         }}
                         onPreview={() => {
                           // Show first 3 items as preview
-                          const _preview = dataset.data.slice(0, 3);
                           // Set preview (you'd need to add this to the store)
                           toast.success("Preview feature coming soon!");
                         }}
@@ -489,7 +483,6 @@ export const DataGenerationModal = ({ opened, onClose }: ModalProps) => {
                   size="xs"
                   leftSection={<FiPlus size={12} />}
                   onClick={() => {
-                    setEditingTemplate(null);
                     setShowCustomTemplateEditor(true);
                   }}
                 >
@@ -500,8 +493,8 @@ export const DataGenerationModal = ({ opened, onClose }: ModalProps) => {
               {customTemplates.length === 0 ? (
                 <Alert icon={<FiInfo size={16} />} color="gray" variant="light">
                   <Text size="sm">
-                    No custom templates created yet. Click "Create Template" to build your own data
-                    structure.
+                    No custom templates created yet. Click &quot;Create Template&quot; to build your
+                    own data structure.
                   </Text>
                 </Alert>
               ) : (
@@ -517,7 +510,6 @@ export const DataGenerationModal = ({ opened, onClose }: ModalProps) => {
                         // Switch to generate tab
                       }}
                       onEdit={() => {
-                        setEditingTemplate(template);
                         setShowCustomTemplateEditor(true);
                       }}
                       onDelete={() => {

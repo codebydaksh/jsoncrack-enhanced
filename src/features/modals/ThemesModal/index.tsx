@@ -344,7 +344,8 @@ export const ThemesModal = ({ opened, onClose }: ModalProps) => {
 
                 {customThemes.length === 0 && (
                   <Alert icon={<FiInfo size={16} />} color="blue" variant="light">
-                    No custom themes yet. Create your first theme in the &quot;Create Theme&quot; tab!
+                    No custom themes yet. Create your first theme in the &quot;Create Theme&quot;
+                    tab!
                   </Alert>
                 )}
               </Stack>
