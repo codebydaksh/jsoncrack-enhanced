@@ -1,4 +1,5 @@
 export { APIGeneratorModal } from "./APIGeneratorModal/index";
+export { APIImportModal } from "./APIImportModal";
 export { AdvancedSearchModal } from "./AdvancedSearchModal";
 export { AutoCompleteModal } from "./AutoCompleteModal";
 export { DataComparisonModal } from "./DataComparisonModal";

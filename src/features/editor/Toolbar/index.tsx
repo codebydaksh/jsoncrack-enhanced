@@ -5,6 +5,7 @@ import styled from "styled-components";
 import toast from "react-hot-toast";
 import { AiOutlineFullscreen } from "react-icons/ai";
 import { FaCrown, FaGithub } from "react-icons/fa6";
+import { FiGlobe } from "react-icons/fi";
 import { LuLink } from "react-icons/lu";
 import { JSONCrackLogo } from "../../../layout/JsonCrackLogo";
 import { useModal } from "../../../store/useModal";
@@ -59,6 +60,12 @@ export const Toolbar = () => {
           </Flex>
         </StyledToolElement>
         <FileMenu />
+        <StyledToolElement
+          title="Import from API"
+          onClick={() => setVisible("APIImportModal", true)}
+        >
+          <FiGlobe size="18" />
+        </StyledToolElement>
         <ViewMenu />
         <ToolsMenu />
         <UndoRedoControl />
