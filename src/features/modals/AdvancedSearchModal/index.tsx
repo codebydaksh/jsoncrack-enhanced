@@ -1,42 +1,40 @@
 import React from "react";
 import type { ModalProps } from "@mantine/core";
-import { 
-  Stack, 
-  Modal, 
-  TextInput, 
-  Group, 
-  Button, 
-  Switch, 
-  Select, 
-  Badge, 
-  ActionIcon, 
-  Divider,
+import {
+  Stack,
+  Modal,
+  TextInput,
+  Group,
+  Button,
+  Switch,
+  Select,
+  Badge,
+  ActionIcon,
   Text,
   ScrollArea,
   Paper,
-  Tooltip,
   Menu,
-  Flex,
   Box,
-  Alert
+  Alert,
 } from "@mantine/core";
 import { useHotkeys } from "@mantine/hooks";
-import { 
-  FiSearch, 
-  FiFilter, 
-  FiArrowDown, 
-  FiArrowUp, 
-  FiX, 
+import { event as gaEvent } from "nextjs-google-analytics";
+import { toast } from "react-hot-toast";
+import {
+  FiSearch,
+  FiFilter,
+  FiArrowDown,
+  FiArrowUp,
+  FiX,
   FiRefreshCw,
   FiInfo,
   FiChevronDown,
-  FiPlus
+  FiPlus,
 } from "react-icons/fi";
 import { MdSearch } from "react-icons/md";
 import { VscJson } from "react-icons/vsc";
-import { event as gaEvent } from "nextjs-google-analytics";
-import { toast } from "react-hot-toast";
-import useAdvancedSearch, { SearchFilter } from "../../../store/useAdvancedSearch";
+import type { SearchFilter } from "../../../store/useAdvancedSearch";
+import useAdvancedSearch from "../../../store/useAdvancedSearch";
 import useJson from "../../../store/useJson";
 
 export const AdvancedSearchModal = ({ opened, onClose }: ModalProps) => {
@@ -102,9 +100,12 @@ export const AdvancedSearchModal = ({ opened, onClose }: ModalProps) => {
 
   const getSearchModeIcon = () => {
     switch (searchMode) {
-      case "regex": return <MdSearch size={16} />;
-      case "jsonPath": return <VscJson size={16} />;
-      default: return <FiSearch size={16} />;
+      case "regex":
+        return <MdSearch size={16} />;
+      case "jsonPath":
+        return <VscJson size={16} />;
+      default:
+        return <FiSearch size={16} />;
     }
   };
 
@@ -137,7 +138,7 @@ export const AdvancedSearchModal = ({ opened, onClose }: ModalProps) => {
   }, [searchQuery, searchMode, searchField, caseSensitive, handleSearch, clearResults]);
 
   return (
-    <Modal 
+    <Modal
       title={
         <Group gap="sm">
           <FiSearch size={20} />
@@ -146,10 +147,10 @@ export const AdvancedSearchModal = ({ opened, onClose }: ModalProps) => {
             {results.length} results
           </Badge>
         </Group>
-      } 
-      size="lg" 
-      opened={opened} 
-      onClose={onClose} 
+      }
+      size="lg"
+      opened={opened}
+      onClose={onClose}
       centered
     >
       <Stack gap="md">
@@ -159,31 +160,23 @@ export const AdvancedSearchModal = ({ opened, onClose }: ModalProps) => {
             <Group gap="xs">
               <TextInput
                 placeholder={
-                  searchMode === "regex" 
-                    ? "Enter regex pattern..." 
+                  searchMode === "regex"
+                    ? "Enter regex pattern..."
                     : searchMode === "jsonPath"
-                    ? "Enter JSONPath query..."
-                    : "Search in JSON..."
+                      ? "Enter JSONPath query..."
+                      : "Search in JSON..."
                 }
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={e => setSearchQuery(e.target.value)}
                 leftSection={getSearchModeIcon()}
                 rightSection={
                   <Group gap="xs">
                     {searchQuery && (
-                      <ActionIcon 
-                        size="sm" 
-                        variant="subtle" 
-                        onClick={() => setSearchQuery("")}
-                      >
+                      <ActionIcon size="sm" variant="subtle" onClick={() => setSearchQuery("")}>
                         <FiX size={12} />
                       </ActionIcon>
                     )}
-                    <Button 
-                      size="compact-sm" 
-                      loading={isSearching}
-                      onClick={handleSearch}
-                    >
+                    <Button size="compact-sm" loading={isSearching} onClick={handleSearch}>
                       Search
                     </Button>
                   </Group>
@@ -196,7 +189,7 @@ export const AdvancedSearchModal = ({ opened, onClose }: ModalProps) => {
             <Group gap="md">
               <Select
                 value={searchMode}
-                onChange={(value) => setSearchMode(value as "simple" | "regex" | "jsonPath")}
+                onChange={value => setSearchMode(value as "simple" | "regex" | "jsonPath")}
                 data={[
                   { value: "simple", label: "Simple Text" },
                   { value: "regex", label: "Regular Expression" },
@@ -205,10 +198,10 @@ export const AdvancedSearchModal = ({ opened, onClose }: ModalProps) => {
                 size="xs"
                 style={{ width: 140 }}
               />
-              
+
               <Select
                 value={searchField}
-                onChange={(value) => setSearchField(value as "key" | "value" | "both")}
+                onChange={value => setSearchField(value as "key" | "value" | "both")}
                 data={[
                   { value: "both", label: "Keys & Values" },
                   { value: "key", label: "Keys Only" },
@@ -222,14 +215,14 @@ export const AdvancedSearchModal = ({ opened, onClose }: ModalProps) => {
                 size="xs"
                 label="Case Sensitive"
                 checked={caseSensitive}
-                onChange={(e) => setCaseSensitive(e.currentTarget.checked)}
+                onChange={e => setCaseSensitive(e.currentTarget.checked)}
               />
 
               <Switch
                 size="xs"
                 label="Highlight"
                 checked={highlightResults}
-                onChange={(e) => setHighlightResults(e.currentTarget.checked)}
+                onChange={e => setHighlightResults(e.currentTarget.checked)}
               />
             </Group>
 
@@ -277,7 +270,7 @@ export const AdvancedSearchModal = ({ opened, onClose }: ModalProps) => {
           >
             Filters ({filters.length})
           </Button>
-          
+
           <Menu>
             <Menu.Target>
               <Button variant="subtle" size="xs" rightSection={<FiChevronDown size={12} />}>
@@ -287,10 +280,7 @@ export const AdvancedSearchModal = ({ opened, onClose }: ModalProps) => {
             <Menu.Dropdown>
               {searchHistory.length > 0 ? (
                 searchHistory.map((query, index) => (
-                  <Menu.Item 
-                    key={index}
-                    onClick={() => setSearchQuery(query)}
-                  >
+                  <Menu.Item key={index} onClick={() => setSearchQuery(query)}>
                     {query}
                   </Menu.Item>
                 ))
@@ -306,14 +296,23 @@ export const AdvancedSearchModal = ({ opened, onClose }: ModalProps) => {
           <Paper withBorder p="md" radius="sm">
             <Stack gap="sm">
               <Group justify="space-between">
-                <Text size="sm" fw={500}>Advanced Filters</Text>
-                <Button size="xs" variant="light" leftSection={<FiPlus size={12} />} onClick={addNewFilter}>
+                <Text size="sm" fw={500}>
+                  Advanced Filters
+                </Text>
+                <Button
+                  size="xs"
+                  variant="light"
+                  leftSection={<FiPlus size={12} />}
+                  onClick={addNewFilter}
+                >
                   Add Filter
                 </Button>
               </Group>
-              
+
               {filters.length === 0 ? (
-                <Text size="xs" c="dimmed">No filters active</Text>
+                <Text size="xs" c="dimmed">
+                  No filters active
+                </Text>
               ) : (
                 <Stack gap="xs">
                   {filters.map((filter, index) => (
@@ -321,7 +320,7 @@ export const AdvancedSearchModal = ({ opened, onClose }: ModalProps) => {
                       <Select
                         size="xs"
                         value={filter.type}
-                        onChange={(value) => {
+                        onChange={value => {
                           const newFilter = { ...filter, type: value as SearchFilter["type"] };
                           // updateFilter(index, newFilter);
                         }}
@@ -334,17 +333,17 @@ export const AdvancedSearchModal = ({ opened, onClose }: ModalProps) => {
                         ]}
                         style={{ width: 100 }}
                       />
-                      
+
                       <TextInput
                         size="xs"
                         placeholder="Filter value..."
                         value={filter.query}
-                        onChange={(e) => {
+                        onChange={e => {
                           // updateFilter(index, { query: e.target.value });
                         }}
                         style={{ flex: 1 }}
                       />
-                      
+
                       <ActionIcon size="sm" color="red" onClick={() => removeFilter(index)}>
                         <FiX size={12} />
                       </ActionIcon>
@@ -368,7 +367,8 @@ export const AdvancedSearchModal = ({ opened, onClose }: ModalProps) => {
                   radius="sm"
                   style={{
                     cursor: "pointer",
-                    backgroundColor: index === currentResultIndex ? "var(--mantine-color-blue-light)" : undefined,
+                    backgroundColor:
+                      index === currentResultIndex ? "var(--mantine-color-blue-light)" : undefined,
                   }}
                   onClick={() => setCurrentResultIndex(index)}
                 >
@@ -378,15 +378,24 @@ export const AdvancedSearchModal = ({ opened, onClose }: ModalProps) => {
                         {result.path}
                       </Text>
                       <Text size="xs" c="dimmed" truncate>
-                        {result.type === "key" ? `Key: ${result.key}` :
-                         result.type === "value" ? `Value: ${JSON.stringify(result.value)}` :
-                         `${result.key}: ${JSON.stringify(result.value)}`}
+                        {result.type === "key"
+                          ? `Key: ${result.key}`
+                          : result.type === "value"
+                            ? `Value: ${JSON.stringify(result.value)}`
+                            : `${result.key}: ${JSON.stringify(result.value)}`}
                       </Text>
                     </Box>
-                    <Badge size="xs" variant="outline" color={
-                      result.type === "key" ? "blue" : 
-                      result.type === "value" ? "green" : "purple"
-                    }>
+                    <Badge
+                      size="xs"
+                      variant="outline"
+                      color={
+                        result.type === "key"
+                          ? "blue"
+                          : result.type === "value"
+                            ? "green"
+                            : "purple"
+                      }
+                    >
                       {result.type}
                     </Badge>
                   </Group>
@@ -399,19 +408,17 @@ export const AdvancedSearchModal = ({ opened, onClose }: ModalProps) => {
         {/* Action Buttons */}
         <Group justify="space-between">
           <Group gap="xs">
-            <Button 
-              variant="light" 
-              size="xs" 
+            <Button
+              variant="light"
+              size="xs"
               leftSection={<FiRefreshCw size={12} />}
               onClick={handleSearch}
             >
               Refresh
             </Button>
           </Group>
-          
-          <Button onClick={onClose}>
-            Close
-          </Button>
+
+          <Button onClick={onClose}>Close</Button>
         </Group>
       </Stack>
     </Modal>

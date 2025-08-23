@@ -1,8 +1,8 @@
 import React from "react";
 import type { CustomNodeProps } from ".";
 import { NODE_DIMENSIONS } from "../../../../../constants/graph";
-import type { NodeData } from "../../../../../types/graph";
 import type { ValidationError } from "../../../../../store/useValidation";
+import type { NodeData } from "../../../../../types/graph";
 import { TextRenderer } from "./TextRenderer";
 import * as Styled from "./styles";
 
@@ -16,10 +16,10 @@ type RowProps = {
 
 const Row = ({ row, x, y, index, validationErrors = [] }: RowProps) => {
   const rowPosition = index * NODE_DIMENSIONS.ROW_HEIGHT;
-  
+
   // Check if this specific row has errors
-  const rowErrors = validationErrors.filter(error => 
-    error.path.endsWith(`.${row.key}`) || error.path === `$.${row.key}`
+  const rowErrors = validationErrors.filter(
+    error => error.path.endsWith(`.${row.key}`) || error.path === `$.${row.key}`
   );
   const hasRowErrors = rowErrors.filter(e => e.severity === "error").length > 0;
   const hasRowWarnings = rowErrors.filter(e => e.severity === "warning").length > 0;
@@ -31,14 +31,14 @@ const Row = ({ row, x, y, index, validationErrors = [] }: RowProps) => {
   };
 
   return (
-    <Styled.StyledRow 
-      $value={row.value} 
+    <Styled.StyledRow
+      $value={row.value}
       $hasError={hasRowErrors}
       $hasWarning={hasRowWarnings}
-      data-key={row.key} 
-      data-x={x} 
+      data-key={row.key}
+      data-x={x}
       data-y={y + rowPosition}
-      title={rowErrors.length > 0 ? rowErrors.map(e => e.message).join(', ') : undefined}
+      title={rowErrors.length > 0 ? rowErrors.map(e => e.message).join(", ") : undefined}
     >
       <Styled.StyledKey $type="object">{row.key}: </Styled.StyledKey>
       <TextRenderer>{getRowText()}</TextRenderer>
@@ -51,7 +51,12 @@ const Row = ({ row, x, y, index, validationErrors = [] }: RowProps) => {
   );
 };
 
-const Node = ({ node, x, y, validationErrors = [] }: CustomNodeProps & { validationErrors?: ValidationError[] }) => (
+const Node = ({
+  node,
+  x,
+  y,
+  validationErrors = [],
+}: CustomNodeProps & { validationErrors?: ValidationError[] }) => (
   <Styled.StyledForeignObject
     data-id={`node-${node.id}`}
     width={node.width}
@@ -61,12 +66,22 @@ const Node = ({ node, x, y, validationErrors = [] }: CustomNodeProps & { validat
     $isObject
   >
     {node.text.map((row, index) => (
-      <Row key={`${node.id}-${index}`} row={row} x={x} y={y} index={index} validationErrors={validationErrors} />
+      <Row
+        key={`${node.id}-${index}`}
+        row={row}
+        x={x}
+        y={y}
+        index={index}
+        validationErrors={validationErrors}
+      />
     ))}
   </Styled.StyledForeignObject>
 );
 
-function propsAreEqual(prev: CustomNodeProps & { validationErrors?: ValidationError[] }, next: CustomNodeProps & { validationErrors?: ValidationError[] }) {
+function propsAreEqual(
+  prev: CustomNodeProps & { validationErrors?: ValidationError[] },
+  next: CustomNodeProps & { validationErrors?: ValidationError[] }
+) {
   return (
     JSON.stringify(prev.node.text) === JSON.stringify(next.node.text) &&
     prev.node.width === next.node.width &&

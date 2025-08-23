@@ -9,23 +9,19 @@ import {
   Card,
   Badge,
   ActionIcon,
-  Divider,
-  Select,
   ScrollArea,
   Tabs,
   SimpleGrid,
   Progress,
   Alert,
   Code,
-  Textarea,
   TextInput,
   Switch,
-  NumberInput,
-  Paper,
-  Tooltip,
   Menu,
   FileInput,
 } from "@mantine/core";
+import { event as gaEvent } from "nextjs-google-analytics";
+import { toast } from "react-hot-toast";
 import {
   FiDownload,
   FiEye,
@@ -36,7 +32,6 @@ import {
   FiCopy,
   FiEdit,
   FiUpload,
-  FiSave,
   FiRefreshCw,
   FiInfo,
   FiChevronDown,
@@ -45,9 +40,8 @@ import {
   FiImage,
 } from "react-icons/fi";
 import { MdTransform } from "react-icons/md";
-import { event as gaEvent } from "nextjs-google-analytics";
-import { toast } from "react-hot-toast";
-import useExportTemplates, { ExportTemplate, ExportResult } from "../../../store/useExportTemplates";
+import type { ExportTemplate, ExportResult } from "../../../store/useExportTemplates";
+import useExportTemplates from "../../../store/useExportTemplates";
 import useJson from "../../../store/useJson";
 
 interface TemplateCardProps {
@@ -71,20 +65,31 @@ const TemplateCard: React.FC<TemplateCardProps> = ({
 }) => {
   const getFormatIcon = () => {
     switch (template.format) {
-      case "json": return <FiFile size={14} />;
-      case "html": case "markdown": return <FiCode size={14} />;
-      case "pdf": case "docx": return <FiImage size={14} />;
-      default: return <FiFile size={14} />;
+      case "json":
+        return <FiFile size={14} />;
+      case "html":
+      case "markdown":
+        return <FiCode size={14} />;
+      case "pdf":
+      case "docx":
+        return <FiImage size={14} />;
+      default:
+        return <FiFile size={14} />;
     }
   };
 
   const getCategoryColor = () => {
     switch (template.category) {
-      case "document": return "blue";
-      case "code": return "green";
-      case "data": return "purple";
-      case "visualization": return "orange";
-      default: return "gray";
+      case "document":
+        return "blue";
+      case "code":
+        return "green";
+      case "data":
+        return "purple";
+      case "visualization":
+        return "orange";
+      default:
+        return "gray";
     }
   };
 
@@ -104,9 +109,11 @@ const TemplateCard: React.FC<TemplateCardProps> = ({
         <Group justify="space-between">
           <Group gap="xs">
             {getFormatIcon()}
-            <Text fw={500} size="sm">{template.name}</Text>
+            <Text fw={500} size="sm">
+              {template.name}
+            </Text>
           </Group>
-          
+
           <Group gap="xs">
             <Badge variant="light" color={getCategoryColor()}>
               {template.category}
@@ -115,24 +122,27 @@ const TemplateCard: React.FC<TemplateCardProps> = ({
               {template.format.toUpperCase()}
             </Badge>
             {isCustom && (
-              <Badge variant="outline" size="xs" color="orange">Custom</Badge>
+              <Badge variant="outline" size="xs" color="orange">
+                Custom
+              </Badge>
             )}
           </Group>
         </Group>
-        
+
         <Text size="xs" c="dimmed" lineClamp={2}>
           {template.description}
         </Text>
-        
+
         <Group justify="space-between">
           <Text size="xs" c="dimmed">
-            {template.transformations.length} transformation{template.transformations.length !== 1 ? "s" : ""}
+            {template.transformations.length} transformation
+            {template.transformations.length !== 1 ? "s" : ""}
           </Text>
-          
+
           {isCustom && (
             <Menu>
               <Menu.Target>
-                <ActionIcon size="sm" variant="subtle" onClick={(e) => e.stopPropagation()}>
+                <ActionIcon size="sm" variant="subtle" onClick={e => e.stopPropagation()}>
                   <FiChevronDown size={12} />
                 </ActionIcon>
               </Menu.Target>
@@ -179,23 +189,30 @@ const ExportResultCard: React.FC<ExportResultCardProps> = ({
       <Stack gap="sm">
         <Group justify="space-between">
           <div>
-            <Text fw={500} size="sm">{result.metadata.title}</Text>
+            <Text fw={500} size="sm">
+              {result.metadata.title}
+            </Text>
             <Text size="xs" c="dimmed">
               {new Date(result.generatedAt).toLocaleString()}
             </Text>
           </div>
           <Badge variant="light">{result.format.toUpperCase()}</Badge>
         </Group>
-        
+
         <Text size="xs" c="dimmed">
           Template: {result.templateName} • Size: {(result.size / 1024).toFixed(1)} KB
         </Text>
-        
+
         <Group gap="xs">
           <Button size="xs" variant="light" leftSection={<FiEye size={12} />} onClick={onPreview}>
             Preview
           </Button>
-          <Button size="xs" variant="light" leftSection={<FiDownload size={12} />} onClick={onDownload}>
+          <Button
+            size="xs"
+            variant="light"
+            leftSection={<FiDownload size={12} />}
+            onClick={onDownload}
+          >
             Download
           </Button>
           <ActionIcon size="sm" variant="subtle" color="red" onClick={onDelete}>
@@ -256,13 +273,13 @@ export const ExportTemplatesModal = ({ opened, onClose }: ModalProps) => {
         title: customTitle || `Export - ${selectedTemplate.name}`,
         author: customAuthor,
       });
-      
+
       toast.success("Export completed successfully!");
-      gaEvent("advanced_export", { 
-        template: selectedTemplate.name, 
-        format: selectedTemplate.format 
+      gaEvent("advanced_export", {
+        template: selectedTemplate.name,
+        format: selectedTemplate.format,
       });
-      
+
       // Switch to results tab
       setActiveTab("results");
     } catch (error) {
@@ -291,8 +308,8 @@ export const ExportTemplatesModal = ({ opened, onClose }: ModalProps) => {
   };
 
   const handleDownloadResult = (result: ExportResult) => {
-    const blob = new Blob([result.content], { 
-      type: getContentType(result.format) 
+    const blob = new Blob([result.content], {
+      type: getContentType(result.format),
     });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -300,15 +317,15 @@ export const ExportTemplatesModal = ({ opened, onClose }: ModalProps) => {
     a.download = `${result.metadata.title.replace(/\s+/g, "_")}.${result.format}`;
     a.click();
     URL.revokeObjectURL(url);
-    
+
     toast.success("File downloaded successfully!");
   };
 
   const handleImportTemplate = (file: File | null) => {
     if (!file) return;
-    
+
     const reader = new FileReader();
-    reader.onload = (e) => {
+    reader.onload = e => {
       const content = e.target?.result as string;
       if (importTemplate(content)) {
         toast.success("Template imported successfully!");
@@ -329,7 +346,7 @@ export const ExportTemplatesModal = ({ opened, onClose }: ModalProps) => {
       a.download = `template_${templateId}.json`;
       a.click();
       URL.revokeObjectURL(url);
-      
+
       toast.success("Template exported successfully!");
     }
   };
@@ -365,7 +382,7 @@ export const ExportTemplatesModal = ({ opened, onClose }: ModalProps) => {
       centered
     >
       <Stack gap="md">
-        <Tabs value={activeTab} onChange={(value) => setActiveTab(value || "export")}>
+        <Tabs value={activeTab} onChange={value => setActiveTab(value || "export")}>
           <Tabs.List>
             <Tabs.Tab value="export" leftSection={<FiDownload size={14} />}>
               Export Data
@@ -383,8 +400,8 @@ export const ExportTemplatesModal = ({ opened, onClose }: ModalProps) => {
             <Stack gap="md" mt="md">
               <Alert icon={<FiInfo size={16} />} color="blue" variant="light">
                 <Text size="sm">
-                  Transform and export your JSON data using powerful templates. 
-                  Generate documents, code, visualizations, and more.
+                  Transform and export your JSON data using powerful templates. Generate documents,
+                  code, visualizations, and more.
                 </Text>
               </Alert>
 
@@ -394,7 +411,7 @@ export const ExportTemplatesModal = ({ opened, onClose }: ModalProps) => {
                   size="sm"
                   label="Live Preview"
                   checked={enablePreview}
-                  onChange={(e) => setEnablePreview(e.currentTarget.checked)}
+                  onChange={e => setEnablePreview(e.currentTarget.checked)}
                 />
               </Group>
 
@@ -456,13 +473,13 @@ export const ExportTemplatesModal = ({ opened, onClose }: ModalProps) => {
                         label="Export Title"
                         placeholder="My Data Export"
                         value={customTitle}
-                        onChange={(e) => setCustomTitle(e.target.value)}
+                        onChange={e => setCustomTitle(e.target.value)}
                       />
                       <TextInput
                         label="Author"
                         placeholder="Your name"
                         value={customAuthor}
-                        onChange={(e) => setCustomAuthor(e.target.value)}
+                        onChange={e => setCustomAuthor(e.target.value)}
                       />
                     </SimpleGrid>
 
@@ -498,9 +515,7 @@ export const ExportTemplatesModal = ({ opened, onClose }: ModalProps) => {
                       </ActionIcon>
                     </Group>
                     <ScrollArea h={300}>
-                      <Code block>
-                        {previewContent}
-                      </Code>
+                      <Code block>{previewContent}</Code>
                     </ScrollArea>
                   </Stack>
                 </Card>
@@ -577,7 +592,8 @@ export const ExportTemplatesModal = ({ opened, onClose }: ModalProps) => {
               {customTemplates.length === 0 ? (
                 <Alert icon={<FiInfo size={16} />} color="gray" variant="light">
                   <Text size="sm">
-                    No custom templates created yet. Click "Create Template" to build your own export format.
+                    No custom templates created yet. Click "Create Template" to build your own
+                    export format.
                   </Text>
                 </Alert>
               ) : (
@@ -618,15 +634,14 @@ export const ExportTemplatesModal = ({ opened, onClose }: ModalProps) => {
         {showTemplateEditor && (
           <Alert icon={<FiInfo size={16} />} color="yellow" variant="light">
             <Text size="sm">
-              Custom template editor is coming soon! For now, you can use and duplicate the predefined templates.
+              Custom template editor is coming soon! For now, you can use and duplicate the
+              predefined templates.
             </Text>
           </Alert>
         )}
 
         <Group justify="right">
-          <Button onClick={onClose}>
-            Close
-          </Button>
+          <Button onClick={onClose}>Close</Button>
         </Group>
       </Stack>
     </Modal>

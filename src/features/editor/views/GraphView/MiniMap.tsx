@@ -1,9 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
 import { ActionIcon, Card, Group, Text, Tooltip } from "@mantine/core";
 import { useViewportSize } from "@mantine/hooks";
+import styled from "styled-components";
 import { event as gaEvent } from "nextjs-google-analytics";
 import { LuMap, LuMapPin, LuX } from "react-icons/lu";
-import styled from "styled-components";
 import useGraph from "./stores/useGraph";
 
 const StyledMiniMapContainer = styled(Card)<{ $visible: boolean }>`
@@ -15,10 +15,12 @@ const StyledMiniMapContainer = styled(Card)<{ $visible: boolean }>`
   z-index: 99;
   opacity: ${({ $visible }) => ($visible ? 0.9 : 0)};
   visibility: ${({ $visible }) => ($visible ? "visible" : "hidden")};
-  transition: opacity 0.3s ease, visibility 0.3s ease;
+  transition:
+    opacity 0.3s ease,
+    visibility 0.3s ease;
   pointer-events: ${({ $visible }) => ($visible ? "auto" : "none")};
   border: 1px solid ${({ theme }) => theme.INTERACTIVE_NORMAL};
-  
+
   &:hover {
     opacity: 1;
   }
@@ -65,18 +67,21 @@ export const MiniMap = ({ visible, onToggle }: MiniMapProps) => {
   useEffect(() => {
     if (nodes.length === 0) return;
 
-    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+    let minX = Infinity,
+      minY = Infinity,
+      maxX = -Infinity,
+      maxY = -Infinity;
 
     // Find all node elements to get their actual positions
     nodes.forEach(node => {
       const nodeElement = document.querySelector(`g[id$='node-${node.id}']`) as SVGElement;
       if (nodeElement) {
-        const transform = nodeElement.getAttribute('transform') || '';
+        const transform = nodeElement.getAttribute("transform") || "";
         const matches = transform.match(/translate\(([^,]+),([^)]+)\)/);
         if (matches) {
           const x = parseFloat(matches[1]);
           const y = parseFloat(matches[2]);
-          
+
           minX = Math.min(minX, x);
           minY = Math.min(minY, y);
           maxX = Math.max(maxX, x + node.width);
@@ -129,7 +134,7 @@ export const MiniMap = ({ visible, onToggle }: MiniMapProps) => {
     const canvas = canvasRef.current;
     if (!canvas || nodes.length === 0) return;
 
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
     // Set canvas size to match display size
@@ -139,7 +144,8 @@ export const MiniMap = ({ visible, onToggle }: MiniMapProps) => {
     ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
 
     // Clear canvas
-    ctx.fillStyle = getComputedStyle(canvas).getPropertyValue('--mantine-color-gray-0') || '#f8f9fa';
+    ctx.fillStyle =
+      getComputedStyle(canvas).getPropertyValue("--mantine-color-gray-0") || "#f8f9fa";
     ctx.fillRect(0, 0, rect.width, rect.height);
 
     const graphWidth = graphBounds.maxX - graphBounds.minX;
@@ -154,12 +160,12 @@ export const MiniMap = ({ visible, onToggle }: MiniMapProps) => {
     nodes.forEach(node => {
       const nodeElement = document.querySelector(`g[id$='node-${node.id}']`) as SVGElement;
       if (nodeElement) {
-        const transform = nodeElement.getAttribute('transform') || '';
+        const transform = nodeElement.getAttribute("transform") || "";
         const matches = transform.match(/translate\(([^,]+),([^)]+)\)/);
         if (matches) {
           const x = parseFloat(matches[1]);
           const y = parseFloat(matches[2]);
-          
+
           const miniX = (x - graphBounds.minX) * scaleX;
           const miniY = (y - graphBounds.minY) * scaleY;
           const miniWidth = Math.max(2, node.width * scaleX);
@@ -167,19 +173,18 @@ export const MiniMap = ({ visible, onToggle }: MiniMapProps) => {
 
           // Node color based on type
           const hasKey = node.text[0].key;
-          ctx.fillStyle = hasKey ? '#3b82f6' : '#6b7280';
+          ctx.fillStyle = hasKey ? "#3b82f6" : "#6b7280";
           ctx.fillRect(miniX, miniY, miniWidth, miniHeight);
         }
       }
     });
 
     // Draw edges (simplified)
-    ctx.strokeStyle = '#d1d5db';
+    ctx.strokeStyle = "#d1d5db";
     ctx.lineWidth = 1;
-    
+
     // We'll skip edge drawing for performance since it's complex to get actual positions
     // The nodes give a good enough overview for navigation
-
   }, [nodes, graphBounds, visible]);
 
   const handleMiniMapClick = (event: React.MouseEvent<HTMLCanvasElement>) => {
@@ -203,7 +208,7 @@ export const MiniMap = ({ visible, onToggle }: MiniMapProps) => {
 
     // Center viewport on clicked position
     viewPort.camera?.recenter(graphX, graphY, viewPort.zoomFactor);
-    
+
     gaEvent("minimap_navigate");
   };
 
@@ -213,18 +218,20 @@ export const MiniMap = ({ visible, onToggle }: MiniMapProps) => {
   }
 
   return (
-    <div style={{
-      position: "absolute",
-      top: "60px",
-      right: "10px",
-      width: "200px",
-      height: "150px",
-      zIndex: 99,
-      opacity: visible ? 0.9 : 0,
-      visibility: visible ? "visible" : "hidden",
-      transition: "opacity 0.3s ease, visibility 0.3s ease",
-      pointerEvents: visible ? "auto" : "none",
-    }}>
+    <div
+      style={{
+        position: "absolute",
+        top: "60px",
+        right: "10px",
+        width: "200px",
+        height: "150px",
+        zIndex: 99,
+        opacity: visible ? 0.9 : 0,
+        visibility: visible ? "visible" : "hidden",
+        transition: "opacity 0.3s ease, visibility 0.3s ease",
+        pointerEvents: visible ? "auto" : "none",
+      }}
+    >
       <Card
         withBorder
         padding="xs"
@@ -232,37 +239,36 @@ export const MiniMap = ({ visible, onToggle }: MiniMapProps) => {
           width: "100%",
           height: "100%",
         }}
-        onMouseEnter={(e) => {
+        onMouseEnter={e => {
           e.currentTarget.style.opacity = "1";
         }}
-        onMouseLeave={(e) => {
+        onMouseLeave={e => {
           e.currentTarget.style.opacity = visible ? "0.9" : "0";
         }}
       >
-      <Group justify="space-between" mb="xs">
-        <Group gap="xs">
-          <LuMap size={12} />
-          <Text size="xs" fw={500}>Mini Map</Text>
+        <Group justify="space-between" mb="xs">
+          <Group gap="xs">
+            <LuMap size={12} />
+            <Text size="xs" fw={500}>
+              Mini Map
+            </Text>
+          </Group>
+          <ActionIcon size="xs" variant="subtle" onClick={onToggle}>
+            <LuX size={10} />
+          </ActionIcon>
         </Group>
-        <ActionIcon size="xs" variant="subtle" onClick={onToggle}>
-          <LuX size={10} />
-        </ActionIcon>
-      </Group>
-      
-      <div style={{ position: 'relative', height: 'calc(100% - 30px)' }}>
-        <StyledMiniMapCanvas
-          ref={canvasRef}
-          onClick={handleMiniMapClick}
-        />
-        {visible && viewPort && (
-          <StyledViewportIndicator
-            $x={viewportBounds.x}
-            $y={viewportBounds.y}
-            $width={viewportBounds.width}
-            $height={viewportBounds.height}
-          />
-        )}
-      </div>
+
+        <div style={{ position: "relative", height: "calc(100% - 30px)" }}>
+          <StyledMiniMapCanvas ref={canvasRef} onClick={handleMiniMapClick} />
+          {visible && viewPort && (
+            <StyledViewportIndicator
+              $x={viewportBounds.x}
+              $y={viewportBounds.y}
+              $width={viewportBounds.width}
+              $height={viewportBounds.height}
+            />
+          )}
+        </div>
       </Card>
     </div>
   );
@@ -300,7 +306,7 @@ export const MiniMapToggle = () => {
           {miniMapVisible ? <LuMapPin /> : <LuMap />}
         </ActionIcon>
       </Tooltip>
-      
+
       <MiniMap visible={miniMapVisible} onToggle={toggleMiniMap} />
     </>
   );

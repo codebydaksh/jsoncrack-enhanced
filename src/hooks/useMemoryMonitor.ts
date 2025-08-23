@@ -30,13 +30,13 @@ const getRecommendations = (level: "good" | "warning" | "critical", size: number
         "Consider breaking down large objects",
         "Use Tree View for better performance",
         "Enable lazy loading in settings",
-        "Consider using external data processing tools"
+        "Consider using external data processing tools",
       ];
     case "warning":
       return [
         "Performance may be affected with complex operations",
         "Consider using Tree View for large datasets",
-        "Enable compression for better memory usage"
+        "Enable compression for better memory usage",
       ];
     default:
       return [];
@@ -45,7 +45,7 @@ const getRecommendations = (level: "good" | "warning" | "critical", size: number
 
 const countNodes = (obj: any, count = 0): number => {
   if (typeof obj !== "object" || obj === null) return count + 1;
-  
+
   for (const key in obj) {
     if (obj.hasOwnProperty(key)) {
       count = countNodes(obj[key], count + 1);
@@ -70,7 +70,7 @@ export const useMemoryMonitor = (): MemoryStats => {
         const jsonString = getJson();
         const jsonSize = new Blob([jsonString]).size;
         const formattedSize = formatBytes(jsonSize);
-        
+
         let nodeCount = 0;
         try {
           const parsedJson = JSON.parse(jsonString);

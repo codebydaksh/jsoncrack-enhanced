@@ -30,51 +30,51 @@ interface APITemplate {
 
 const generateCurl = (options: any): string => {
   const { method, url, contentType, jsonData } = options;
-  
+
   let curl = `curl -X ${method} "${url}" \\
   -H "Content-Type: ${contentType}"`;
-  
+
   if (method !== "GET" && jsonData) {
     curl += ` \\
   -d '${jsonData}'`;
   }
-  
+
   return curl;
 };
 
 const generateJavaScript = (options: any): string => {
   const { method, url, contentType, jsonData } = options;
-  
+
   let js = `const response = await fetch("${url}", {
   method: "${method}",
   headers: {
     "Content-Type": "${contentType}",
   },`;
-  
+
   if (method !== "GET" && jsonData) {
     js += `
   body: JSON.stringify(${jsonData})`;
   }
-  
+
   js += `
 });
 
 const data = await response.json();
 console.log(data);`;
-  
+
   return js;
 };
 
 const generatePython = (options: any): string => {
   const { method, url, contentType, jsonData } = options;
-  
+
   let python = `import requests
 
 url = "${url}"
 headers = {
     "Content-Type": "${contentType}"
 }`;
-  
+
   if (method !== "GET" && jsonData) {
     python += `
 data = ${jsonData}
@@ -83,20 +83,20 @@ response = requests.${method.toLowerCase()}(url, json=data, headers=headers)`;
     python += `
 response = requests.${method.toLowerCase()}(url, headers=headers)`;
   }
-  
+
   python += `
 print(response.json())`;
-  
+
   return python;
 };
 
 const generatePostman = (options: any): string => {
   const { method, url, contentType, jsonData } = options;
-  
+
   const postmanCollection = {
     info: {
       name: "Generated API Request",
-      description: "Generated from JSON Crack"
+      description: "Generated from JSON Crack",
     },
     item: [
       {
@@ -106,21 +106,24 @@ const generatePostman = (options: any): string => {
           header: [
             {
               key: "Content-Type",
-              value: contentType
-            }
+              value: contentType,
+            },
           ],
-          body: method !== "GET" && jsonData ? {
-            mode: "raw",
-            raw: jsonData
-          } : undefined,
+          body:
+            method !== "GET" && jsonData
+              ? {
+                  mode: "raw",
+                  raw: jsonData,
+                }
+              : undefined,
           url: {
-            raw: url
-          }
-        }
-      }
-    ]
+            raw: url,
+          },
+        },
+      },
+    ],
   };
-  
+
   return JSON.stringify(postmanCollection, null, 2);
 };
 
@@ -166,7 +169,7 @@ export const APIGeneratorModal = ({ opened, onClose }: ModalProps) => {
     try {
       const json = getJson();
       if (!json.trim()) return "";
-      
+
       // Pretty format the JSON
       return JSON.stringify(JSON.parse(json), null, 2);
     } catch {
@@ -175,12 +178,12 @@ export const APIGeneratorModal = ({ opened, onClose }: ModalProps) => {
   }, [getJson]);
 
   const currentTemplate = API_TEMPLATES.find(t => t.id === selectedTemplate)!;
-  
+
   const generatedCode = useMemo(() => {
     if (!jsonData.trim() && method !== "GET") {
       return "// Please load some JSON data first";
     }
-    
+
     return currentTemplate.generator({
       method,
       url,
@@ -200,13 +203,7 @@ export const APIGeneratorModal = ({ opened, onClose }: ModalProps) => {
   };
 
   return (
-    <Modal 
-      title="API Request Generator" 
-      size="xl" 
-      opened={opened} 
-      onClose={onClose} 
-      centered
-    >
+    <Modal title="API Request Generator" size="xl" opened={opened} onClose={onClose} centered>
       <Stack gap="md">
         <Text size="sm" c="dimmed">
           Generate API request examples in various formats using your JSON data as the request body.
@@ -220,7 +217,7 @@ export const APIGeneratorModal = ({ opened, onClose }: ModalProps) => {
             <Select
               label="HTTP Method"
               value={method}
-              onChange={(value) => setMethod(value || "POST")}
+              onChange={value => setMethod(value || "POST")}
               data={[
                 { label: "GET", value: "GET" },
                 { label: "POST", value: "POST" },
@@ -232,7 +229,7 @@ export const APIGeneratorModal = ({ opened, onClose }: ModalProps) => {
             <Select
               label="Content Type"
               value={contentType}
-              onChange={(value) => setContentType(value || "application/json")}
+              onChange={value => setContentType(value || "application/json")}
               data={[
                 { label: "application/json", value: "application/json" },
                 { label: "application/xml", value: "application/xml" },
@@ -240,11 +237,11 @@ export const APIGeneratorModal = ({ opened, onClose }: ModalProps) => {
               ]}
             />
           </Group>
-          
+
           <TextInput
             label="API Endpoint URL"
             value={url}
-            onChange={(e) => setUrl(e.currentTarget.value)}
+            onChange={e => setUrl(e.currentTarget.value)}
             placeholder="https://api.example.com/endpoint"
           />
         </Stack>
@@ -252,20 +249,16 @@ export const APIGeneratorModal = ({ opened, onClose }: ModalProps) => {
         <Divider />
 
         {/* Template Selection */}
-        <Tabs value={selectedTemplate} onChange={(value) => setSelectedTemplate(value || "curl")}>
+        <Tabs value={selectedTemplate} onChange={value => setSelectedTemplate(value || "curl")}>
           <Tabs.List grow>
-            {API_TEMPLATES.map((template) => (
-              <Tabs.Tab
-                key={template.id}
-                value={template.id}
-                leftSection={template.icon}
-              >
+            {API_TEMPLATES.map(template => (
+              <Tabs.Tab key={template.id} value={template.id} leftSection={template.icon}>
                 {template.name}
               </Tabs.Tab>
             ))}
           </Tabs.List>
 
-          {API_TEMPLATES.map((template) => (
+          {API_TEMPLATES.map(template => (
             <Tabs.Panel key={template.id} value={template.id} pt="md">
               <Stack gap="sm">
                 <Group justify="space-between" align="center">
@@ -277,7 +270,7 @@ export const APIGeneratorModal = ({ opened, onClose }: ModalProps) => {
                       {template.language}
                     </Badge>
                   </Group>
-                  
+
                   <Tooltip label="Copy to clipboard">
                     <Button
                       size="xs"
@@ -289,7 +282,7 @@ export const APIGeneratorModal = ({ opened, onClose }: ModalProps) => {
                     </Button>
                   </Tooltip>
                 </Group>
-                
+
                 <CodeHighlight
                   code={generatedCode}
                   language={template.language}

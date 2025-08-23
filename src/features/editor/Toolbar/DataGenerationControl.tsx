@@ -2,8 +2,8 @@ import React from "react";
 import { ActionIcon, Tooltip, Text, Flex, Badge } from "@mantine/core";
 import { useHotkeys } from "@mantine/hooks";
 import { MdDataUsage } from "react-icons/md";
-import { useModal } from "../../../store/useModal";
 import useDataGeneration from "../../../store/useDataGeneration";
+import { useModal } from "../../../store/useModal";
 
 export const DataGenerationControl = () => {
   const setVisible = useModal(state => state.setVisible);
@@ -13,9 +13,7 @@ export const DataGenerationControl = () => {
     setVisible("DataGenerationModal", true);
   }, [setVisible]);
 
-  useHotkeys([
-    ["mod+shift+d", openDataGeneration],
-  ]);
+  useHotkeys([["mod+shift+d", openDataGeneration]]);
 
   const totalAssets = recentDatasets.length + customTemplates.length;
   const hasAssets = totalAssets > 0;
@@ -42,7 +40,8 @@ export const DataGenerationControl = () => {
             </Text>
             {hasAssets && (
               <Text fz="xs" c="dimmed">
-                {recentDatasets.length} dataset{recentDatasets.length !== 1 ? "s" : ""} • {customTemplates.length} template{customTemplates.length !== 1 ? "s" : ""}
+                {recentDatasets.length} dataset{recentDatasets.length !== 1 ? "s" : ""} •{" "}
+                {customTemplates.length} template{customTemplates.length !== 1 ? "s" : ""}
               </Text>
             )}
           </Flex>

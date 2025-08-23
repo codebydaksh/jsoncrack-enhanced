@@ -2,25 +2,18 @@ import React from "react";
 import { ActionIcon, Tooltip, Text, Flex, Badge } from "@mantine/core";
 import { useHotkeys } from "@mantine/hooks";
 import { MdAutoAwesome } from "react-icons/md";
-import { useModal } from "../../../store/useModal";
 import useAutoComplete from "../../../store/useAutoComplete";
+import { useModal } from "../../../store/useModal";
 
 export const AutoCompleteControl = () => {
   const setVisible = useModal(state => state.setVisible);
-  const { 
-    isEnabled, 
-    learningEnabled, 
-    customPatterns,
-    commonPatterns 
-  } = useAutoComplete();
+  const { isEnabled, learningEnabled, customPatterns, commonPatterns } = useAutoComplete();
 
   const openAutoComplete = React.useCallback(() => {
     setVisible("AutoCompleteModal", true);
   }, [setVisible]);
 
-  useHotkeys([
-    ["mod+shift+a", openAutoComplete],
-  ]);
+  useHotkeys([["mod+shift+a", openAutoComplete]]);
 
   const totalPatterns = Object.keys(customPatterns).length + Object.keys(commonPatterns).length;
   const hasPatterns = totalPatterns > 0;

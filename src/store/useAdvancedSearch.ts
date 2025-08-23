@@ -56,35 +56,39 @@ const evaluateJSONPath = (data: any, path: string): any[] => {
     if (path.startsWith("$.")) {
       const segments = path.slice(2).split(".");
       let results = [data];
-      
+
       for (const segment of segments) {
         if (segment === "*") {
-          results = results.flatMap(obj => 
+          results = results.flatMap(obj =>
             typeof obj === "object" && obj !== null ? Object.values(obj) : []
           );
         } else if (segment.includes("[") && segment.includes("]")) {
           // Handle array access like items[0] or items[*]
           const [key, indexPart] = segment.split("[");
           const index = indexPart.replace("]", "");
-          
+
           results = results.flatMap(obj => {
             if (typeof obj === "object" && obj !== null && obj[key]) {
               if (index === "*") {
                 return Array.isArray(obj[key]) ? obj[key] : [];
               } else {
                 const idx = parseInt(index);
-                return Array.isArray(obj[key]) && obj[key][idx] !== undefined ? [obj[key][idx]] : [];
+                return Array.isArray(obj[key]) && obj[key][idx] !== undefined
+                  ? [obj[key][idx]]
+                  : [];
               }
             }
             return [];
           });
         } else {
-          results = results.flatMap(obj => 
-            typeof obj === "object" && obj !== null && obj[segment] !== undefined ? [obj[segment]] : []
+          results = results.flatMap(obj =>
+            typeof obj === "object" && obj !== null && obj[segment] !== undefined
+              ? [obj[segment]]
+              : []
           );
         }
       }
-      
+
       return results;
     }
     return [];
@@ -95,15 +99,15 @@ const evaluateJSONPath = (data: any, path: string): any[] => {
 
 // Recursive search function
 const searchInObject = (
-  obj: any, 
-  query: string, 
+  obj: any,
+  query: string,
   mode: "simple" | "regex" | "jsonPath",
   field: "key" | "value" | "both",
   caseSensitive: boolean,
   path = "$"
 ): SearchResult[] => {
   const results: SearchResult[] = [];
-  
+
   if (mode === "jsonPath") {
     try {
       const pathResults = evaluateJSONPath(obj, query);
@@ -112,7 +116,7 @@ const searchInObject = (
           path: `${query}[${index}]`,
           key: "",
           value: result,
-          type: "value"
+          type: "value",
         });
       });
       return results;
@@ -120,11 +124,11 @@ const searchInObject = (
       return [];
     }
   }
-  
+
   const searchText = caseSensitive ? query : query.toLowerCase();
   const isRegex = mode === "regex";
   let regex: RegExp | null = null;
-  
+
   if (isRegex) {
     try {
       regex = new RegExp(query, caseSensitive ? "g" : "gi");
@@ -132,37 +136,37 @@ const searchInObject = (
       return results;
     }
   }
-  
+
   const matches = (text: string, type: "key" | "value"): boolean => {
     if ((field === "key" && type === "value") || (field === "value" && type === "key")) {
       return false;
     }
-    
+
     const textToSearch = caseSensitive ? text : text.toLowerCase();
-    
+
     if (isRegex && regex) {
       return regex.test(textToSearch);
     }
-    
+
     return textToSearch.includes(searchText);
   };
-  
+
   const processValue = (key: string, value: any, currentPath: string) => {
     const keyStr = String(key);
     const valueStr = String(value);
-    
+
     const keyMatches = matches(keyStr, "key");
     const valueMatches = matches(valueStr, "value");
-    
+
     if (keyMatches || valueMatches) {
       results.push({
         path: currentPath,
         key: keyStr,
         value: value,
-        type: keyMatches && valueMatches ? "both" : keyMatches ? "key" : "value"
+        type: keyMatches && valueMatches ? "both" : keyMatches ? "key" : "value",
       });
     }
-    
+
     if (typeof value === "object" && value !== null) {
       if (Array.isArray(value)) {
         value.forEach((item, index) => {
@@ -175,7 +179,7 @@ const searchInObject = (
       }
     }
   };
-  
+
   if (typeof obj === "object" && obj !== null) {
     if (Array.isArray(obj)) {
       obj.forEach((item, index) => {
@@ -187,7 +191,7 @@ const searchInObject = (
       });
     }
   }
-  
+
   return results;
 };
 
@@ -229,9 +233,9 @@ const useAdvancedSearch = create<AdvancedSearchState & AdvancedSearchActions>((s
   },
 
   setResults: (results: SearchResult[]) => {
-    set({ 
-      results, 
-      currentResultIndex: results.length > 0 ? 0 : -1 
+    set({
+      results,
+      currentResultIndex: results.length > 0 ? 0 : -1,
     });
   },
 
@@ -277,7 +281,7 @@ const useAdvancedSearch = create<AdvancedSearchState & AdvancedSearchActions>((s
 
   searchInJson: (jsonData: any) => {
     const { searchQuery, searchMode, searchField, caseSensitive } = get();
-    
+
     if (!searchQuery.trim()) {
       set({ results: [], currentResultIndex: -1 });
       return;
@@ -285,11 +289,11 @@ const useAdvancedSearch = create<AdvancedSearchState & AdvancedSearchActions>((s
 
     try {
       const results = searchInObject(jsonData, searchQuery, searchMode, searchField, caseSensitive);
-      set({ 
-        results, 
-        currentResultIndex: results.length > 0 ? 0 : -1 
+      set({
+        results,
+        currentResultIndex: results.length > 0 ? 0 : -1,
       });
-      
+
       // Add to history
       get().addToHistory(searchQuery);
     } catch (error) {
@@ -308,7 +312,7 @@ const useAdvancedSearch = create<AdvancedSearchState & AdvancedSearchActions>((s
     } else {
       newIndex = currentResultIndex <= 0 ? results.length - 1 : currentResultIndex - 1;
     }
-    
+
     set({ currentResultIndex: newIndex });
   },
 }));

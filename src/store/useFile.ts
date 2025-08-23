@@ -70,7 +70,7 @@ const debouncedUpdateJson = debounce((value: unknown) => {
   useGraph.getState().setLoading(true);
   const jsonString = JSON.stringify(value, null, 2);
   useJson.getState().setJson(jsonString);
-  
+
   // Add to history for undo/redo (debounced to avoid too many history entries)
   useHistory.getState().pushToHistory(jsonString);
 }, 400);
@@ -133,7 +133,7 @@ const useFile = create<FileStates & JsonActions>()((set, get) => ({
         sessionStorage.setItem("content", contents);
         sessionStorage.setItem("format", get().format);
         set({ hasChanges: true });
-        
+
         // Add to history for undo/redo (only for user changes, not programmatic)
         if (hasChanges && contents) {
           debouncedAddToHistory(contents);
@@ -174,10 +174,10 @@ const useFile = create<FileStates & JsonActions>()((set, get) => ({
     if (sessionContent && !widget) contents = sessionContent;
 
     if (format) set({ format });
-    
+
     // Initialize history with the starting content
     useHistory.getState().initializeHistory(contents);
-    
+
     get().setContents({ contents, hasChanges: false });
   },
 }));

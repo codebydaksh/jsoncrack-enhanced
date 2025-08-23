@@ -30,12 +30,12 @@ export const useSharedData = () => {
     if (!router.isReady) return;
 
     const { share } = router.query;
-    
+
     if (share && typeof share === "string") {
       try {
         // Attempt to decode the shared data
         let decodedData: string;
-        
+
         try {
           // Try base64 decoding first (for compressed data)
           decodedData = decompressFromURL(share);
@@ -45,29 +45,30 @@ export const useSharedData = () => {
         }
 
         const sharedData: SharedData = JSON.parse(decodedData);
-        
+
         if (sharedData.json) {
           // Validate that the JSON is parseable
           JSON.parse(sharedData.json);
-          
+
           // Load the shared JSON into the editor
-          setContents({ 
+          setContents({
             contents: sharedData.json,
-            hasChanges: false 
+            hasChanges: false,
           });
 
           // Show success notification
           toast.success(
-            `Shared data loaded${sharedData.timestamp 
-              ? ` from ${new Date(sharedData.timestamp).toLocaleDateString()}`
-              : ""
+            `Shared data loaded${
+              sharedData.timestamp
+                ? ` from ${new Date(sharedData.timestamp).toLocaleDateString()}`
+                : ""
             }`
           );
 
           // Remove the share parameter from URL to clean it up
           const newQuery = { ...router.query };
           delete newQuery.share;
-          
+
           router.replace(
             {
               pathname: router.pathname,
@@ -81,13 +82,13 @@ export const useSharedData = () => {
         }
       } catch (error) {
         console.error("Error loading shared data:", error);
-        
+
         toast.error("The shared link appears to be invalid or corrupted");
 
         // Clean up the invalid share parameter
         const newQuery = { ...router.query };
         delete newQuery.share;
-        
+
         router.replace(
           {
             pathname: router.pathname,

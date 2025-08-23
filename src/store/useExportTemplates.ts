@@ -5,7 +5,24 @@ export interface ExportTemplate {
   name: string;
   description: string;
   category: "document" | "code" | "data" | "visualization" | "custom";
-  format: "json" | "xml" | "yaml" | "csv" | "html" | "markdown" | "pdf" | "docx" | "excel" | "sql" | "typescript" | "javascript" | "python" | "graphql" | "swagger" | "postman" | "custom";
+  format:
+    | "json"
+    | "xml"
+    | "yaml"
+    | "csv"
+    | "html"
+    | "markdown"
+    | "pdf"
+    | "docx"
+    | "excel"
+    | "sql"
+    | "typescript"
+    | "javascript"
+    | "python"
+    | "graphql"
+    | "swagger"
+    | "postman"
+    | "custom";
   template: string; // Template string with placeholders
   transformations: DataTransformation[];
   styling?: ExportStyling;
@@ -84,7 +101,11 @@ interface ExportTemplateActions {
   updateTemplate: (templateId: string, updates: Partial<ExportTemplate>) => void;
   deleteTemplate: (templateId: string) => void;
   duplicateTemplate: (templateId: string) => void;
-  exportData: (jsonData: any, template: ExportTemplate, metadata?: Partial<ExportMetadata>) => Promise<ExportResult>;
+  exportData: (
+    jsonData: any,
+    template: ExportTemplate,
+    metadata?: Partial<ExportMetadata>
+  ) => Promise<ExportResult>;
   generatePreview: (jsonData: any, template: ExportTemplate) => void;
   clearPreview: () => void;
   saveExportResult: (result: ExportResult) => void;
@@ -146,7 +167,7 @@ const DEFAULT_TEMPLATES: ExportTemplate[] = [
     description: "Generate TypeScript interfaces from JSON structure",
     category: "code",
     format: "typescript",
-    template: `{{generateTypeScriptInterface(data, metadata.title || 'DataInterface')}}`,
+    template: "{{generateTypeScriptInterface(data, metadata.title || 'DataInterface')}}",
     transformations: [],
   },
   {
@@ -242,7 +263,7 @@ const processTemplate = (template: string, data: any, metadata: ExportMetadata):
         formatBytes,
         getObjectPaths,
       };
-      
+
       // Evaluate the expression in the context
       const func = new Function(...Object.keys(context), `return ${expression}`);
       return func(...Object.values(context));
@@ -272,16 +293,24 @@ const generateTypeScriptInterface = (data: any, interfaceName: string): string =
     const indent = "  ".repeat(level);
     const properties = Object.keys(obj).map(key => {
       const value = obj[key];
-      const type = Array.isArray(value) 
-        ? generateInterface(value, `${name}${key.charAt(0).toUpperCase() + key.slice(1)}`, level + 1)
+      const type = Array.isArray(value)
+        ? generateInterface(
+            value,
+            `${name}${key.charAt(0).toUpperCase() + key.slice(1)}`,
+            level + 1
+          )
         : typeof value === "object" && value !== null
-        ? generateInterface(value, `${name}${key.charAt(0).toUpperCase() + key.slice(1)}`, level + 1)
-        : typeof value;
-      
+          ? generateInterface(
+              value,
+              `${name}${key.charAt(0).toUpperCase() + key.slice(1)}`,
+              level + 1
+            )
+          : typeof value;
+
       return `${indent}  ${key}: ${type};`;
     });
 
-    return level === 0 
+    return level === 0
       ? `interface ${name} {\n${properties.join("\n")}\n}`
       : `{\n${properties.join("\n")}\n${indent}}`;
   };
@@ -296,9 +325,9 @@ const generateHTMLTable = (data: any): string => {
 
   const headers = Object.keys(data[0]);
   const headerRow = `<tr>${headers.map(h => `<th>${h}</th>`).join("")}</tr>`;
-  const dataRows = data.map(row => 
-    `<tr>${headers.map(h => `<td>${JSON.stringify(row[h] || "")}</td>`).join("")}</tr>`
-  ).join("");
+  const dataRows = data
+    .map(row => `<tr>${headers.map(h => `<td>${JSON.stringify(row[h] || "")}</td>`).join("")}</tr>`)
+    .join("");
 
   return `<table>${headerRow}${dataRows}</table>`;
 };
@@ -310,11 +339,13 @@ const generateCSV = (data: any): string => {
 
   const headers = Object.keys(data[0]);
   const csvHeaders = headers.join(",");
-  const csvRows = data.map(row => 
-    headers.map(header => {
-      const value = row[header] || "";
-      return `"${String(value).replace(/"/g, '""')}"`;
-    }).join(",")
+  const csvRows = data.map(row =>
+    headers
+      .map(header => {
+        const value = row[header] || "";
+        return `"${String(value).replace(/"/g, '""')}"`;
+      })
+      .join(",")
   );
 
   return [csvHeaders, ...csvRows].join("\n");
@@ -327,7 +358,7 @@ const generateSQLInserts = (data: any, tableName: string): string => {
 
   const columns = Object.keys(data[0]);
   const columnsList = columns.join(", ");
-  
+
   const inserts = data.map(row => {
     const values = columns.map(col => {
       const value = row[col];
@@ -336,7 +367,7 @@ const generateSQLInserts = (data: any, tableName: string): string => {
       if (typeof value === "number" || typeof value === "boolean") return String(value);
       return `'${JSON.stringify(value).replace(/'/g, "''")}'`;
     });
-    
+
     return `INSERT INTO ${tableName} (${columnsList}) VALUES (${values.join(", ")});`;
   });
 
@@ -349,7 +380,7 @@ const generateSwaggerSpec = (data: any): string => {
     if (Array.isArray(obj)) {
       return {
         type: "array",
-        items: obj.length > 0 ? generateSchema(obj[0]) : { type: "object" }
+        items: obj.length > 0 ? generateSchema(obj[0]) : { type: "object" },
       };
     }
 
@@ -360,7 +391,7 @@ const generateSwaggerSpec = (data: any): string => {
       });
       return {
         type: "object",
-        properties
+        properties,
       };
     }
 
@@ -368,7 +399,7 @@ const generateSwaggerSpec = (data: any): string => {
   };
 
   const schema = generateSchema(data);
-  
+
   return `paths:
   /data:
     get:
@@ -401,18 +432,18 @@ const formatBytes = (bytes: number): string => {
 
 const getObjectPaths = (obj: any, prefix = ""): string[] => {
   const paths: string[] = [];
-  
+
   if (typeof obj === "object" && obj !== null) {
     Object.keys(obj).forEach(key => {
       const path = prefix ? `${prefix}.${key}` : key;
       paths.push(path);
-      
+
       if (typeof obj[key] === "object" && obj[key] !== null) {
         paths.push(...getObjectPaths(obj[key], path));
       }
     });
   }
-  
+
   return paths;
 };
 
@@ -430,20 +461,20 @@ const useExportTemplates = create<ExportTemplateState & ExportTemplateActions>((
   autoSaveTemplates: true,
 
   // Actions
-  setSelectedTemplate: (template) => {
+  setSelectedTemplate: template => {
     set({ selectedTemplate: template });
   },
 
-  setEnablePreview: (enabled) => {
+  setEnablePreview: enabled => {
     set({ enablePreview: enabled });
   },
 
-  addCustomTemplate: (templateData) => {
+  addCustomTemplate: templateData => {
     const template: ExportTemplate = {
       ...templateData,
       id: `custom_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
     };
-    
+
     set(state => ({
       customTemplates: [...state.customTemplates, template],
     }));
@@ -451,31 +482,31 @@ const useExportTemplates = create<ExportTemplateState & ExportTemplateActions>((
 
   updateTemplate: (templateId, updates) => {
     set(state => ({
-      customTemplates: state.customTemplates.map(t => 
+      customTemplates: state.customTemplates.map(t =>
         t.id === templateId ? { ...t, ...updates } : t
       ),
     }));
   },
 
-  deleteTemplate: (templateId) => {
+  deleteTemplate: templateId => {
     set(state => ({
       customTemplates: state.customTemplates.filter(t => t.id !== templateId),
       selectedTemplate: state.selectedTemplate?.id === templateId ? null : state.selectedTemplate,
     }));
   },
 
-  duplicateTemplate: (templateId) => {
+  duplicateTemplate: templateId => {
     const { templates, customTemplates } = get();
     const allTemplates = [...templates, ...customTemplates];
     const template = allTemplates.find(t => t.id === templateId);
-    
+
     if (template) {
       const duplicated: ExportTemplate = {
         ...template,
         id: `custom_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
         name: `${template.name} (Copy)`,
       };
-      
+
       set(state => ({
         customTemplates: [...state.customTemplates, duplicated],
       }));
@@ -484,7 +515,7 @@ const useExportTemplates = create<ExportTemplateState & ExportTemplateActions>((
 
   exportData: async (jsonData, template, metadata = {}) => {
     set({ isExporting: true, exportProgress: 0 });
-    
+
     try {
       // Apply transformations
       let transformedData = jsonData;
@@ -492,7 +523,7 @@ const useExportTemplates = create<ExportTemplateState & ExportTemplateActions>((
         transformedData = get().applyTransformations(jsonData, template.transformations);
         set({ exportProgress: 30 });
       }
-      
+
       // Prepare metadata
       const finalMetadata: ExportMetadata = {
         title: `Export - ${new Date().toLocaleDateString()}`,
@@ -505,13 +536,13 @@ const useExportTemplates = create<ExportTemplateState & ExportTemplateActions>((
         includeSchema: false,
         ...metadata,
       };
-      
+
       set({ exportProgress: 50 });
-      
+
       // Process template
       const content = processTemplate(template.template, transformedData, finalMetadata);
       set({ exportProgress: 80 });
-      
+
       const result: ExportResult = {
         id: `export_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
         templateId: template.id,
@@ -522,14 +553,14 @@ const useExportTemplates = create<ExportTemplateState & ExportTemplateActions>((
         generatedAt: Date.now(),
         metadata: finalMetadata,
       };
-      
+
       set({ exportProgress: 100 });
       get().saveExportResult(result);
-      
+
       setTimeout(() => {
         set({ isExporting: false, exportProgress: 0 });
       }, 500);
-      
+
       return result;
     } catch (error) {
       set({ isExporting: false, exportProgress: 0 });
@@ -544,7 +575,7 @@ const useExportTemplates = create<ExportTemplateState & ExportTemplateActions>((
       if (template.transformations.length > 0) {
         transformedData = get().applyTransformations(jsonData, template.transformations);
       }
-      
+
       const previewMetadata: ExportMetadata = {
         title: "Preview",
         author: "JSON Crack",
@@ -555,22 +586,25 @@ const useExportTemplates = create<ExportTemplateState & ExportTemplateActions>((
         includeStats: false,
         includeSchema: false,
       };
-      
+
       // Limit data for preview to avoid performance issues
-      const limitedData = Array.isArray(transformedData) 
-        ? transformedData.slice(0, 10) 
+      const limitedData = Array.isArray(transformedData)
+        ? transformedData.slice(0, 10)
         : transformedData;
-      
+
       const content = processTemplate(template.template, limitedData, previewMetadata);
-      
+
       // Truncate if too long
-      const truncatedContent = content.length > 5000 
-        ? content.substring(0, 5000) + "\n\n... (preview truncated)"
-        : content;
-      
+      const truncatedContent =
+        content.length > 5000
+          ? content.substring(0, 5000) + "\n\n... (preview truncated)"
+          : content;
+
       set({ previewContent: truncatedContent });
     } catch (error) {
-      set({ previewContent: `Preview error: ${error instanceof Error ? error.message : String(error)}` });
+      set({
+        previewContent: `Preview error: ${error instanceof Error ? error.message : String(error)}`,
+      });
     }
   },
 
@@ -578,13 +612,13 @@ const useExportTemplates = create<ExportTemplateState & ExportTemplateActions>((
     set({ previewContent: null });
   },
 
-  saveExportResult: (result) => {
+  saveExportResult: result => {
     set(state => ({
       recentExports: [result, ...state.recentExports].slice(0, 20), // Keep last 20
     }));
   },
 
-  deleteExportResult: (resultId) => {
+  deleteExportResult: resultId => {
     set(state => ({
       recentExports: state.recentExports.filter(r => r.id !== resultId),
     }));
@@ -592,11 +626,11 @@ const useExportTemplates = create<ExportTemplateState & ExportTemplateActions>((
 
   applyTransformations: (data, transformations) => {
     let result = data;
-    
+
     const enabledTransformations = transformations
       .filter(t => t.enabled)
       .sort((a, b) => a.order - b.order);
-    
+
     enabledTransformations.forEach(transformation => {
       switch (transformation.type) {
         case "filter":
@@ -607,7 +641,7 @@ const useExportTemplates = create<ExportTemplateState & ExportTemplateActions>((
             });
           }
           break;
-        
+
         case "map":
           if (Array.isArray(result)) {
             result = result.map(item => {
@@ -616,7 +650,7 @@ const useExportTemplates = create<ExportTemplateState & ExportTemplateActions>((
             });
           }
           break;
-        
+
         case "sort":
           if (Array.isArray(result)) {
             result = [...result].sort((a, b) => {
@@ -625,55 +659,55 @@ const useExportTemplates = create<ExportTemplateState & ExportTemplateActions>((
             });
           }
           break;
-        
+
         case "flatten":
           if (Array.isArray(result)) {
             result = result.flat(transformation.config.depth || 1);
           }
           break;
-        
+
         default:
           // Custom transformation would go here
           break;
       }
     });
-    
+
     return result;
   },
 
-  validateTemplate: (template) => {
+  validateTemplate: template => {
     const errors: string[] = [];
-    
+
     if (!template.name?.trim()) {
       errors.push("Template name is required");
     }
-    
+
     if (!template.template?.trim()) {
       errors.push("Template content is required");
     }
-    
+
     if (!template.format) {
       errors.push("Template format is required");
     }
-    
+
     // Additional validation logic...
-    
+
     return {
       isValid: errors.length === 0,
       errors,
     };
   },
 
-  importTemplate: (templateData) => {
+  importTemplate: templateData => {
     try {
       const template = JSON.parse(templateData);
-      
+
       // Validate imported template
       const validation = get().validateTemplate(template);
       if (!validation.isValid) {
         return false;
       }
-      
+
       get().addCustomTemplate(template);
       return true;
     } catch (error) {
@@ -681,15 +715,15 @@ const useExportTemplates = create<ExportTemplateState & ExportTemplateActions>((
     }
   },
 
-  exportTemplate: (templateId) => {
+  exportTemplate: templateId => {
     const { templates, customTemplates } = get();
     const allTemplates = [...templates, ...customTemplates];
     const template = allTemplates.find(t => t.id === templateId);
-    
+
     if (template) {
       return JSON.stringify(template, null, 2);
     }
-    
+
     return "";
   },
 }));

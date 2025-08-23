@@ -2,8 +2,8 @@ import React from "react";
 import { ActionIcon, Tooltip, Text, Flex, Badge } from "@mantine/core";
 import { useHotkeys } from "@mantine/hooks";
 import { MdTransform } from "react-icons/md";
-import { useModal } from "../../../store/useModal";
 import useExportTemplates from "../../../store/useExportTemplates";
+import { useModal } from "../../../store/useModal";
 
 export const ExportTemplatesControl = () => {
   const setVisible = useModal(state => state.setVisible);
@@ -13,9 +13,7 @@ export const ExportTemplatesControl = () => {
     setVisible("ExportTemplatesModal", true);
   }, [setVisible]);
 
-  useHotkeys([
-    ["mod+shift+e", openExportTemplates],
-  ]);
+  useHotkeys([["mod+shift+e", openExportTemplates]]);
 
   const totalAssets = customTemplates.length + recentExports.length;
   const hasAssets = totalAssets > 0;
@@ -42,7 +40,8 @@ export const ExportTemplatesControl = () => {
             </Text>
             {hasAssets && (
               <Text fz="xs" c="dimmed">
-                {customTemplates.length} template{customTemplates.length !== 1 ? "s" : ""} • {recentExports.length} export{recentExports.length !== 1 ? "s" : ""}
+                {customTemplates.length} template{customTemplates.length !== 1 ? "s" : ""} •{" "}
+                {recentExports.length} export{recentExports.length !== 1 ? "s" : ""}
               </Text>
             )}
           </Flex>

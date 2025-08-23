@@ -2,8 +2,8 @@ import React from "react";
 import { ActionIcon, Tooltip, Text, Flex } from "@mantine/core";
 import { useHotkeys } from "@mantine/hooks";
 import { MdCompare } from "react-icons/md";
-import { useModal } from "../../../store/useModal";
 import useComparison from "../../../store/useComparison";
+import { useModal } from "../../../store/useModal";
 
 export const DataComparisonControl = () => {
   const setVisible = useModal(state => state.setVisible);
@@ -13,9 +13,7 @@ export const DataComparisonControl = () => {
     setVisible("DataComparisonModal", true);
   }, [setVisible]);
 
-  useHotkeys([
-    ["mod+shift+c", openComparison],
-  ]);
+  useHotkeys([["mod+shift+c", openComparison]]);
 
   const hasComparison = differences.length > 0;
 
@@ -51,9 +49,12 @@ export const DataComparisonControl = () => {
               width: 16,
               height: 16,
               borderRadius: "50%",
-              backgroundColor: stats.similarity > 80 ? "var(--mantine-color-green-filled)" : 
-                             stats.similarity > 50 ? "var(--mantine-color-yellow-filled)" : 
-                             "var(--mantine-color-red-filled)",
+              backgroundColor:
+                stats.similarity > 80
+                  ? "var(--mantine-color-green-filled)"
+                  : stats.similarity > 50
+                    ? "var(--mantine-color-yellow-filled)"
+                    : "var(--mantine-color-red-filled)",
               color: "white",
               fontSize: 8,
               display: "flex",

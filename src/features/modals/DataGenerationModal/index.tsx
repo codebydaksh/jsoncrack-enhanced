@@ -9,7 +9,6 @@ import {
   Card,
   Badge,
   ActionIcon,
-  Divider,
   NumberInput,
   Select,
   ScrollArea,
@@ -18,11 +17,9 @@ import {
   Progress,
   Alert,
   Code,
-  Switch,
-  Textarea,
-  TextInput,
-  JsonInput,
 } from "@mantine/core";
+import { event as gaEvent } from "nextjs-google-analytics";
+import { toast } from "react-hot-toast";
 import {
   FiDatabase,
   FiDownload,
@@ -37,9 +34,8 @@ import {
   FiEdit,
 } from "react-icons/fi";
 import { MdDataUsage } from "react-icons/md";
-import { event as gaEvent } from "nextjs-google-analytics";
-import { toast } from "react-hot-toast";
-import useDataGeneration, { DataTemplate, GeneratedDataset } from "../../../store/useDataGeneration";
+import type { DataTemplate, GeneratedDataset } from "../../../store/useDataGeneration";
+import useDataGeneration from "../../../store/useDataGeneration";
 
 interface TemplateCardProps {
   template: DataTemplate;
@@ -76,52 +72,73 @@ const TemplateCard: React.FC<TemplateCardProps> = ({
             <Badge
               variant="light"
               color={
-                template.category === "users" ? "blue" :
-                template.category === "products" ? "green" :
-                template.category === "api" ? "purple" :
-                template.category === "companies" ? "orange" :
-                "gray"
+                template.category === "users"
+                  ? "blue"
+                  : template.category === "products"
+                    ? "green"
+                    : template.category === "api"
+                      ? "purple"
+                      : template.category === "companies"
+                        ? "orange"
+                        : "gray"
               }
             >
               {template.category}
             </Badge>
             {isCustom && (
-              <Badge variant="outline" size="xs">Custom</Badge>
+              <Badge variant="outline" size="xs">
+                Custom
+              </Badge>
             )}
           </Group>
-          
+
           {isCustom && (
             <Group gap="xs">
               {onEdit && (
-                <ActionIcon size="xs" variant="subtle" onClick={(e) => {
-                  e.stopPropagation();
-                  onEdit();
-                }}>
+                <ActionIcon
+                  size="xs"
+                  variant="subtle"
+                  onClick={e => {
+                    e.stopPropagation();
+                    onEdit();
+                  }}
+                >
                   <FiEdit size={12} />
                 </ActionIcon>
               )}
               {onDelete && (
-                <ActionIcon size="xs" variant="subtle" color="red" onClick={(e) => {
-                  e.stopPropagation();
-                  onDelete();
-                }}>
+                <ActionIcon
+                  size="xs"
+                  variant="subtle"
+                  color="red"
+                  onClick={e => {
+                    e.stopPropagation();
+                    onDelete();
+                  }}
+                >
                   <FiTrash2 size={12} />
                 </ActionIcon>
               )}
             </Group>
           )}
         </Group>
-        
+
         <div>
-          <Text fw={500} size="sm">{template.name}</Text>
-          <Text size="xs" c="dimmed">{template.description}</Text>
+          <Text fw={500} size="sm">
+            {template.name}
+          </Text>
+          <Text size="xs" c="dimmed">
+            {template.description}
+          </Text>
         </div>
-        
+
         <Group gap="xs">
           <Text size="xs" c="dimmed">
             {template.mockFields.length} fields
           </Text>
-          <Text size="xs" c="dimmed">•</Text>
+          <Text size="xs" c="dimmed">
+            •
+          </Text>
           <Text size="xs" c="dimmed">
             {template.sampleSize} samples
           </Text>
@@ -138,34 +155,36 @@ interface DatasetCardProps {
   onPreview: () => void;
 }
 
-const DatasetCard: React.FC<DatasetCardProps> = ({
-  dataset,
-  onDownload,
-  onDelete,
-  onPreview,
-}) => {
+const DatasetCard: React.FC<DatasetCardProps> = ({ dataset, onDownload, onDelete, onPreview }) => {
   return (
     <Card withBorder padding="md" radius="sm">
       <Stack gap="sm">
         <Group justify="space-between">
           <div>
-            <Text fw={500} size="sm">{dataset.name}</Text>
+            <Text fw={500} size="sm">
+              {dataset.name}
+            </Text>
             <Text size="xs" c="dimmed">
               {new Date(dataset.generatedAt).toLocaleString()}
             </Text>
           </div>
           <Badge variant="light">{dataset.size} records</Badge>
         </Group>
-        
+
         <Text size="xs" c="dimmed">
           Template: {dataset.template.name}
         </Text>
-        
+
         <Group gap="xs">
           <Button size="xs" variant="light" leftSection={<FiEye size={12} />} onClick={onPreview}>
             Preview
           </Button>
-          <Button size="xs" variant="light" leftSection={<FiDownload size={12} />} onClick={onDownload}>
+          <Button
+            size="xs"
+            variant="light"
+            leftSection={<FiDownload size={12} />}
+            onClick={onDownload}
+          >
             Export
           </Button>
           <ActionIcon size="sm" variant="subtle" color="red" onClick={onDelete}>
@@ -213,9 +232,9 @@ export const DataGenerationModal = ({ opened, onClose }: ModalProps) => {
     try {
       const dataset = await generateData(selectedTemplate, generateCount);
       toast.success(`Generated ${dataset.size} records successfully!`);
-      gaEvent("data_generated", { 
-        template: selectedTemplate.name, 
-        count: generateCount 
+      gaEvent("data_generated", {
+        template: selectedTemplate.name,
+        count: generateCount,
       });
     } catch (error) {
       toast.error("Failed to generate data");
@@ -227,15 +246,15 @@ export const DataGenerationModal = ({ opened, onClose }: ModalProps) => {
       toast.error("Please select a template first");
       return;
     }
-    
+
     generatePreview(selectedTemplate, 3);
   };
 
   const handleExportDataset = (dataset: GeneratedDataset) => {
     const exported = exportDataset(dataset, outputFormat);
-    
-    const blob = new Blob([exported], { 
-      type: outputFormat === "json" ? "application/json" : "text/plain" 
+
+    const blob = new Blob([exported], {
+      type: outputFormat === "json" ? "application/json" : "text/plain",
     });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -243,14 +262,14 @@ export const DataGenerationModal = ({ opened, onClose }: ModalProps) => {
     a.download = `${dataset.name.replace(/\s+/g, "_")}.${outputFormat}`;
     a.click();
     URL.revokeObjectURL(url);
-    
+
     toast.success("Dataset exported successfully!");
     gaEvent("dataset_exported", { format: outputFormat });
   };
 
   const handleCopyToEditor = () => {
     if (!previewData) return;
-    
+
     // This would integrate with the main JSON editor
     // For now, we'll copy to clipboard
     navigator.clipboard.writeText(JSON.stringify(previewData, null, 2));
@@ -289,8 +308,8 @@ export const DataGenerationModal = ({ opened, onClose }: ModalProps) => {
             <Stack gap="md" mt="md">
               <Alert icon={<FiInfo size={16} />} color="blue" variant="light">
                 <Text size="sm">
-                  Generate realistic test data for your applications. Choose from predefined templates 
-                  or create custom data structures.
+                  Generate realistic test data for your applications. Choose from predefined
+                  templates or create custom data structures.
                 </Text>
               </Alert>
 
@@ -300,7 +319,7 @@ export const DataGenerationModal = ({ opened, onClose }: ModalProps) => {
                   <Select
                     size="xs"
                     value={outputFormat}
-                    onChange={(value) => setOutputFormat(value as any)}
+                    onChange={value => setOutputFormat(value as any)}
                     data={[
                       { value: "json", label: "JSON" },
                       { value: "csv", label: "CSV" },
@@ -360,7 +379,7 @@ export const DataGenerationModal = ({ opened, onClose }: ModalProps) => {
                       label="Number of Records"
                       description="How many records to generate"
                       value={generateCount}
-                      onChange={(value) => setGenerateCount(Number(value) || 100)}
+                      onChange={value => setGenerateCount(Number(value) || 100)}
                       min={1}
                       max={10000}
                       style={{ width: 200 }}
@@ -408,9 +427,7 @@ export const DataGenerationModal = ({ opened, onClose }: ModalProps) => {
                       </Group>
                     </Group>
                     <ScrollArea h={300}>
-                      <Code block>
-                        {JSON.stringify(previewData, null, 2)}
-                      </Code>
+                      <Code block>{JSON.stringify(previewData, null, 2)}</Code>
                     </ScrollArea>
                   </Stack>
                 </Card>
@@ -431,7 +448,8 @@ export const DataGenerationModal = ({ opened, onClose }: ModalProps) => {
               {recentDatasets.length === 0 ? (
                 <Alert icon={<FiInfo size={16} />} color="gray" variant="light">
                   <Text size="sm">
-                    No datasets generated yet. Go to the Generate Data tab to create your first dataset.
+                    No datasets generated yet. Go to the Generate Data tab to create your first
+                    dataset.
                   </Text>
                 </Alert>
               ) : (
@@ -480,7 +498,8 @@ export const DataGenerationModal = ({ opened, onClose }: ModalProps) => {
               {customTemplates.length === 0 ? (
                 <Alert icon={<FiInfo size={16} />} color="gray" variant="light">
                   <Text size="sm">
-                    No custom templates created yet. Click "Create Template" to build your own data structure.
+                    No custom templates created yet. Click "Create Template" to build your own data
+                    structure.
                   </Text>
                 </Alert>
               ) : (
@@ -521,9 +540,7 @@ export const DataGenerationModal = ({ opened, onClose }: ModalProps) => {
         )}
 
         <Group justify="right">
-          <Button onClick={onClose}>
-            Close
-          </Button>
+          <Button onClick={onClose}>Close</Button>
         </Group>
       </Stack>
     </Modal>

@@ -55,7 +55,12 @@ const validateJsonSchema = (data: any, schema: any, path = "$"): ValidationError
   }
 
   // Required properties validation
-  if (schema.required && Array.isArray(schema.required) && typeof data === "object" && data !== null) {
+  if (
+    schema.required &&
+    Array.isArray(schema.required) &&
+    typeof data === "object" &&
+    data !== null
+  ) {
     schema.required.forEach((requiredProp: string) => {
       if (!(requiredProp in data)) {
         errors.push({
@@ -183,10 +188,10 @@ const useValidation = create<ValidationState & ValidationActions>((set, get) => 
   setSchema: (schema: any | null) => {
     set({ schema });
     if (!schema) {
-      set({ 
-        errors: [], 
+      set({
+        errors: [],
         validationResults: { isValid: true, errorCount: 0, warningCount: 0 },
-        isValidationEnabled: false 
+        isValidationEnabled: false,
       });
     }
   },
@@ -194,14 +199,14 @@ const useValidation = create<ValidationState & ValidationActions>((set, get) => 
   setErrors: (errors: ValidationError[]) => {
     const errorCount = errors.filter(e => e.severity === "error").length;
     const warningCount = errors.filter(e => e.severity === "warning").length;
-    
-    set({ 
+
+    set({
       errors,
       validationResults: {
         isValid: errorCount === 0,
         errorCount,
         warningCount,
-      }
+      },
     });
   },
 
@@ -211,7 +216,7 @@ const useValidation = create<ValidationState & ValidationActions>((set, get) => 
 
   validateData: async (jsonData: string) => {
     const { schema, isValidationEnabled } = get();
-    
+
     if (!isValidationEnabled || !schema) {
       return;
     }
@@ -221,7 +226,7 @@ const useValidation = create<ValidationState & ValidationActions>((set, get) => 
     try {
       const data = JSON.parse(jsonData);
       const errors = validateJsonSchema(data, schema);
-      
+
       const errorCount = errors.filter(e => e.severity === "error").length;
       const warningCount = errors.filter(e => e.severity === "warning").length;
 
@@ -237,12 +242,14 @@ const useValidation = create<ValidationState & ValidationActions>((set, get) => 
     } catch (error) {
       // JSON parsing error
       set({
-        errors: [{
-          path: "$",
-          message: "Invalid JSON format",
-          severity: "error",
-          schemaPath: "$",
-        }],
+        errors: [
+          {
+            path: "$",
+            message: "Invalid JSON format",
+            severity: "error",
+            schemaPath: "$",
+          },
+        ],
         validationResults: {
           isValid: false,
           errorCount: 1,
@@ -269,10 +276,11 @@ const useValidation = create<ValidationState & ValidationActions>((set, get) => 
 
   getErrorsForPath: (path: string): ValidationError[] => {
     const { errors } = get();
-    return errors.filter(error => 
-      error.path === path || 
-      error.path.startsWith(`${path}.`) ||
-      error.path.startsWith(`${path}[`)
+    return errors.filter(
+      error =>
+        error.path === path ||
+        error.path.startsWith(`${path}.`) ||
+        error.path.startsWith(`${path}[`)
     );
   },
 }));

@@ -2,8 +2,8 @@ import React from "react";
 import { ActionIcon, Tooltip, Text, Flex } from "@mantine/core";
 import { useHotkeys } from "@mantine/hooks";
 import { FiSearch } from "react-icons/fi";
-import { useModal } from "../../../store/useModal";
 import useAdvancedSearch from "../../../store/useAdvancedSearch";
+import { useModal } from "../../../store/useModal";
 
 export const AdvancedSearchControl = () => {
   const setVisible = useModal(state => state.setVisible);
@@ -13,9 +13,7 @@ export const AdvancedSearchControl = () => {
     setVisible("AdvancedSearchModal", true);
   }, [setVisible]);
 
-  useHotkeys([
-    ["mod+shift+f", openAdvancedSearch],
-  ]);
+  useHotkeys([["mod+shift+f", openAdvancedSearch]]);
 
   return (
     <Tooltip

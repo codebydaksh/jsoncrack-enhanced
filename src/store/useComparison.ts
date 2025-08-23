@@ -55,31 +55,31 @@ interface ComparisonActions {
 // Deep comparison function
 const deepCompare = (obj1: any, obj2: any, path = "$"): ComparisonDiff[] => {
   const differences: ComparisonDiff[] = [];
-  
+
   // Handle null/undefined cases
   if (obj1 === null && obj2 === null) return differences;
   if (obj1 === undefined && obj2 === undefined) return differences;
-  
+
   if (obj1 === null || obj1 === undefined) {
     differences.push({
       path,
       type: "added",
       rightValue: obj2,
-      severity: "medium"
+      severity: "medium",
     });
     return differences;
   }
-  
+
   if (obj2 === null || obj2 === undefined) {
     differences.push({
       path,
       type: "removed",
       leftValue: obj1,
-      severity: "medium"
+      severity: "medium",
     });
     return differences;
   }
-  
+
   // Handle primitive values
   if (typeof obj1 !== "object" || typeof obj2 !== "object") {
     if (obj1 !== obj2) {
@@ -88,32 +88,32 @@ const deepCompare = (obj1: any, obj2: any, path = "$"): ComparisonDiff[] => {
         type: "modified",
         leftValue: obj1,
         rightValue: obj2,
-        severity: typeof obj1 !== typeof obj2 ? "high" : "low"
+        severity: typeof obj1 !== typeof obj2 ? "high" : "low",
       });
     }
     return differences;
   }
-  
+
   // Handle arrays
   if (Array.isArray(obj1) && Array.isArray(obj2)) {
     const maxLength = Math.max(obj1.length, obj2.length);
-    
+
     for (let i = 0; i < maxLength; i++) {
       const currentPath = `${path}[${i}]`;
-      
+
       if (i >= obj1.length) {
         differences.push({
           path: currentPath,
           type: "added",
           rightValue: obj2[i],
-          severity: "medium"
+          severity: "medium",
         });
       } else if (i >= obj2.length) {
         differences.push({
           path: currentPath,
           type: "removed",
           leftValue: obj1[i],
-          severity: "medium"
+          severity: "medium",
         });
       } else {
         differences.push(...deepCompare(obj1[i], obj2[i], currentPath));
@@ -121,7 +121,7 @@ const deepCompare = (obj1: any, obj2: any, path = "$"): ComparisonDiff[] => {
     }
     return differences;
   }
-  
+
   // Handle array vs non-array
   if (Array.isArray(obj1) !== Array.isArray(obj2)) {
     differences.push({
@@ -129,36 +129,36 @@ const deepCompare = (obj1: any, obj2: any, path = "$"): ComparisonDiff[] => {
       type: "modified",
       leftValue: obj1,
       rightValue: obj2,
-      severity: "high"
+      severity: "high",
     });
     return differences;
   }
-  
+
   // Handle objects
   const allKeys = new Set([...Object.keys(obj1), ...Object.keys(obj2)]);
-  
+
   for (const key of allKeys) {
     const currentPath = path === "$" ? `$.${key}` : `${path}.${key}`;
-    
+
     if (!(key in obj1)) {
       differences.push({
         path: currentPath,
         type: "added",
         rightValue: obj2[key],
-        severity: "medium"
+        severity: "medium",
       });
     } else if (!(key in obj2)) {
       differences.push({
         path: currentPath,
         type: "removed",
         leftValue: obj1[key],
-        severity: "medium"
+        severity: "medium",
       });
     } else {
       differences.push(...deepCompare(obj1[key], obj2[key], currentPath));
     }
   }
-  
+
   return differences;
 };
 
@@ -172,7 +172,7 @@ const calculateSimilarity = (diffs: ComparisonDiff[], totalElements: number): nu
 // Count total elements in an object
 const countElements = (obj: any): number => {
   if (typeof obj !== "object" || obj === null) return 1;
-  
+
   let count = 0;
   if (Array.isArray(obj)) {
     for (const item of obj) {
@@ -224,11 +224,18 @@ const useComparison = create<ComparisonState & ComparisonActions>((set, get) => 
 
   compareJsons: async () => {
     const { leftJson, rightJson } = get();
-    
+
     if (!leftJson.trim() || !rightJson.trim()) {
-      set({ 
-        differences: [], 
-        stats: { totalDifferences: 0, additions: 0, deletions: 0, modifications: 0, moves: 0, similarity: 100 }
+      set({
+        differences: [],
+        stats: {
+          totalDifferences: 0,
+          additions: 0,
+          deletions: 0,
+          modifications: 0,
+          moves: 0,
+          similarity: 100,
+        },
       });
       return;
     }
@@ -238,20 +245,20 @@ const useComparison = create<ComparisonState & ComparisonActions>((set, get) => 
     try {
       const leftData = JSON.parse(leftJson);
       const rightData = JSON.parse(rightJson);
-      
+
       const differences = deepCompare(leftData, rightData);
-      
+
       // Calculate statistics
       const additions = differences.filter(d => d.type === "added").length;
       const deletions = differences.filter(d => d.type === "removed").length;
       const modifications = differences.filter(d => d.type === "modified").length;
       const moves = differences.filter(d => d.type === "moved").length;
-      
+
       const leftElements = countElements(leftData);
       const rightElements = countElements(rightData);
       const totalElements = Math.max(leftElements, rightElements);
       const similarity = calculateSimilarity(differences, totalElements);
-      
+
       const stats: ComparisonStats = {
         totalDifferences: differences.length,
         additions,
@@ -261,18 +268,25 @@ const useComparison = create<ComparisonState & ComparisonActions>((set, get) => 
         similarity: Math.round(similarity),
       };
 
-      set({ 
-        differences, 
-        stats, 
+      set({
+        differences,
+        stats,
         selectedDiff: differences.length > 0 ? 0 : -1,
-        isComparing: false 
+        isComparing: false,
       });
     } catch (error) {
       console.error("Comparison error:", error);
-      set({ 
-        differences: [], 
-        stats: { totalDifferences: 0, additions: 0, deletions: 0, modifications: 0, moves: 0, similarity: 0 },
-        isComparing: false 
+      set({
+        differences: [],
+        stats: {
+          totalDifferences: 0,
+          additions: 0,
+          deletions: 0,
+          modifications: 0,
+          moves: 0,
+          similarity: 0,
+        },
+        isComparing: false,
       });
     }
   },
@@ -282,7 +296,14 @@ const useComparison = create<ComparisonState & ComparisonActions>((set, get) => 
       leftJson: "",
       rightJson: "",
       differences: [],
-      stats: { totalDifferences: 0, additions: 0, deletions: 0, modifications: 0, moves: 0, similarity: 100 },
+      stats: {
+        totalDifferences: 0,
+        additions: 0,
+        deletions: 0,
+        modifications: 0,
+        moves: 0,
+        similarity: 100,
+      },
       selectedDiff: -1,
       searchQuery: "",
     });
@@ -298,25 +319,26 @@ const useComparison = create<ComparisonState & ComparisonActions>((set, get) => 
     } else {
       newIndex = selectedDiff <= 0 ? differences.length - 1 : selectedDiff - 1;
     }
-    
+
     set({ selectedDiff: newIndex });
   },
 
   getFilteredDifferences: (): ComparisonDiff[] => {
     const { differences, searchQuery, showOnlyDifferences } = get();
-    
+
     let filtered = differences;
-    
+
     // Apply search filter
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(diff => 
-        diff.path.toLowerCase().includes(query) ||
-        JSON.stringify(diff.leftValue).toLowerCase().includes(query) ||
-        JSON.stringify(diff.rightValue).toLowerCase().includes(query)
+      filtered = filtered.filter(
+        diff =>
+          diff.path.toLowerCase().includes(query) ||
+          JSON.stringify(diff.leftValue).toLowerCase().includes(query) ||
+          JSON.stringify(diff.rightValue).toLowerCase().includes(query)
       );
     }
-    
+
     return filtered;
   },
 }));

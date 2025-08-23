@@ -21,7 +21,6 @@ import { event as gaEvent } from "nextjs-google-analytics";
 import toast from "react-hot-toast";
 import { FiSave, FiTrash2, FiDownload, FiUpload, FiInfo } from "react-icons/fi";
 import { MdPalette } from "react-icons/md";
-import { darkTheme, lightTheme } from "../../../constants/theme";
 import useConfig from "../../../store/useConfig";
 
 interface CustomTheme {
@@ -73,7 +72,7 @@ export const ThemesModal = ({ opened, onClose }: ModalProps) => {
       return [];
     }
   });
-  
+
   // New theme creation state
   const [newThemeName, setNewThemeName] = useState("");
   const [newThemeColors, setNewThemeColors] = useState(defaultCustomColors);
@@ -104,7 +103,7 @@ export const ThemesModal = ({ opened, onClose }: ModalProps) => {
 
     const updatedThemes = [...customThemes, newTheme];
     saveCustomThemes(updatedThemes);
-    
+
     setNewThemeName("");
     setNewThemeColors(defaultCustomColors);
     toast.success(`Theme "${newTheme.name}" created!`);
@@ -144,14 +143,14 @@ export const ThemesModal = ({ opened, onClose }: ModalProps) => {
     if (!file) return;
 
     const reader = new FileReader();
-    reader.onload = (e) => {
+    reader.onload = e => {
       try {
         const importedThemes = JSON.parse(e.target?.result as string);
         if (Array.isArray(importedThemes)) {
-          const validThemes = importedThemes.filter(theme => 
-            theme.id && theme.name && theme.colors
+          const validThemes = importedThemes.filter(
+            theme => theme.id && theme.name && theme.colors
           );
-          
+
           if (validThemes.length > 0) {
             const mergedThemes = [...customThemes, ...validThemes];
             saveCustomThemes(mergedThemes);
@@ -168,50 +167,47 @@ export const ThemesModal = ({ opened, onClose }: ModalProps) => {
       }
     };
     reader.readAsText(file);
-    
+
     // Reset input
     event.target.value = "";
   };
 
-  const presetThemes = useMemo(() => [
-    {
-      id: "default_light",
-      name: "Default Light",
-      baseTheme: "light" as const,
-      colors: defaultCustomColors,
-      isPreset: true,
-    },
-    {
-      id: "default_dark", 
-      name: "Default Dark",
-      baseTheme: "dark" as const,
-      colors: {
-        BACKGROUND_PRIMARY: "#36393f",
-        BACKGROUND_SECONDARY: "#2f3136", 
-        BACKGROUND_NODE: "#2B2C3E",
-        TEXT_NORMAL: "#dcddde",
-        NODE_KEY: "#FAA81A",
-        NODE_VALUE: "#DCE5E7",
-        INTEGER: "#e8c479",
-        BOOL_TRUE: "#00DC7D",
-        BOOL_FALSE: "#F85C50",
-        NULL: "#939598",
-        PARENT_ARR: "#FC9A40",
-        PARENT_OBJ: "#59b8ff",
+  const presetThemes = useMemo(
+    () => [
+      {
+        id: "default_light",
+        name: "Default Light",
+        baseTheme: "light" as const,
+        colors: defaultCustomColors,
+        isPreset: true,
       },
-      isPreset: true,
-    },
-  ], []);
+      {
+        id: "default_dark",
+        name: "Default Dark",
+        baseTheme: "dark" as const,
+        colors: {
+          BACKGROUND_PRIMARY: "#36393f",
+          BACKGROUND_SECONDARY: "#2f3136",
+          BACKGROUND_NODE: "#2B2C3E",
+          TEXT_NORMAL: "#dcddde",
+          NODE_KEY: "#FAA81A",
+          NODE_VALUE: "#DCE5E7",
+          INTEGER: "#e8c479",
+          BOOL_TRUE: "#00DC7D",
+          BOOL_FALSE: "#F85C50",
+          NULL: "#939598",
+          PARENT_ARR: "#FC9A40",
+          PARENT_OBJ: "#59b8ff",
+        },
+        isPreset: true,
+      },
+    ],
+    []
+  );
 
   return (
-    <Modal 
-      title="Color Themes" 
-      size="xl" 
-      opened={opened} 
-      onClose={onClose} 
-      centered
-    >
-      <Tabs value={activeTab} onChange={(value) => setActiveTab(value || "browse")}>
+    <Modal title="Color Themes" size="xl" opened={opened} onClose={onClose} centered>
+      <Tabs value={activeTab} onChange={value => setActiveTab(value || "browse")}>
         <Tabs.List grow>
           <Tabs.Tab value="browse" leftSection={<MdPalette size={16} />}>
             Browse Themes
@@ -257,9 +253,11 @@ export const ThemesModal = ({ opened, onClose }: ModalProps) => {
             <ScrollArea h={400}>
               <Stack gap="sm">
                 {/* Preset Themes */}
-                <Text fw={500} size="sm">Built-in Themes</Text>
+                <Text fw={500} size="sm">
+                  Built-in Themes
+                </Text>
                 <Grid>
-                  {presetThemes.map((theme) => (
+                  {presetThemes.map(theme => (
                     <Grid.Col span={6} key={theme.id}>
                       <Card withBorder p="sm">
                         <Group justify="space-between" mb="xs">
@@ -269,23 +267,27 @@ export const ThemesModal = ({ opened, onClose }: ModalProps) => {
                           </Badge>
                         </Group>
                         <Group gap="xs" mb="sm">
-                          {Object.entries(theme.colors).slice(0, 6).map(([key, color]) => (
-                            <div
-                              key={key}
-                              style={{
-                                width: 16,
-                                height: 16,
-                                backgroundColor: color,
-                                borderRadius: 4,
-                                border: "1px solid #e0e0e0",
-                              }}
-                            />
-                          ))}
+                          {Object.entries(theme.colors)
+                            .slice(0, 6)
+                            .map(([key, color]) => (
+                              <div
+                                key={key}
+                                style={{
+                                  width: 16,
+                                  height: 16,
+                                  backgroundColor: color,
+                                  borderRadius: 4,
+                                  border: "1px solid #e0e0e0",
+                                }}
+                              />
+                            ))}
                         </Group>
                         <Button
                           size="xs"
                           fullWidth
-                          onClick={() => applyTheme({ ...theme, createdAt: Date.now() } as CustomTheme)}
+                          onClick={() =>
+                            applyTheme({ ...theme, createdAt: Date.now() } as CustomTheme)
+                          }
                         >
                           Apply
                         </Button>
@@ -298,9 +300,11 @@ export const ThemesModal = ({ opened, onClose }: ModalProps) => {
                 {customThemes.length > 0 && (
                   <>
                     <Divider />
-                    <Text fw={500} size="sm">Custom Themes</Text>
+                    <Text fw={500} size="sm">
+                      Custom Themes
+                    </Text>
                     <Grid>
-                      {customThemes.map((theme) => (
+                      {customThemes.map(theme => (
                         <Grid.Col span={6} key={theme.id}>
                           <Card withBorder p="sm">
                             <Group justify="space-between" mb="xs">
@@ -315,24 +319,22 @@ export const ThemesModal = ({ opened, onClose }: ModalProps) => {
                               </ActionIcon>
                             </Group>
                             <Group gap="xs" mb="sm">
-                              {Object.entries(theme.colors).slice(0, 6).map(([key, color]) => (
-                                <div
-                                  key={key}
-                                  style={{
-                                    width: 16,
-                                    height: 16,
-                                    backgroundColor: color,
-                                    borderRadius: 4,
-                                    border: "1px solid #e0e0e0",
-                                  }}
-                                />
-                              ))}
+                              {Object.entries(theme.colors)
+                                .slice(0, 6)
+                                .map(([key, color]) => (
+                                  <div
+                                    key={key}
+                                    style={{
+                                      width: 16,
+                                      height: 16,
+                                      backgroundColor: color,
+                                      borderRadius: 4,
+                                      border: "1px solid #e0e0e0",
+                                    }}
+                                  />
+                                ))}
                             </Group>
-                            <Button
-                              size="xs"
-                              fullWidth
-                              onClick={() => applyTheme(theme)}
-                            >
+                            <Button size="xs" fullWidth onClick={() => applyTheme(theme)}>
                               Apply
                             </Button>
                           </Card>
@@ -358,93 +360,101 @@ export const ThemesModal = ({ opened, onClose }: ModalProps) => {
               label="Theme Name"
               placeholder="My Awesome Theme"
               value={newThemeName}
-              onChange={(e) => setNewThemeName(e.currentTarget.value)}
+              onChange={e => setNewThemeName(e.currentTarget.value)}
             />
 
-            <Text fw={500} size="sm">Color Configuration</Text>
+            <Text fw={500} size="sm">
+              Color Configuration
+            </Text>
             <Grid>
               <Grid.Col span={6}>
                 <ColorInput
                   label="Background Primary"
                   value={newThemeColors.BACKGROUND_PRIMARY}
-                  onChange={(value) => setNewThemeColors(prev => ({ ...prev, BACKGROUND_PRIMARY: value }))}
+                  onChange={value =>
+                    setNewThemeColors(prev => ({ ...prev, BACKGROUND_PRIMARY: value }))
+                  }
                 />
               </Grid.Col>
               <Grid.Col span={6}>
                 <ColorInput
                   label="Background Secondary"
                   value={newThemeColors.BACKGROUND_SECONDARY}
-                  onChange={(value) => setNewThemeColors(prev => ({ ...prev, BACKGROUND_SECONDARY: value }))}
+                  onChange={value =>
+                    setNewThemeColors(prev => ({ ...prev, BACKGROUND_SECONDARY: value }))
+                  }
                 />
               </Grid.Col>
               <Grid.Col span={6}>
                 <ColorInput
                   label="Node Background"
                   value={newThemeColors.BACKGROUND_NODE}
-                  onChange={(value) => setNewThemeColors(prev => ({ ...prev, BACKGROUND_NODE: value }))}
+                  onChange={value =>
+                    setNewThemeColors(prev => ({ ...prev, BACKGROUND_NODE: value }))
+                  }
                 />
               </Grid.Col>
               <Grid.Col span={6}>
                 <ColorInput
                   label="Text Color"
                   value={newThemeColors.TEXT_NORMAL}
-                  onChange={(value) => setNewThemeColors(prev => ({ ...prev, TEXT_NORMAL: value }))}
+                  onChange={value => setNewThemeColors(prev => ({ ...prev, TEXT_NORMAL: value }))}
                 />
               </Grid.Col>
               <Grid.Col span={6}>
                 <ColorInput
                   label="Object Keys"
                   value={newThemeColors.NODE_KEY}
-                  onChange={(value) => setNewThemeColors(prev => ({ ...prev, NODE_KEY: value }))}
+                  onChange={value => setNewThemeColors(prev => ({ ...prev, NODE_KEY: value }))}
                 />
               </Grid.Col>
               <Grid.Col span={6}>
                 <ColorInput
                   label="Values"
                   value={newThemeColors.NODE_VALUE}
-                  onChange={(value) => setNewThemeColors(prev => ({ ...prev, NODE_VALUE: value }))}
+                  onChange={value => setNewThemeColors(prev => ({ ...prev, NODE_VALUE: value }))}
                 />
               </Grid.Col>
               <Grid.Col span={6}>
                 <ColorInput
                   label="Numbers"
                   value={newThemeColors.INTEGER}
-                  onChange={(value) => setNewThemeColors(prev => ({ ...prev, INTEGER: value }))}
+                  onChange={value => setNewThemeColors(prev => ({ ...prev, INTEGER: value }))}
                 />
               </Grid.Col>
               <Grid.Col span={6}>
                 <ColorInput
                   label="Boolean True"
                   value={newThemeColors.BOOL_TRUE}
-                  onChange={(value) => setNewThemeColors(prev => ({ ...prev, BOOL_TRUE: value }))}
+                  onChange={value => setNewThemeColors(prev => ({ ...prev, BOOL_TRUE: value }))}
                 />
               </Grid.Col>
               <Grid.Col span={6}>
                 <ColorInput
                   label="Boolean False"
                   value={newThemeColors.BOOL_FALSE}
-                  onChange={(value) => setNewThemeColors(prev => ({ ...prev, BOOL_FALSE: value }))}
+                  onChange={value => setNewThemeColors(prev => ({ ...prev, BOOL_FALSE: value }))}
                 />
               </Grid.Col>
               <Grid.Col span={6}>
                 <ColorInput
                   label="Null Values"
                   value={newThemeColors.NULL}
-                  onChange={(value) => setNewThemeColors(prev => ({ ...prev, NULL: value }))}
+                  onChange={value => setNewThemeColors(prev => ({ ...prev, NULL: value }))}
                 />
               </Grid.Col>
               <Grid.Col span={6}>
                 <ColorInput
                   label="Arrays"
                   value={newThemeColors.PARENT_ARR}
-                  onChange={(value) => setNewThemeColors(prev => ({ ...prev, PARENT_ARR: value }))}
+                  onChange={value => setNewThemeColors(prev => ({ ...prev, PARENT_ARR: value }))}
                 />
               </Grid.Col>
               <Grid.Col span={6}>
                 <ColorInput
                   label="Objects"
                   value={newThemeColors.PARENT_OBJ}
-                  onChange={(value) => setNewThemeColors(prev => ({ ...prev, PARENT_OBJ: value }))}
+                  onChange={value => setNewThemeColors(prev => ({ ...prev, PARENT_OBJ: value }))}
                 />
               </Grid.Col>
             </Grid>

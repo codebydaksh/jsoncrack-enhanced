@@ -8,13 +8,13 @@ import { FaCrown, FaGithub } from "react-icons/fa6";
 import { LuLink } from "react-icons/lu";
 import { JSONCrackLogo } from "../../../layout/JsonCrackLogo";
 import { useModal } from "../../../store/useModal";
-import { FileMenu } from "./FileMenu";
-import { MemoryMonitor } from "./MemoryMonitor";
-import { ToolsMenu } from "./ToolsMenu";
-import { UndoRedoControl } from "./UndoRedoControl";
 import { AdvancedSearchControl } from "./AdvancedSearchControl";
 import { DataComparisonControl } from "./DataComparisonControl";
+import { FileMenu } from "./FileMenu";
+import { MemoryMonitor } from "./MemoryMonitor";
 import { PerformanceAnalyticsControl } from "./PerformanceAnalyticsControl";
+import { ToolsMenu } from "./ToolsMenu";
+import { UndoRedoControl } from "./UndoRedoControl";
 import { ViewMenu } from "./ViewMenu";
 import { StyledToolElement } from "./styles";
 

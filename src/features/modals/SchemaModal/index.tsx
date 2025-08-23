@@ -1,26 +1,36 @@
 import React from "react";
 import type { ModalProps } from "@mantine/core";
-import { Stack, Modal, Button, Text, Anchor, Menu, Group, Paper, Switch, Badge, Alert } from "@mantine/core";
+import {
+  Stack,
+  Modal,
+  Button,
+  Text,
+  Anchor,
+  Menu,
+  Group,
+  Paper,
+  Badge,
+  Alert,
+} from "@mantine/core";
 import Editor from "@monaco-editor/react";
 import { event as gaEvent } from "nextjs-google-analytics";
 import { toast } from "react-hot-toast";
 import { FaChevronDown } from "react-icons/fa";
-import { FaCrown } from "react-icons/fa6";
+import { FiCheckCircle, FiXCircle } from "react-icons/fi";
 import { VscLinkExternal } from "react-icons/vsc";
-import { FiCheckCircle, FiXCircle, FiAlertTriangle } from "react-icons/fi";
 import { FileFormat } from "../../../enums/file.enum";
 import useConfig from "../../../store/useConfig";
 import useFile from "../../../store/useFile";
 import useJson from "../../../store/useJson";
-import useValidation from "../../../store/useValidation";
 import { useModal } from "../../../store/useModal";
+import useValidation from "../../../store/useValidation";
 
 export const SchemaModal = ({ opened, onClose }: ModalProps) => {
   const setContents = useFile(state => state.setContents);
   const setJsonSchema = useFile(state => state.setJsonSchema);
   const getJson = useJson(state => state.getJson);
   const setVisible = useModal(state => state.setVisible);
-  
+
   // Validation store
   const {
     isValidationEnabled,
@@ -31,7 +41,7 @@ export const SchemaModal = ({ opened, onClose }: ModalProps) => {
     validateData,
     clearValidation,
   } = useValidation();
-  
+
   const darkmodeEnabled = useConfig(state => (state.darkmodeEnabled ? "vs-dark" : "light"));
   const [schema, setSchema] = React.useState(
     JSON.stringify(
@@ -58,7 +68,7 @@ export const SchemaModal = ({ opened, onClose }: ModalProps) => {
       const parsedSchema = JSON.parse(schema);
       setJsonSchema(parsedSchema);
       setValidationSchema(parsedSchema);
-      
+
       // Enable validation and validate current data
       setValidationEnabled(true);
       const currentJson = getJson();
@@ -99,27 +109,23 @@ export const SchemaModal = ({ opened, onClose }: ModalProps) => {
   return (
     <Modal title="JSON Schema" size="lg" opened={opened} onClose={onClose} centered>
       <Stack>
-        <Text fz="sm">Define a JSON Schema to validate your data structure and get visual feedback.</Text>
-        
+        <Text fz="sm">
+          Define a JSON Schema to validate your data structure and get visual feedback.
+        </Text>
+
         {/* Validation Status */}
         {isValidationEnabled && (
           <Alert
-            icon={
-              validationResults.isValid ? (
-                <FiCheckCircle size={16} />
-              ) : (
-                <FiXCircle size={16} />
-              )
-            }
+            icon={validationResults.isValid ? <FiCheckCircle size={16} /> : <FiXCircle size={16} />}
             color={validationResults.isValid ? "green" : "red"}
             variant="light"
           >
             <Group justify="space-between">
               <Text size="sm">
-                {validationResults.isValid 
-                  ? "✅ Data is valid" 
+                {validationResults.isValid
+                  ? "✅ Data is valid"
                   : `❌ Found ${validationResults.errorCount} errors`}
-                {validationResults.warningCount > 0 && 
+                {validationResults.warningCount > 0 &&
                   `, ${validationResults.warningCount} warnings`}
               </Text>
               <Group gap="xs">
@@ -137,7 +143,7 @@ export const SchemaModal = ({ opened, onClose }: ModalProps) => {
             </Group>
           </Alert>
         )}
-        
+
         <Anchor
           fz="sm"
           target="_blank"

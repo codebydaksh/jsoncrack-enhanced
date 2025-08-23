@@ -34,10 +34,10 @@ const useHistory = create<HistoryState & HistoryActions>()(
     // Actions
     pushToHistory: (newState: string) => {
       const { past, present, maxHistorySize } = get();
-      
+
       // Don't add to history if the new state is the same as current
       if (newState === present) return;
-      
+
       // Don't add empty states or invalid JSON to history
       try {
         JSON.parse(newState);
@@ -46,7 +46,7 @@ const useHistory = create<HistoryState & HistoryActions>()(
       }
 
       const newPast = [...past, present];
-      
+
       // Limit history size
       if (newPast.length > maxHistorySize) {
         newPast.shift(); // Remove oldest entry
@@ -63,7 +63,7 @@ const useHistory = create<HistoryState & HistoryActions>()(
 
     undo: () => {
       const { past, present, future } = get();
-      
+
       if (past.length === 0) return null;
 
       const previous = past[past.length - 1];
@@ -83,7 +83,7 @@ const useHistory = create<HistoryState & HistoryActions>()(
 
     redo: () => {
       const { past, present, future } = get();
-      
+
       if (future.length === 0) return null;
 
       const next = future[0];
@@ -114,7 +114,7 @@ const useHistory = create<HistoryState & HistoryActions>()(
     setMaxHistorySize: (size: number) => {
       const { past } = get();
       const newPast = past.slice(-size); // Keep only the last 'size' entries
-      
+
       set({
         maxHistorySize: size,
         past: newPast,

@@ -11,7 +11,6 @@ import {
   TextInput,
   Switch,
   ActionIcon,
-  Tooltip,
   ScrollArea,
   Paper,
   Grid,
@@ -24,9 +23,9 @@ import {
 } from "@mantine/core";
 import { CodeHighlight } from "@mantine/code-highlight";
 import { useHotkeys } from "@mantine/hooks";
+import { event as gaEvent } from "nextjs-google-analytics";
+import { toast } from "react-hot-toast";
 import {
-  FiArrowRight,
-  FiArrowLeft,
   FiSearch,
   FiRefreshCw,
   FiCopy,
@@ -35,19 +34,17 @@ import {
   FiMinus,
   FiEdit,
   FiEye,
-  FiEyeOff,
   FiChevronUp,
   FiChevronDown,
 } from "react-icons/fi";
 import { MdSwapHoriz, MdCompare } from "react-icons/md";
-import { event as gaEvent } from "nextjs-google-analytics";
-import { toast } from "react-hot-toast";
-import useComparison, { ComparisonDiff } from "../../../store/useComparison";
+import type { ComparisonDiff } from "../../../store/useComparison";
+import useComparison from "../../../store/useComparison";
 import useJson from "../../../store/useJson";
 
 const DiffTypeColors = {
   added: "green",
-  removed: "red", 
+  removed: "red",
   modified: "yellow",
   moved: "blue",
 } as const;
@@ -68,7 +65,7 @@ interface DiffRowProps {
 
 const DiffRow: React.FC<DiffRowProps> = ({ diff, index, isSelected, onClick }) => {
   const Icon = DiffTypeIcons[diff.type];
-  
+
   return (
     <Paper
       withBorder
@@ -92,26 +89,31 @@ const DiffRow: React.FC<DiffRowProps> = ({ diff, index, isSelected, onClick }) =
             {diff.type}
           </Badge>
         </Group>
-        
-        <Badge size="xs" variant="dot" color={
-          diff.severity === "high" ? "red" : 
-          diff.severity === "medium" ? "yellow" : "gray"
-        }>
+
+        <Badge
+          size="xs"
+          variant="dot"
+          color={diff.severity === "high" ? "red" : diff.severity === "medium" ? "yellow" : "gray"}
+        >
           {diff.severity}
         </Badge>
       </Group>
-      
+
       {/* Value Preview */}
       <Stack gap={2} mt="xs">
         {diff.leftValue !== undefined && (
           <Text size="xs" c="dimmed" lineClamp={1}>
-            <Text span fw={500} c="red">- </Text>
+            <Text span fw={500} c="red">
+              -{" "}
+            </Text>
             {JSON.stringify(diff.leftValue)}
           </Text>
         )}
         {diff.rightValue !== undefined && (
           <Text size="xs" c="dimmed" lineClamp={1}>
-            <Text span fw={500} c="green">+ </Text>
+            <Text span fw={500} c="green">
+              +{" "}
+            </Text>
             {JSON.stringify(diff.rightValue)}
           </Text>
         )}
@@ -146,15 +148,14 @@ export const DataComparisonModal = ({ opened, onClose }: ModalProps) => {
   } = useComparison();
 
   const getJson = useJson(state => state.getJson);
-  
+
   const [activeTab, setActiveTab] = React.useState<string | null>("compare");
   const [autoCompare, setAutoCompare] = React.useState(true);
 
-  const filteredDifferences = React.useMemo(() => getFilteredDifferences(), [
-    differences,
-    searchQuery,
-    getFilteredDifferences,
-  ]);
+  const filteredDifferences = React.useMemo(
+    () => getFilteredDifferences(),
+    [differences, searchQuery, getFilteredDifferences]
+  );
 
   const loadCurrentJson = (side: "left" | "right") => {
     const currentJson = getJson();
@@ -177,11 +178,11 @@ export const DataComparisonModal = ({ opened, onClose }: ModalProps) => {
     setRightJson(tempJson);
     setLeftLabel(rightLabel);
     setRightLabel(tempLabel);
-    
+
     if (autoCompare) {
       setTimeout(compareJsons, 100);
     }
-    
+
     gaEvent("comparison_swap_sides");
   };
 
@@ -195,7 +196,7 @@ export const DataComparisonModal = ({ opened, onClose }: ModalProps) => {
         differences: filteredDifferences,
       },
     };
-    
+
     const blob = new Blob([JSON.stringify(report, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -203,7 +204,7 @@ export const DataComparisonModal = ({ opened, onClose }: ModalProps) => {
     a.download = `json-comparison-${Date.now()}.json`;
     a.click();
     URL.revokeObjectURL(url);
-    
+
     gaEvent("export_comparison_report");
     toast.success("Comparison report exported!");
   };
@@ -242,7 +243,10 @@ export const DataComparisonModal = ({ opened, onClose }: ModalProps) => {
           <MdCompare size={20} />
           <Text fw={600}>JSON Data Comparison</Text>
           {stats.totalDifferences > 0 && (
-            <Badge variant="light" color={stats.similarity > 80 ? "green" : stats.similarity > 50 ? "yellow" : "red"}>
+            <Badge
+              variant="light"
+              color={stats.similarity > 80 ? "green" : stats.similarity > 50 ? "yellow" : "red"}
+            >
               {stats.similarity}% similar
             </Badge>
           )}
@@ -260,14 +264,22 @@ export const DataComparisonModal = ({ opened, onClose }: ModalProps) => {
           <Alert variant="light" color="blue">
             <Group justify="space-between" gap="md">
               <Group gap="md">
-                <Text size="sm" fw={500}>Comparison Summary:</Text>
-                <Badge color="green" variant="light">{stats.additions} added</Badge>
-                <Badge color="red" variant="light">{stats.deletions} removed</Badge>
-                <Badge color="yellow" variant="light">{stats.modifications} modified</Badge>
+                <Text size="sm" fw={500}>
+                  Comparison Summary:
+                </Text>
+                <Badge color="green" variant="light">
+                  {stats.additions} added
+                </Badge>
+                <Badge color="red" variant="light">
+                  {stats.deletions} removed
+                </Badge>
+                <Badge color="yellow" variant="light">
+                  {stats.modifications} modified
+                </Badge>
               </Group>
-              <Progress 
-                value={stats.similarity} 
-                size="sm" 
+              <Progress
+                value={stats.similarity}
+                size="sm"
                 color={stats.similarity > 80 ? "green" : stats.similarity > 50 ? "yellow" : "red"}
                 style={{ width: 100 }}
               />
@@ -307,22 +319,17 @@ export const DataComparisonModal = ({ opened, onClose }: ModalProps) => {
                   >
                     Load Current → Right
                   </Button>
-                  <ActionIcon
-                    size="sm"
-                    variant="light"
-                    onClick={swapSides}
-                    title="Swap sides"
-                  >
+                  <ActionIcon size="sm" variant="light" onClick={swapSides} title="Swap sides">
                     <MdSwapHoriz size={14} />
                   </ActionIcon>
                 </Group>
-                
+
                 <Group gap="xs">
                   <Switch
                     size="xs"
                     label="Auto Compare"
                     checked={autoCompare}
-                    onChange={(e) => setAutoCompare(e.currentTarget.checked)}
+                    onChange={e => setAutoCompare(e.currentTarget.checked)}
                   />
                   <Button
                     size="xs"
@@ -343,7 +350,7 @@ export const DataComparisonModal = ({ opened, onClose }: ModalProps) => {
                       size="xs"
                       placeholder="Label for left side..."
                       value={leftLabel}
-                      onChange={(e) => setLeftLabel(e.target.value)}
+                      onChange={e => setLeftLabel(e.target.value)}
                     />
                     <Paper withBorder radius="sm" style={{ height: 300 }}>
                       <textarea
@@ -360,19 +367,19 @@ export const DataComparisonModal = ({ opened, onClose }: ModalProps) => {
                         }}
                         placeholder="Paste your JSON here..."
                         value={leftJson}
-                        onChange={(e) => setLeftJson(e.target.value)}
+                        onChange={e => setLeftJson(e.target.value)}
                       />
                     </Paper>
                   </Stack>
                 </Grid.Col>
-                
+
                 <Grid.Col span={6}>
                   <Stack gap="xs">
                     <TextInput
                       size="xs"
                       placeholder="Label for right side..."
                       value={rightLabel}
-                      onChange={(e) => setRightLabel(e.target.value)}
+                      onChange={e => setRightLabel(e.target.value)}
                     />
                     <Paper withBorder radius="sm" style={{ height: 300 }}>
                       <textarea
@@ -389,7 +396,7 @@ export const DataComparisonModal = ({ opened, onClose }: ModalProps) => {
                         }}
                         placeholder="Paste your JSON here..."
                         value={rightJson}
-                        onChange={(e) => setRightJson(e.target.value)}
+                        onChange={e => setRightJson(e.target.value)}
                       />
                     </Paper>
                   </Stack>
@@ -408,7 +415,7 @@ export const DataComparisonModal = ({ opened, onClose }: ModalProps) => {
                     size="xs"
                     placeholder="Search differences..."
                     value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onChange={e => setSearchQuery(e.target.value)}
                     leftSection={<FiSearch size={12} />}
                     style={{ width: 200 }}
                   />
@@ -416,10 +423,10 @@ export const DataComparisonModal = ({ opened, onClose }: ModalProps) => {
                     size="xs"
                     label="Show only differences"
                     checked={showOnlyDifferences}
-                    onChange={(e) => setShowOnlyDifferences(e.currentTarget.checked)}
+                    onChange={e => setShowOnlyDifferences(e.currentTarget.checked)}
                   />
                 </Group>
-                
+
                 <Group gap="xs">
                   <Text size="xs" c="dimmed">
                     {selectedDiff + 1} of {filteredDifferences.length}
@@ -446,12 +453,16 @@ export const DataComparisonModal = ({ opened, onClose }: ModalProps) => {
               {/* Differences List */}
               <Grid>
                 <Grid.Col span={5}>
-                  <Text size="sm" fw={500} mb="xs">Differences ({filteredDifferences.length})</Text>
+                  <Text size="sm" fw={500} mb="xs">
+                    Differences ({filteredDifferences.length})
+                  </Text>
                   <ScrollArea h={400}>
                     <Stack gap="xs">
                       {filteredDifferences.length === 0 ? (
                         <Text size="sm" c="dimmed" ta="center" py="xl">
-                          {differences.length === 0 ? "No differences found" : "No matches for current filter"}
+                          {differences.length === 0
+                            ? "No differences found"
+                            : "No matches for current filter"}
                         </Text>
                       ) : (
                         filteredDifferences.map((diff, index) => (
@@ -467,10 +478,12 @@ export const DataComparisonModal = ({ opened, onClose }: ModalProps) => {
                     </Stack>
                   </ScrollArea>
                 </Grid.Col>
-                
+
                 <Grid.Col span={7}>
                   <Group justify="space-between" mb="xs">
-                    <Text size="sm" fw={500}>Difference Details</Text>
+                    <Text size="sm" fw={500}>
+                      Difference Details
+                    </Text>
                     {selectedDiffData && (
                       <Button
                         size="xs"
@@ -482,7 +495,7 @@ export const DataComparisonModal = ({ opened, onClose }: ModalProps) => {
                       </Button>
                     )}
                   </Group>
-                  
+
                   <Paper withBorder p="md" radius="sm" h={400}>
                     {selectedDiffData ? (
                       <Stack gap="md">
@@ -491,19 +504,27 @@ export const DataComparisonModal = ({ opened, onClose }: ModalProps) => {
                           <Badge color={DiffTypeColors[selectedDiffData.type]} variant="light">
                             {selectedDiffData.type}
                           </Badge>
-                          <Badge size="xs" color={
-                            selectedDiffData.severity === "high" ? "red" : 
-                            selectedDiffData.severity === "medium" ? "yellow" : "gray"
-                          }>
+                          <Badge
+                            size="xs"
+                            color={
+                              selectedDiffData.severity === "high"
+                                ? "red"
+                                : selectedDiffData.severity === "medium"
+                                  ? "yellow"
+                                  : "gray"
+                            }
+                          >
                             {selectedDiffData.severity} impact
                           </Badge>
                         </Group>
-                        
+
                         <Divider />
-                        
+
                         {selectedDiffData.leftValue !== undefined && (
                           <Box>
-                            <Text size="xs" fw={500} c="red" mb="xs">Before (Left):</Text>
+                            <Text size="xs" fw={500} c="red" mb="xs">
+                              Before (Left):
+                            </Text>
                             <CodeHighlight
                               code={JSON.stringify(selectedDiffData.leftValue, null, 2)}
                               language="json"
@@ -511,10 +532,12 @@ export const DataComparisonModal = ({ opened, onClose }: ModalProps) => {
                             />
                           </Box>
                         )}
-                        
+
                         {selectedDiffData.rightValue !== undefined && (
                           <Box>
-                            <Text size="xs" fw={500} c="green" mb="xs">After (Right):</Text>
+                            <Text size="xs" fw={500} c="green" mb="xs">
+                              After (Right):
+                            </Text>
                             <CodeHighlight
                               code={JSON.stringify(selectedDiffData.rightValue, null, 2)}
                               language="json"
@@ -525,7 +548,9 @@ export const DataComparisonModal = ({ opened, onClose }: ModalProps) => {
                       </Stack>
                     ) : (
                       <Flex align="center" justify="center" h="100%">
-                        <Text size="sm" c="dimmed">Select a difference to view details</Text>
+                        <Text size="sm" c="dimmed">
+                          Select a difference to view details
+                        </Text>
                       </Flex>
                     )}
                   </Paper>
@@ -557,10 +582,8 @@ export const DataComparisonModal = ({ opened, onClose }: ModalProps) => {
               </Button>
             )}
           </Group>
-          
-          <Button onClick={onClose}>
-            Close
-          </Button>
+
+          <Button onClick={onClose}>Close</Button>
         </Group>
       </Stack>
     </Modal>

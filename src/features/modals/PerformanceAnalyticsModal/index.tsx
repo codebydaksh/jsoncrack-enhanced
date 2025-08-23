@@ -7,7 +7,6 @@ import {
   Button,
   Text,
   Badge,
-  Divider,
   Switch,
   ActionIcon,
   Tooltip,
@@ -22,11 +21,11 @@ import {
   ThemeIcon,
 } from "@mantine/core";
 import { useHotkeys } from "@mantine/hooks";
+import { event as gaEvent } from "nextjs-google-analytics";
+import { toast } from "react-hot-toast";
 import {
   FiActivity,
   FiClock,
-  FiCpu,
-  FiHardDrive,
   FiTrendingUp,
   FiTrendingDown,
   FiAlertCircle,
@@ -37,10 +36,9 @@ import {
   FiPause,
   FiX,
 } from "react-icons/fi";
-import { MdAnalytics, MdMemory, MdSpeed } from "react-icons/md";
-import { event as gaEvent } from "nextjs-google-analytics";
-import { toast } from "react-hot-toast";
-import usePerformanceAnalytics, { PerformanceAlert } from "../../../store/usePerformanceAnalytics";
+import { MdAnalytics, MdMemory } from "react-icons/md";
+import type { PerformanceAlert } from "../../../store/usePerformanceAnalytics";
+import usePerformanceAnalytics from "../../../store/usePerformanceAnalytics";
 
 interface StatCardProps {
   title: string;
@@ -102,10 +100,14 @@ const AlertRow: React.FC<AlertRowProps> = ({ alert, onDismiss }) => (
           {alert.message}
         </Text>
         <Text size="xs" c="dimmed">
-          {new Date(alert.timestamp).toLocaleTimeString()} • {alert.metric}: {alert.value.toFixed(2)}
+          {new Date(alert.timestamp).toLocaleTimeString()} • {alert.metric}:{" "}
+          {alert.value.toFixed(2)}
         </Text>
       </div>
-      <Badge size="xs" color={alert.type === "error" ? "red" : alert.type === "warning" ? "yellow" : "blue"}>
+      <Badge
+        size="xs"
+        color={alert.type === "error" ? "red" : alert.type === "warning" ? "yellow" : "blue"}
+      >
         {alert.type}
       </Badge>
     </Group>
@@ -137,7 +139,10 @@ export const PerformanceAnalyticsModal = ({ opened, onClose }: ModalProps) => {
   const [showSettings, setShowSettings] = React.useState(false);
 
   const activeAlerts = alerts.filter(a => !a.dismissed);
-  const recentMetrics = React.useMemo(() => getPerformanceTrend(timeRange), [metrics, timeRange, getPerformanceTrend]);
+  const recentMetrics = React.useMemo(
+    () => getPerformanceTrend(timeRange),
+    [metrics, timeRange, getPerformanceTrend]
+  );
 
   const chartData = React.useMemo(() => {
     return recentMetrics.map((metric, index) => ({
@@ -158,7 +163,7 @@ export const PerformanceAnalyticsModal = ({ opened, onClose }: ModalProps) => {
     a.download = `performance-report-${Date.now()}.json`;
     a.click();
     URL.revokeObjectURL(url);
-    
+
     gaEvent("export_performance_report");
     toast.success("Performance report exported!");
   };
@@ -172,9 +177,7 @@ export const PerformanceAnalyticsModal = ({ opened, onClose }: ModalProps) => {
 
   const performanceInfo = getPerformanceScore();
 
-  useHotkeys([
-    ["space", () => setRecording(!isRecording)],
-  ]);
+  useHotkeys([["space", () => setRecording(!isRecording)]]);
 
   return (
     <Modal
@@ -182,10 +185,7 @@ export const PerformanceAnalyticsModal = ({ opened, onClose }: ModalProps) => {
         <Group gap="sm">
           <MdAnalytics size={20} />
           <Text fw={600}>Performance Analytics Dashboard</Text>
-          <Badge
-            variant="dot"
-            color={isRecording ? "green" : "gray"}
-          >
+          <Badge variant="dot" color={isRecording ? "green" : "gray"}>
             {isRecording ? "Recording" : "Paused"}
           </Badge>
         </Group>
@@ -204,7 +204,7 @@ export const PerformanceAnalyticsModal = ({ opened, onClose }: ModalProps) => {
               size="sm"
               label="Enable Analytics"
               checked={isEnabled}
-              onChange={(e) => setEnabled(e.currentTarget.checked)}
+              onChange={e => setEnabled(e.currentTarget.checked)}
             />
             <ActionIcon
               size="sm"
@@ -216,16 +216,12 @@ export const PerformanceAnalyticsModal = ({ opened, onClose }: ModalProps) => {
               {isRecording ? <FiPause size={14} /> : <FiPlay size={14} />}
             </ActionIcon>
             <Tooltip label="Settings">
-              <ActionIcon
-                size="sm"
-                variant="light"
-                onClick={() => setShowSettings(!showSettings)}
-              >
+              <ActionIcon size="sm" variant="light" onClick={() => setShowSettings(!showSettings)}>
                 <FiSettings size={14} />
               </ActionIcon>
             </Tooltip>
           </Group>
-          
+
           <Group gap="xs">
             <Button
               size="xs"
@@ -251,19 +247,21 @@ export const PerformanceAnalyticsModal = ({ opened, onClose }: ModalProps) => {
         {showSettings && (
           <Paper withBorder p="md" radius="sm">
             <Stack gap="sm">
-              <Text size="sm" fw={500}>Analytics Settings</Text>
+              <Text size="sm" fw={500}>
+                Analytics Settings
+              </Text>
               <Group gap="md">
                 <Switch
                   size="xs"
                   label="Auto Optimize"
                   checked={autoOptimize}
-                  onChange={(e) => setAutoOptimize(e.currentTarget.checked)}
+                  onChange={e => setAutoOptimize(e.currentTarget.checked)}
                 />
                 <Switch
                   size="xs"
                   label="Real-time Graph"
                   checked={showRealTimeGraph}
-                  onChange={(e) => setShowRealTimeGraph(e.currentTarget.checked)}
+                  onChange={e => setShowRealTimeGraph(e.currentTarget.checked)}
                 />
               </Group>
               <Group gap="md">
@@ -306,7 +304,9 @@ export const PerformanceAnalyticsModal = ({ opened, onClose }: ModalProps) => {
                 sections={[{ value: stats.performanceScore, color: performanceInfo.color }]}
                 label={
                   <div>
-                    <Text size="xs" c="dimmed">Performance</Text>
+                    <Text size="xs" c="dimmed">
+                      Performance
+                    </Text>
                     <Text fw={700}>{stats.performanceScore}/100</Text>
                     <Text size="xs" c={performanceInfo.color}>
                       {performanceInfo.label}
@@ -316,7 +316,7 @@ export const PerformanceAnalyticsModal = ({ opened, onClose }: ModalProps) => {
               />
             </Paper>
           </Grid.Col>
-          
+
           <Grid.Col span={9}>
             <SimpleGrid cols={3} spacing="md">
               <StatCard
@@ -352,76 +352,118 @@ export const PerformanceAnalyticsModal = ({ opened, onClose }: ModalProps) => {
                 <Text fw={500}>Performance Trends</Text>
                 <Badge variant="light">{chartData.length} data points</Badge>
               </Group>
-              
+
               <SimpleGrid cols={2}>
                 <Card withBorder p="md">
                   <Stack gap="xs">
-                    <Text size="sm" fw={500}>Parse Time Trend</Text>
+                    <Text size="sm" fw={500}>
+                      Parse Time Trend
+                    </Text>
                     <Group justify="space-between">
-                      <Text size="xs" c="dimmed">Latest:</Text>
-                      <Badge color="blue">{chartData[chartData.length - 1]?.parseTime || 0}ms</Badge>
+                      <Text size="xs" c="dimmed">
+                        Latest:
+                      </Text>
+                      <Badge color="blue">
+                        {chartData[chartData.length - 1]?.parseTime || 0}ms
+                      </Badge>
                     </Group>
-                    <Progress 
-                      value={Math.min((chartData[chartData.length - 1]?.parseTime || 0) / 10, 100)} 
-                      color="blue" 
-                      size="sm" 
+                    <Progress
+                      value={Math.min((chartData[chartData.length - 1]?.parseTime || 0) / 10, 100)}
+                      color="blue"
+                      size="sm"
                     />
                     <Text size="xs" c="dimmed">
-                      Avg: {chartData.reduce((sum, d) => sum + d.parseTime, 0) / chartData.length || 0}ms
+                      Avg:{" "}
+                      {chartData.reduce((sum, d) => sum + d.parseTime, 0) / chartData.length || 0}ms
                     </Text>
                   </Stack>
                 </Card>
-                
+
                 <Card withBorder p="md">
                   <Stack gap="xs">
-                    <Text size="sm" fw={500}>Memory Usage Trend</Text>
+                    <Text size="sm" fw={500}>
+                      Memory Usage Trend
+                    </Text>
                     <Group justify="space-between">
-                      <Text size="xs" c="dimmed">Latest:</Text>
-                      <Badge color="green">{chartData[chartData.length - 1]?.memoryUsage || 0}MB</Badge>
+                      <Text size="xs" c="dimmed">
+                        Latest:
+                      </Text>
+                      <Badge color="green">
+                        {chartData[chartData.length - 1]?.memoryUsage || 0}MB
+                      </Badge>
                     </Group>
-                    <Progress 
-                      value={Math.min((chartData[chartData.length - 1]?.memoryUsage || 0) / 100 * 100, 100)} 
-                      color="green" 
-                      size="sm" 
+                    <Progress
+                      value={Math.min(
+                        ((chartData[chartData.length - 1]?.memoryUsage || 0) / 100) * 100,
+                        100
+                      )}
+                      color="green"
+                      size="sm"
                     />
                     <Text size="xs" c="dimmed">
-                      Avg: {(chartData.reduce((sum, d) => sum + d.memoryUsage, 0) / chartData.length || 0).toFixed(1)}MB
+                      Avg:{" "}
+                      {(
+                        chartData.reduce((sum, d) => sum + d.memoryUsage, 0) / chartData.length || 0
+                      ).toFixed(1)}
+                      MB
                     </Text>
                   </Stack>
                 </Card>
-                
+
                 <Card withBorder p="md">
                   <Stack gap="xs">
-                    <Text size="sm" fw={500}>Complexity Score</Text>
+                    <Text size="sm" fw={500}>
+                      Complexity Score
+                    </Text>
                     <Group justify="space-between">
-                      <Text size="xs" c="dimmed">Latest:</Text>
-                      <Badge color="orange">{chartData[chartData.length - 1]?.complexity || 0}/10</Badge>
+                      <Text size="xs" c="dimmed">
+                        Latest:
+                      </Text>
+                      <Badge color="orange">
+                        {chartData[chartData.length - 1]?.complexity || 0}/10
+                      </Badge>
                     </Group>
-                    <Progress 
-                      value={(chartData[chartData.length - 1]?.complexity || 0) * 10} 
-                      color="orange" 
-                      size="sm" 
+                    <Progress
+                      value={(chartData[chartData.length - 1]?.complexity || 0) * 10}
+                      color="orange"
+                      size="sm"
                     />
                     <Text size="xs" c="dimmed">
-                      Avg: {(chartData.reduce((sum, d) => sum + d.complexity, 0) / chartData.length || 0).toFixed(1)}/10
+                      Avg:{" "}
+                      {(
+                        chartData.reduce((sum, d) => sum + d.complexity, 0) / chartData.length || 0
+                      ).toFixed(1)}
+                      /10
                     </Text>
                   </Stack>
                 </Card>
-                
+
                 <Card withBorder p="md">
                   <Stack gap="xs">
-                    <Text size="sm" fw={500}>Node Count</Text>
+                    <Text size="sm" fw={500}>
+                      Node Count
+                    </Text>
                     <Group justify="space-between">
-                      <Text size="xs" c="dimmed">Latest:</Text>
-                      <Badge color="purple">{(chartData[chartData.length - 1]?.nodeCount || 0).toLocaleString()}</Badge>
+                      <Text size="xs" c="dimmed">
+                        Latest:
+                      </Text>
+                      <Badge color="purple">
+                        {(chartData[chartData.length - 1]?.nodeCount || 0).toLocaleString()}
+                      </Badge>
                     </Group>
-                    <Progress 
-                      value={Math.min((chartData[chartData.length - 1]?.nodeCount || 0) / 1000 * 100, 100)} 
-                      color="purple" 
-                      size="sm" 
+                    <Progress
+                      value={Math.min(
+                        ((chartData[chartData.length - 1]?.nodeCount || 0) / 1000) * 100,
+                        100
+                      )}
+                      color="purple"
+                      size="sm"
                     />
                     <Text size="xs" c="dimmed">
-                      Avg: {(chartData.reduce((sum, d) => sum + d.nodeCount, 0) / chartData.length || 0).toFixed(0)}
+                      Avg:{" "}
+                      {(
+                        chartData.reduce((sum, d) => sum + d.nodeCount, 0) / chartData.length || 0
+                      ).toFixed(0)}
                     </Text>
                   </Stack>
                 </Card>
@@ -444,15 +486,11 @@ export const PerformanceAnalyticsModal = ({ opened, onClose }: ModalProps) => {
                 Dismiss All
               </Button>
             </Group>
-            
+
             <ScrollArea h={200}>
               <Stack gap="xs">
                 {activeAlerts.map(alert => (
-                  <AlertRow
-                    key={alert.id}
-                    alert={alert}
-                    onDismiss={() => dismissAlert(alert.id)}
-                  />
+                  <AlertRow key={alert.id} alert={alert} onDismiss={() => dismissAlert(alert.id)} />
                 ))}
               </Stack>
             </ScrollArea>
@@ -476,7 +514,7 @@ export const PerformanceAnalyticsModal = ({ opened, onClose }: ModalProps) => {
               <Text fw={500}>Recent Metrics</Text>
               <Badge variant="light">{metrics.length} total records</Badge>
             </Group>
-            
+
             <ScrollArea h={250}>
               <table style={{ width: "100%", fontSize: "12px" }}>
                 <thead>
@@ -489,35 +527,50 @@ export const PerformanceAnalyticsModal = ({ opened, onClose }: ModalProps) => {
                   </tr>
                 </thead>
                 <tbody>
-                  {metrics.slice(-10).reverse().map((metric, index) => (
-                    <tr key={metric.timestamp}>
-                      <td style={{ padding: "8px" }}>
-                        {new Date(metric.timestamp).toLocaleTimeString()}
-                      </td>
-                      <td style={{ padding: "8px", textAlign: "right" }}>
-                        <Badge
-                          size="xs"
-                          color={metric.parseTime > 1000 ? "red" : metric.parseTime > 500 ? "yellow" : "green"}
-                        >
-                          {metric.parseTime}ms
-                        </Badge>
-                      </td>
-                      <td style={{ padding: "8px", textAlign: "right" }}>
-                        {(metric.memoryUsage / 1024 / 1024).toFixed(1)}MB
-                      </td>
-                      <td style={{ padding: "8px", textAlign: "right" }}>
-                        {metric.nodeCount.toLocaleString()}
-                      </td>
-                      <td style={{ padding: "8px", textAlign: "right" }}>
-                        <Badge
-                          size="xs"
-                          color={metric.complexity > 7 ? "red" : metric.complexity > 5 ? "yellow" : "green"}
-                        >
-                          {metric.complexity}/10
-                        </Badge>
-                      </td>
-                    </tr>
-                  ))}
+                  {metrics
+                    .slice(-10)
+                    .reverse()
+                    .map((metric, index) => (
+                      <tr key={metric.timestamp}>
+                        <td style={{ padding: "8px" }}>
+                          {new Date(metric.timestamp).toLocaleTimeString()}
+                        </td>
+                        <td style={{ padding: "8px", textAlign: "right" }}>
+                          <Badge
+                            size="xs"
+                            color={
+                              metric.parseTime > 1000
+                                ? "red"
+                                : metric.parseTime > 500
+                                  ? "yellow"
+                                  : "green"
+                            }
+                          >
+                            {metric.parseTime}ms
+                          </Badge>
+                        </td>
+                        <td style={{ padding: "8px", textAlign: "right" }}>
+                          {(metric.memoryUsage / 1024 / 1024).toFixed(1)}MB
+                        </td>
+                        <td style={{ padding: "8px", textAlign: "right" }}>
+                          {metric.nodeCount.toLocaleString()}
+                        </td>
+                        <td style={{ padding: "8px", textAlign: "right" }}>
+                          <Badge
+                            size="xs"
+                            color={
+                              metric.complexity > 7
+                                ? "red"
+                                : metric.complexity > 5
+                                  ? "yellow"
+                                  : "green"
+                            }
+                          >
+                            {metric.complexity}/10
+                          </Badge>
+                        </td>
+                      </tr>
+                    ))}
                 </tbody>
               </table>
             </ScrollArea>
@@ -527,7 +580,8 @@ export const PerformanceAnalyticsModal = ({ opened, onClose }: ModalProps) => {
         {/* Action Buttons */}
         <Group justify="space-between">
           <Text size="xs" c="dimmed">
-            Press Space to toggle recording • {isEnabled ? "Analytics enabled" : "Analytics disabled"}
+            Press Space to toggle recording •{" "}
+            {isEnabled ? "Analytics enabled" : "Analytics disabled"}
           </Text>
           <Button onClick={onClose}>Close</Button>
         </Group>

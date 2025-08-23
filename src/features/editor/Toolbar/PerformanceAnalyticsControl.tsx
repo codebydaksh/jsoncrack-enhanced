@@ -1,5 +1,5 @@
 import React from "react";
-import { ActionIcon, Tooltip, Text, Flex, Badge } from "@mantine/core";
+import { ActionIcon, Tooltip, Text, Flex } from "@mantine/core";
 import { useHotkeys } from "@mantine/hooks";
 import { MdAnalytics } from "react-icons/md";
 import { useModal } from "../../../store/useModal";
@@ -13,9 +13,7 @@ export const PerformanceAnalyticsControl = () => {
     setVisible("PerformanceAnalyticsModal", true);
   }, [setVisible]);
 
-  useHotkeys([
-    ["mod+shift+p", openAnalytics],
-  ]);
+  useHotkeys([["mod+shift+p", openAnalytics]]);
 
   const activeAlerts = alerts.filter(a => !a.dismissed);
   const hasAlerts = activeAlerts.length > 0;
@@ -75,7 +73,9 @@ export const PerformanceAnalyticsControl = () => {
               width: 12,
               height: 12,
               borderRadius: "50%",
-              backgroundColor: isRecording ? "var(--mantine-color-green-filled)" : "var(--mantine-color-gray-filled)",
+              backgroundColor: isRecording
+                ? "var(--mantine-color-green-filled)"
+                : "var(--mantine-color-gray-filled)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",

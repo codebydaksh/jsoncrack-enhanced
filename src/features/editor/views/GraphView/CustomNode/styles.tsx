@@ -84,7 +84,7 @@ export const StyledKey = styled.span<{
   }}
 `;
 
-export const StyledRow = styled.span<{ 
+export const StyledRow = styled.span<{
   $value: TextColorFn["$value"];
   $hasError?: boolean;
   $hasWarning?: boolean;
@@ -101,8 +101,10 @@ export const StyledRow = styled.span<{
   box-sizing: border-box;
   position: relative;
   ${({ $hasError, $hasWarning }) => {
-    if ($hasError) return "background-color: rgba(255, 107, 107, 0.1); border-left: 3px solid #ff6b6b;";
-    if ($hasWarning) return "background-color: rgba(255, 212, 59, 0.1); border-left: 3px solid #ffd43b;";
+    if ($hasError)
+      return "background-color: rgba(255, 107, 107, 0.1); border-left: 3px solid #ff6b6b;";
+    if ($hasWarning)
+      return "background-color: rgba(255, 212, 59, 0.1); border-left: 3px solid #ffd43b;";
     return "";
   }}
 
@@ -121,7 +123,7 @@ export const StyledValidationIcon = styled.span<{ $severity: "error" | "warning"
   top: 50%;
   transform: translateY(-50%);
   font-size: 12px;
-  color: ${({ $severity }) => $severity === "error" ? "#ff6b6b" : "#ffd43b"};
+  color: ${({ $severity }) => ($severity === "error" ? "#ff6b6b" : "#ffd43b")};
   z-index: 1;
   pointer-events: none;
 `;

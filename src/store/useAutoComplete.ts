@@ -53,7 +53,17 @@ interface AutoCompleteActions {
 
 // Common JSON patterns and structures
 const COMMON_PATTERNS = {
-  user: ["id", "name", "email", "username", "firstName", "lastName", "avatar", "createdAt", "updatedAt"],
+  user: [
+    "id",
+    "name",
+    "email",
+    "username",
+    "firstName",
+    "lastName",
+    "avatar",
+    "createdAt",
+    "updatedAt",
+  ],
   address: ["street", "city", "state", "country", "zipCode", "coordinates"],
   product: ["id", "name", "description", "price", "category", "stock", "sku", "brand"],
   order: ["id", "userId", "items", "total", "status", "createdAt", "shippingAddress"],
@@ -86,9 +96,12 @@ const VALUE_PATTERNS = {
 };
 
 // Analyze current context and generate intelligent suggestions
-const generateIntelligentSuggestions = (context: AutoCompleteContext, jsonData?: string): AutoCompleteSuggestion[] => {
+const generateIntelligentSuggestions = (
+  context: AutoCompleteContext,
+  jsonData?: string
+): AutoCompleteSuggestion[] => {
   const suggestions: AutoCompleteSuggestion[] = [];
-  
+
   // Schema-based suggestions (if we have existing JSON structure)
   if (jsonData) {
     try {
@@ -99,28 +112,32 @@ const generateIntelligentSuggestions = (context: AutoCompleteContext, jsonData?:
       // Invalid JSON, skip schema suggestions
     }
   }
-  
+
   // Pattern-based suggestions
   const patternSuggestions = generatePatternSuggestions(context);
   suggestions.push(...patternSuggestions);
-  
+
   // Structure suggestions
   const structureSuggestions = generateStructureSuggestions(context);
   suggestions.push(...structureSuggestions);
-  
+
   // Sort by priority and remove duplicates
   return suggestions
     .sort((a, b) => b.priority - a.priority)
-    .filter((suggestion, index, arr) => 
-      arr.findIndex(s => s.insertText === suggestion.insertText) === index
+    .filter(
+      (suggestion, index, arr) =>
+        arr.findIndex(s => s.insertText === suggestion.insertText) === index
     )
     .slice(0, 10); // Limit to top 10 suggestions
 };
 
 // Extract patterns from existing JSON structure
-const extractSchemaPatterns = (data: any, context: AutoCompleteContext): AutoCompleteSuggestion[] => {
+const extractSchemaPatterns = (
+  data: any,
+  context: AutoCompleteContext
+): AutoCompleteSuggestion[] => {
   const suggestions: AutoCompleteSuggestion[] = [];
-  
+
   const analyzeObject = (obj: any, path: string[] = []) => {
     if (typeof obj === "object" && obj !== null && !Array.isArray(obj)) {
       Object.keys(obj).forEach(key => {
@@ -136,7 +153,7 @@ const extractSchemaPatterns = (data: any, context: AutoCompleteContext): AutoCom
             icon: "🔑",
           });
         }
-        
+
         // Analyze nested objects
         if (typeof obj[key] === "object" && obj[key] !== null) {
           analyzeObject(obj[key], [...path, key]);
@@ -144,7 +161,7 @@ const extractSchemaPatterns = (data: any, context: AutoCompleteContext): AutoCom
       });
     }
   };
-  
+
   analyzeObject(data);
   return suggestions;
 };
@@ -152,10 +169,10 @@ const extractSchemaPatterns = (data: any, context: AutoCompleteContext): AutoCom
 // Generate suggestions based on common patterns
 const generatePatternSuggestions = (context: AutoCompleteContext): AutoCompleteSuggestion[] => {
   const suggestions: AutoCompleteSuggestion[] = [];
-  
+
   // Detect pattern based on existing keys
   const detectedPatterns = detectPatterns(context.neighborKeys);
-  
+
   detectedPatterns.forEach(pattern => {
     const patternKeys = COMMON_PATTERNS[pattern] || [];
     patternKeys.forEach(key => {
@@ -172,14 +189,14 @@ const generatePatternSuggestions = (context: AutoCompleteContext): AutoCompleteS
       }
     });
   });
-  
+
   return suggestions;
 };
 
 // Generate structural suggestions (objects, arrays, etc.)
 const generateStructureSuggestions = (context: AutoCompleteContext): AutoCompleteSuggestion[] => {
   const suggestions: AutoCompleteSuggestion[] = [];
-  
+
   if (context.parentType === "object") {
     // Common object structures
     suggestions.push(
@@ -205,20 +222,20 @@ const generateStructureSuggestions = (context: AutoCompleteContext): AutoComplet
         text: "Nested Object",
         type: "structure",
         description: "Insert a nested object with common properties",
-        insertText: `{\n  "id": "",\n  "name": "",\n  "value": ""\n}`,
+        insertText: '{\n  "id": "",\n  "name": "",\n  "value": ""\n}',
         priority: 6,
         category: "Structure",
         icon: "🏗️",
       }
     );
   }
-  
+
   // Value suggestions based on key names
   if (context.currentKey) {
     const valueSuggestions = generateValueSuggestions(context.currentKey);
     suggestions.push(...valueSuggestions);
   }
-  
+
   return suggestions;
 };
 
@@ -226,7 +243,7 @@ const generateStructureSuggestions = (context: AutoCompleteContext): AutoComplet
 const generateValueSuggestions = (keyName: string): AutoCompleteSuggestion[] => {
   const suggestions: AutoCompleteSuggestion[] = [];
   const lowerKey = keyName.toLowerCase();
-  
+
   // Email suggestions
   if (lowerKey.includes("email") || lowerKey.includes("mail")) {
     VALUE_PATTERNS.email.forEach(email => {
@@ -241,7 +258,7 @@ const generateValueSuggestions = (keyName: string): AutoCompleteSuggestion[] => 
       });
     });
   }
-  
+
   // URL suggestions
   if (lowerKey.includes("url") || lowerKey.includes("link") || lowerKey.includes("href")) {
     VALUE_PATTERNS.url.forEach(url => {
@@ -256,7 +273,7 @@ const generateValueSuggestions = (keyName: string): AutoCompleteSuggestion[] => 
       });
     });
   }
-  
+
   // Status suggestions
   if (lowerKey.includes("status") || lowerKey.includes("state")) {
     VALUE_PATTERNS.status.forEach(status => {
@@ -271,7 +288,7 @@ const generateValueSuggestions = (keyName: string): AutoCompleteSuggestion[] => 
       });
     });
   }
-  
+
   // Date suggestions
   if (lowerKey.includes("date") || lowerKey.includes("time") || lowerKey.includes("at")) {
     VALUE_PATTERNS.date.forEach(date => {
@@ -286,21 +303,22 @@ const generateValueSuggestions = (keyName: string): AutoCompleteSuggestion[] => 
       });
     });
   }
-  
+
   return suggestions;
 };
 
 // Detect patterns from neighboring keys
 const detectPatterns = (keys: string[]): string[] => {
   const patterns: string[] = [];
-  
+
   Object.entries(COMMON_PATTERNS).forEach(([pattern, patternKeys]) => {
     const matchCount = keys.filter(key => patternKeys.includes(key)).length;
-    if (matchCount >= 2) { // Require at least 2 matching keys
+    if (matchCount >= 2) {
+      // Require at least 2 matching keys
       patterns.push(pattern);
     }
   });
-  
+
   return patterns;
 };
 
@@ -369,16 +387,13 @@ const useAutoComplete = create<AutoCompleteState & AutoCompleteActions>((set, ge
     const { isEnabled, schemaAware } = get();
     if (!isEnabled) return;
 
-    const suggestions = generateIntelligentSuggestions(
-      context, 
-      schemaAware ? jsonData : undefined
-    );
-    
-    set({ 
-      suggestions, 
-      selectedIndex: 0, 
+    const suggestions = generateIntelligentSuggestions(context, schemaAware ? jsonData : undefined);
+
+    set({
+      suggestions,
+      selectedIndex: 0,
       isVisible: suggestions.length > 0,
-      context 
+      context,
     });
   },
 
@@ -396,15 +411,15 @@ const useAutoComplete = create<AutoCompleteState & AutoCompleteActions>((set, ge
 
   applySuggestion: (suggestion: AutoCompleteSuggestion): string => {
     const { learningEnabled, context } = get();
-    
+
     // Learn from usage
     if (learningEnabled && suggestion.type === "key" && context) {
       get().learnFromUsage(suggestion.text, context.currentPath);
     }
-    
+
     // Hide suggestions
     set({ isVisible: false, suggestions: [] });
-    
+
     return suggestion.insertText;
   },
 
@@ -419,15 +434,15 @@ const useAutoComplete = create<AutoCompleteState & AutoCompleteActions>((set, ge
 
   learnFromUsage: (key: string, context: string[]) => {
     const { recentKeys, commonPatterns } = get();
-    
+
     // Add to recent keys
     const newRecentKeys = [key, ...recentKeys.filter(k => k !== key)].slice(0, 20);
-    
+
     // Learn pattern based on context
     const contextKey = context.join(".");
     const existingPattern = commonPatterns[contextKey] || [];
     const newPattern = [key, ...existingPattern.filter(k => k !== key)].slice(0, 10);
-    
+
     set({
       recentKeys: newRecentKeys,
       commonPatterns: {

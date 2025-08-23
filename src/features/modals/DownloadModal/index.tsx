@@ -77,29 +77,29 @@ function downloadContent(content: string, filename: string, mimeType: string) {
 const generatePDF = async (imageElement: HTMLElement, options: any): Promise<string> => {
   try {
     // Convert SVG to canvas first
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d')!;
-    
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d")!;
+
     // Get the SVG dimensions
     const rect = imageElement.getBoundingClientRect();
     canvas.width = rect.width;
     canvas.height = rect.height;
-    
+
     // Convert SVG to canvas
     const svgData = new XMLSerializer().serializeToString(imageElement);
     const img = new Image();
-    
+
     return new Promise((resolve, reject) => {
       img.onload = () => {
-        ctx.fillStyle = options.backgroundColor || '#ffffff';
+        ctx.fillStyle = options.backgroundColor || "#ffffff";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         ctx.drawImage(img, 0, 0);
-        
+
         // Convert canvas to data URL (this will be used to trigger download)
-        const dataUrl = canvas.toDataURL('image/png');
-        
+        const dataUrl = canvas.toDataURL("image/png");
+
         // Create a simple PDF-like HTML page and trigger print
-        const printWindow = window.open('', '_blank');
+        const printWindow = window.open("", "_blank");
         if (printWindow) {
           printWindow.document.write(`
             <!DOCTYPE html>
@@ -121,15 +121,15 @@ const generatePDF = async (imageElement: HTMLElement, options: any): Promise<str
           printWindow.print();
           printWindow.close();
         }
-        
+
         resolve(dataUrl);
       };
-      
+
       img.onerror = reject;
-      img.src = 'data:image/svg+xml;base64,' + btoa(svgData);
+      img.src = "data:image/svg+xml;base64," + btoa(svgData);
     });
   } catch (error) {
-    throw new Error('PDF generation failed');
+    throw new Error("PDF generation failed");
   }
 };
 
@@ -143,7 +143,7 @@ const generateHTML = (jsonData: string, options: any) => {
     <style>
         body {
             font-family: 'Monaco', 'Menlo', monospace;
-            background-color: ${options.backgroundColor || '#ffffff'};
+            background-color: ${options.backgroundColor || "#ffffff"};
             margin: 20px;
             line-height: 1.6;
         }
@@ -194,7 +194,7 @@ const generateHTML = (jsonData: string, options: any) => {
     </div>
 </body>
 </html>`;
-  
+
   return htmlTemplate;
 };
 
@@ -247,20 +247,20 @@ export const DownloadModal = ({ opened, onClose }: ModalProps) => {
       toast.loading("Downloading...", { id: "toastDownload" });
 
       const imageElement = document.querySelector("svg[id*='ref']") as HTMLElement;
-      
+
       if (extension === Extensions.PDF) {
         await generatePDF(imageElement, {
           backgroundColor: fileDetails.backgroundColor,
-          filename: fileDetails.filename
+          filename: fileDetails.filename,
         });
-        toast.success('PDF print dialog opened!');
+        toast.success("PDF print dialog opened!");
       } else if (extension === Extensions.HTML) {
         const jsonData = getJson();
         const htmlContent = generateHTML(jsonData, {
           backgroundColor: fileDetails.backgroundColor,
-          filename: fileDetails.filename
+          filename: fileDetails.filename,
         });
-        downloadContent(htmlContent, `${fileDetails.filename}.${extension}`, 'text/html');
+        downloadContent(htmlContent, `${fileDetails.filename}.${extension}`, "text/html");
       } else {
         // Original image export logic
         const downloadFn = getDownloadFormat(extension);
@@ -270,10 +270,10 @@ export const DownloadModal = ({ opened, onClose }: ModalProps) => {
         });
         downloadURI(dataURI, `${fileDetails.filename}.${extension}`);
       }
-      
+
       gaEvent("download_file", { label: extension });
     } catch (error) {
-      console.error('Export error:', error);
+      console.error("Export error:", error);
       toast.error(`Failed to export as ${extension.toUpperCase()}!`);
     } finally {
       toast.dismiss("toastDownload");
@@ -333,16 +333,24 @@ export const DownloadModal = ({ opened, onClose }: ModalProps) => {
             Clipboard
           </Button>
         )}
-        <Button 
-          color="green" 
+        <Button
+          color="green"
           leftSection={
-            extension === Extensions.HTML ? <FiFileText /> : 
-            extension === Extensions.PDF ? <FiFile /> : <FiDownload />
-          } 
+            extension === Extensions.HTML ? (
+              <FiFileText />
+            ) : extension === Extensions.PDF ? (
+              <FiFile />
+            ) : (
+              <FiDownload />
+            )
+          }
           onClick={exportAsImage}
         >
-          {extension === Extensions.HTML ? 'Export HTML' : 
-           extension === Extensions.PDF ? 'Export PDF' : 'Download'}
+          {extension === Extensions.HTML
+            ? "Export HTML"
+            : extension === Extensions.PDF
+              ? "Export PDF"
+              : "Download"}
         </Button>
       </Group>
     </Modal>

@@ -11,13 +11,12 @@ import {
   Switch,
   Badge,
   Divider,
-  Code,
   Tooltip,
 } from "@mantine/core";
 import { event as gaEvent } from "nextjs-google-analytics";
 import toast from "react-hot-toast";
 import { FiCopy, FiShare2, FiInfo, FiClock } from "react-icons/fi";
-import { LuLink, LuExternalLink } from "react-icons/lu";
+import { LuExternalLink } from "react-icons/lu";
 import useJson from "../../../store/useJson";
 
 const MAX_URL_LENGTH = 2000; // Conservative limit for URL length
@@ -55,7 +54,7 @@ export const ShareModal = ({ opened, onClose }: ModalProps) => {
 
     try {
       const jsonString = getJson();
-      
+
       if (!jsonString.trim()) {
         toast.error("Please load some JSON data before sharing");
         return;
@@ -89,7 +88,7 @@ export const ShareModal = ({ opened, onClose }: ModalProps) => {
       // Generate the shareable URL
       const baseURL = window.location.origin + window.location.pathname;
       const shareableURL = `${baseURL}?share=${encodedData}`;
-      
+
       setUrlSize(shareableURL.length);
 
       if (shareableURL.length > MAX_URL_LENGTH) {
@@ -98,7 +97,7 @@ export const ShareModal = ({ opened, onClose }: ModalProps) => {
       }
 
       setShareURL(shareableURL);
-      
+
       toast.success("Your shareable link has been created successfully!");
     } catch (error) {
       console.error("Error generating share link:", error);
@@ -134,13 +133,13 @@ export const ShareModal = ({ opened, onClose }: ModalProps) => {
     <Modal title="Share JSON Data" size="lg" opened={opened} onClose={handleClose} centered>
       <Stack gap="md">
         <Text size="sm" c="dimmed">
-          Generate a shareable link that includes your JSON data. The data is encoded in the URL
-          and stored locally in the browser - no data is sent to external servers.
+          Generate a shareable link that includes your JSON data. The data is encoded in the URL and
+          stored locally in the browser - no data is sent to external servers.
         </Text>
 
         <Alert icon={<FiInfo size={16} />} color="blue" variant="light">
           <Text size="xs">
-            Links are temporary and work best for small to medium-sized JSON files. For larger 
+            Links are temporary and work best for small to medium-sized JSON files. For larger
             files, consider using the export feature instead.
           </Text>
         </Alert>
@@ -150,7 +149,7 @@ export const ShareModal = ({ opened, onClose }: ModalProps) => {
             label="Include view settings"
             description="Include current display preferences in the shared link"
             checked={includeSettings}
-            onChange={(event) => setIncludeSettings(event.currentTarget.checked)}
+            onChange={event => setIncludeSettings(event.currentTarget.checked)}
             size="sm"
           />
         </Stack>
@@ -192,37 +191,27 @@ export const ShareModal = ({ opened, onClose }: ModalProps) => {
                 rightSection={
                   <Group gap="xs">
                     <Tooltip label="Copy to clipboard">
-                      <Button
-                        size="xs"
-                        variant="subtle"
-                        onClick={copyToClipboard}
-                        p="xs"
-                      >
+                      <Button size="xs" variant="subtle" onClick={copyToClipboard} p="xs">
                         <FiCopy size={14} />
                       </Button>
                     </Tooltip>
                     <Tooltip label="Open in new tab">
-                      <Button
-                        size="xs"
-                        variant="subtle"
-                        onClick={openInNewTab}
-                        p="xs"
-                      >
+                      <Button size="xs" variant="subtle" onClick={openInNewTab} p="xs">
                         <LuExternalLink size={14} />
                       </Button>
                     </Tooltip>
                   </Group>
                 }
                 styles={{
-                  input: { fontSize: "12px", paddingRight: "80px" }
+                  input: { fontSize: "12px", paddingRight: "80px" },
                 }}
               />
 
               <Alert icon={<FiClock size={16} />} color="orange" variant="light">
                 <Text size="xs">
-                  <strong>Note:</strong> This link contains your data and will work as long as 
-                  the recipient has access to JSON Crack. No expiration time, but the URL 
-                  may be quite long for complex data.
+                  <strong>Note:</strong> This link contains your data and will work as long as the
+                  recipient has access to JSON Crack. No expiration time, but the URL may be quite
+                  long for complex data.
                 </Text>
               </Alert>
             </Stack>

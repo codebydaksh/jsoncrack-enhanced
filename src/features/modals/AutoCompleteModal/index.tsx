@@ -7,7 +7,6 @@ import {
   Button,
   Text,
   Switch,
-  Divider,
   TextInput,
   ActionIcon,
   Badge,
@@ -19,6 +18,8 @@ import {
   Alert,
   TagsInput,
 } from "@mantine/core";
+import { event as gaEvent } from "nextjs-google-analytics";
+import { toast } from "react-hot-toast";
 import {
   FiPlus,
   FiTrash2,
@@ -30,8 +31,6 @@ import {
   FiBook,
 } from "react-icons/fi";
 import { MdAutoAwesome } from "react-icons/md";
-import { event as gaEvent } from "nextjs-google-analytics";
-import { toast } from "react-hot-toast";
 import useAutoComplete from "../../../store/useAutoComplete";
 
 interface CustomPatternEditorProps {
@@ -63,9 +62,9 @@ const CustomPatternEditor: React.FC<CustomPatternEditorProps> = ({
           label="Pattern Name"
           placeholder="e.g., 'user', 'product', 'api'"
           value={newPattern}
-          onChange={(e) => setNewPattern(e.target.value)}
+          onChange={e => setNewPattern(e.target.value)}
         />
-        
+
         <TagsInput
           label="Suggestions"
           placeholder="Enter suggestions and press Enter"
@@ -73,7 +72,7 @@ const CustomPatternEditor: React.FC<CustomPatternEditorProps> = ({
           onChange={setNewSuggestions}
           data={[]}
         />
-        
+
         <Group justify="right">
           <Button size="xs" variant="subtle" onClick={onCancel}>
             Cancel
@@ -130,7 +129,7 @@ export const AutoCompleteModal = ({ opened, onClose }: ModalProps) => {
       timestamp: new Date().toISOString(),
       version: "1.0",
     };
-    
+
     const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -138,7 +137,7 @@ export const AutoCompleteModal = ({ opened, onClose }: ModalProps) => {
     a.download = `autocomplete-patterns-${Date.now()}.json`;
     a.click();
     URL.revokeObjectURL(url);
-    
+
     toast.success("Patterns exported!");
     gaEvent("autocomplete_patterns_exported");
   };
@@ -175,7 +174,7 @@ export const AutoCompleteModal = ({ opened, onClose }: ModalProps) => {
             <Stack gap="md" mt="md">
               <Alert icon={<FiInfo size={16} />} color="blue" variant="light">
                 <Text size="sm">
-                  Smart Auto-Complete provides intelligent suggestions while typing JSON based on 
+                  Smart Auto-Complete provides intelligent suggestions while typing JSON based on
                   common patterns, existing structure, and learned usage.
                 </Text>
               </Alert>
@@ -191,7 +190,7 @@ export const AutoCompleteModal = ({ opened, onClose }: ModalProps) => {
                     </div>
                     <Switch
                       checked={isEnabled}
-                      onChange={(e) => setEnabled(e.currentTarget.checked)}
+                      onChange={e => setEnabled(e.currentTarget.checked)}
                     />
                   </Group>
 
@@ -204,7 +203,7 @@ export const AutoCompleteModal = ({ opened, onClose }: ModalProps) => {
                     </div>
                     <Switch
                       checked={schemaAware}
-                      onChange={(e) => setSchemaAware(e.currentTarget.checked)}
+                      onChange={e => setSchemaAware(e.currentTarget.checked)}
                       disabled={!isEnabled}
                     />
                   </Group>
@@ -232,10 +231,18 @@ export const AutoCompleteModal = ({ opened, onClose }: ModalProps) => {
                 <Stack gap="xs">
                   <Text fw={500}>Auto-Complete Shortcuts</Text>
                   <SimpleGrid cols={2} spacing="xs">
-                    <Text size="xs"><kbd>Tab</kbd> - Accept suggestion</Text>
-                    <Text size="xs"><kbd>Esc</kbd> - Dismiss suggestions</Text>
-                    <Text size="xs"><kbd>↑/↓</kbd> - Navigate suggestions</Text>
-                    <Text size="xs"><kbd>Ctrl+Space</kbd> - Force show suggestions</Text>
+                    <Text size="xs">
+                      <kbd>Tab</kbd> - Accept suggestion
+                    </Text>
+                    <Text size="xs">
+                      <kbd>Esc</kbd> - Dismiss suggestions
+                    </Text>
+                    <Text size="xs">
+                      <kbd>↑/↓</kbd> - Navigate suggestions
+                    </Text>
+                    <Text size="xs">
+                      <kbd>Ctrl+Space</kbd> - Force show suggestions
+                    </Text>
                   </SimpleGrid>
                 </Stack>
               </Paper>
@@ -389,7 +396,9 @@ export const AutoCompleteModal = ({ opened, onClose }: ModalProps) => {
 
               {recentKeys.length > 0 && (
                 <Paper withBorder p="md" radius="sm">
-                  <Text fw={500} mb="xs">Recently Used Keys</Text>
+                  <Text fw={500} mb="xs">
+                    Recently Used Keys
+                  </Text>
                   <Group gap="xs">
                     {recentKeys.slice(0, 20).map((key, index) => (
                       <Badge key={`${key}-${index}`} size="xs" variant="light">
@@ -402,26 +411,32 @@ export const AutoCompleteModal = ({ opened, onClose }: ModalProps) => {
 
               {Object.keys(commonPatterns).length > 0 && (
                 <Paper withBorder p="md" radius="sm">
-                  <Text fw={500} mb="xs">Learned Context Patterns</Text>
+                  <Text fw={500} mb="xs">
+                    Learned Context Patterns
+                  </Text>
                   <ScrollArea h={200}>
                     <Stack gap="xs">
-                      {Object.entries(commonPatterns).slice(0, 10).map(([context, keys]) => (
-                        <Group key={context} justify="space-between">
-                          <Text size="xs" c="dimmed" style={{ fontFamily: "monospace" }}>
-                            {context || "root"}
-                          </Text>
-                          <Group gap="xs">
-                            {keys.slice(0, 3).map(key => (
-                              <Badge key={key} size="xs" variant="outline">
-                                {key}
-                              </Badge>
-                            ))}
-                            {keys.length > 3 && (
-                              <Text size="xs" c="dimmed">+{keys.length - 3}</Text>
-                            )}
+                      {Object.entries(commonPatterns)
+                        .slice(0, 10)
+                        .map(([context, keys]) => (
+                          <Group key={context} justify="space-between">
+                            <Text size="xs" c="dimmed" style={{ fontFamily: "monospace" }}>
+                              {context || "root"}
+                            </Text>
+                            <Group gap="xs">
+                              {keys.slice(0, 3).map(key => (
+                                <Badge key={key} size="xs" variant="outline">
+                                  {key}
+                                </Badge>
+                              ))}
+                              {keys.length > 3 && (
+                                <Text size="xs" c="dimmed">
+                                  +{keys.length - 3}
+                                </Text>
+                              )}
+                            </Group>
                           </Group>
-                        </Group>
-                      ))}
+                        ))}
                     </Stack>
                   </ScrollArea>
                 </Paper>
