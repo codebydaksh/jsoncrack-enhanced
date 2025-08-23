@@ -22,7 +22,6 @@ import { FileFormat } from "../../../enums/file.enum";
 import useConfig from "../../../store/useConfig";
 import useFile from "../../../store/useFile";
 import useJson from "../../../store/useJson";
-import { useModal } from "../../../store/useModal";
 import useValidation from "../../../store/useValidation";
 
 export const SchemaModal = ({ opened, onClose }: ModalProps) => {

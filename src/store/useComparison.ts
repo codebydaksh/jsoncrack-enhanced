@@ -324,7 +324,7 @@ const useComparison = create<ComparisonState & ComparisonActions>((set, get) => 
   },
 
   getFilteredDifferences: (): ComparisonDiff[] => {
-    const { differences, searchQuery, showOnlyDifferences } = get();
+    const { differences, searchQuery } = get();
 
     let filtered = differences;
 

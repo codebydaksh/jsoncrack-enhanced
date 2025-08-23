@@ -63,7 +63,7 @@ interface DiffRowProps {
   onClick: () => void;
 }
 
-const DiffRow: React.FC<DiffRowProps> = ({ diff, index, isSelected, onClick }) => {
+const DiffRow: React.FC<DiffRowProps> = ({ diff, isSelected, onClick }) => {
   const Icon = DiffTypeIcons[diff.type];
 
   return (
@@ -154,7 +154,7 @@ export const DataComparisonModal = ({ opened, onClose }: ModalProps) => {
 
   const filteredDifferences = React.useMemo(
     () => getFilteredDifferences(),
-    [differences, searchQuery, getFilteredDifferences]
+    [getFilteredDifferences]
   );
 
   const loadCurrentJson = (side: "left" | "right") => {

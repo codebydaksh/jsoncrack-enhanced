@@ -21,7 +21,6 @@ import { event as gaEvent } from "nextjs-google-analytics";
 import toast from "react-hot-toast";
 import { FiSave, FiTrash2, FiDownload, FiUpload, FiInfo } from "react-icons/fi";
 import { MdPalette } from "react-icons/md";
-import useConfig from "../../../store/useConfig";
 
 interface CustomTheme {
   id: string;
@@ -62,7 +61,6 @@ const defaultCustomColors = {
 const THEME_STORAGE_KEY = "jsoncrack_custom_themes";
 
 export const ThemesModal = ({ opened, onClose }: ModalProps) => {
-  const darkmodeEnabled = useConfig(state => state.darkmodeEnabled);
   const [activeTab, setActiveTab] = useState("browse");
   const [customThemes, setCustomThemes] = useState<CustomTheme[]>(() => {
     try {
@@ -76,7 +74,7 @@ export const ThemesModal = ({ opened, onClose }: ModalProps) => {
   // New theme creation state
   const [newThemeName, setNewThemeName] = useState("");
   const [newThemeColors, setNewThemeColors] = useState(defaultCustomColors);
-  const [baseTheme, setBaseTheme] = useState<"light" | "dark">("light");
+  const [baseTheme] = useState<"light" | "dark">("light");
 
   const saveCustomThemes = (themes: CustomTheme[]) => {
     try {
@@ -346,7 +344,7 @@ export const ThemesModal = ({ opened, onClose }: ModalProps) => {
 
                 {customThemes.length === 0 && (
                   <Alert icon={<FiInfo size={16} />} color="blue" variant="light">
-                    No custom themes yet. Create your first theme in the "Create Theme" tab!
+                    No custom themes yet. Create your first theme in the &quot;Create Theme&quot; tab!
                   </Alert>
                 )}
               </Stack>
