@@ -30,24 +30,24 @@
 
 **JSON Crack Enhanced** is a powerful fork of the original JSON Crack with **14 additional professional-grade features** that transform it into a comprehensive data analysis and development tool. While maintaining all the original functionality, we've added enterprise-level capabilities for advanced users and development teams.
 
-### ✨ **Enhanced Features (New in this Fork)**
+### **Enhanced Features (New in this Fork)**
 
-* **🔍 Advanced Search & Filter**: Powerful search with regex, JSONPath, and multi-field filtering
-* **🔄 Data Comparison Tool**: Side-by-side diff viewer for comparing JSON structures
-* **📊 Performance Analytics**: Real-time metrics, parsing time, and memory usage monitoring
-* **🤖 Smart Auto-Complete**: Intelligent suggestions based on JSON structure and patterns
-* **🎲 Data Generation Tools**: Generate realistic test data, mock APIs, and sample datasets
-* **📄 Advanced Export Templates**: Custom reports, transformations, and multiple output formats
-* **📋 Memory Usage Monitor**: Real-time JSON size and performance tracking
-* **🗺️ Mini-map Navigation**: Interactive minimap for large graph visualization
-* **🔗 Enhanced Sharing**: URL-based data sharing without external servers
-* **🎨 Custom Themes**: User-defined color schemes and theme management
-* **⚙️ API Generator**: Convert JSON to cURL, JavaScript, Python, Postman formats
-* **✅ Smart Validation**: Visual validation feedback with error highlighting
-* **↩️ Undo/Redo System**: Comprehensive history management for all operations
-* **📈 Export Enhancements**: PDF, HTML, and advanced export options
+* **Advanced Search & Filter**: Powerful search with regex, JSONPath, and multi-field filtering
+* **Data Comparison Tool**: Side-by-side diff viewer for comparing JSON structures
+* **Performance Analytics**: Real-time metrics, parsing time, and memory usage monitoring
+* **Smart Auto-Complete**: Intelligent suggestions based on JSON structure and patterns
+* **Data Generation Tools**: Generate realistic test data, mock APIs, and sample datasets
+* **Advanced Export Templates**: Custom reports, transformations, and multiple output formats
+* **Memory Usage Monitor**: Real-time JSON size and performance tracking
+* **Mini-map Navigation**: Interactive minimap for large graph visualization
+* **Enhanced Sharing**: URL-based data sharing without external servers
+* **Custom Themes**: User-defined color schemes and theme management
+* **API Generator**: Convert JSON to cURL, JavaScript, Python, Postman formats
+* **Smart Validation**: Visual validation feedback with error highlighting
+* **Undo/Redo System**: Comprehensive history management for all operations
+* **Export Enhancements**: PDF, HTML, and advanced export options
 
-### 💫 **Original Core Features**
+### **Original Core Features**
 
 * **Visualizer**: Convert JSON, YAML, CSV, XML, TOML into interactive graphs or trees
 * **Convert**: Transform data formats seamlessly (JSON to CSV, XML to JSON, etc.)
@@ -58,7 +58,7 @@
 * **Export Images**: Download visualizations as PNG, JPEG, or SVG
 * **Privacy**: All processing is local - no data sent to servers
 
-### 🚀 **What Makes This Enhanced?**
+### **What Makes This Enhanced?**
 
 This fork transforms JSON Crack from a simple JSON visualizer into a **professional-grade data analysis platform**:
 
@@ -95,7 +95,7 @@ All features are fully integrated, production-ready, and maintain the privacy-fi
 
 **JSON Crack Enhanced** is actively developed with new professional features being added regularly. This enhanced fork builds upon the solid foundation of the original JSON Crack (launched February 17, 2022) and adds enterprise-grade functionality.
 
-⭐ **Star this repository** to stay notified of new features and updates:
+**Star this repository** to stay notified of new features and updates:
 
 <a href="https://github.com/codebydaksh/jsoncrack-enhanced"><img src="https://img.shields.io/github/stars/codebydaksh/jsoncrack-enhanced?style=social" alt="Star JSON Crack Enhanced" /></a>
 
@@ -146,7 +146,7 @@ Here is what you need to be able to run JSON Crack Enhanced.
 
    > **Note**: The development server runs on port 3001 by default to avoid conflicts.
 
-### 🎨 **Accessing Enhanced Features**
+### **Accessing Enhanced Features**
 
 Once running, you can access all the new professional features through:
 
@@ -174,7 +174,7 @@ pnpm dev
 
 ### Docker
 
-🐳 A [`Dockerfile`](Dockerfile) is provided in the root of the repository.
+A [`Dockerfile`](Dockerfile) is provided in the root of the repository.
 To run JSON Crack Enhanced locally with Docker:
 
 ```console
@@ -193,7 +193,7 @@ docker compose up
 
 The supported node limit can be changed by editing the `NEXT_PUBLIC_NODE_LIMIT` value in the `.env` file at the project root.
 
-## 📚 **Enhanced Features Documentation**
+## **Enhanced Features Documentation**
 
 ### Professional Tools Overview
 
@@ -214,7 +214,7 @@ The supported node limit can be changed by editing the `NEXT_PUBLIC_NODE_LIMIT` 
 | Undo/Redo | Comprehensive history | `Ctrl+Z` / `Ctrl+Shift+Z` |
 | Advanced Export | PDF, HTML, multiple formats | Download menu |
 
-### 📊 **Performance & Analytics**
+### **Performance & Analytics**
 
 The enhanced version includes comprehensive performance monitoring:
 - **Real-time memory usage** tracking
@@ -223,7 +223,7 @@ The enhanced version includes comprehensive performance monitoring:
 - **Performance recommendations** and alerts
 - **Trend analysis** over time
 
-### 🎆 **Data Generation Capabilities**
+### **Data Generation Capabilities**
 
 Create realistic test data with built-in templates:
 - **User profiles** with realistic personal information
@@ -232,7 +232,7 @@ Create realistic test data with built-in templates:
 - **Custom templates** with pattern recognition
 - **Multiple export formats** (JSON, CSV, SQL, TypeScript)
 
-## 🚀 **Contributing**
+## **Contributing**
 
 We welcome contributions to JSON Crack Enhanced! Please feel free to:
 
@@ -242,7 +242,7 @@ We welcome contributions to JSON Crack Enhanced! Please feel free to:
 4. **Push to the branch** (`git push origin feature/amazing-feature`)
 5. **Open a Pull Request**
 
-## 🙏 **Acknowledgments**
+## **Acknowledgments**
 
 - **Original JSON Crack** by [Aykut Saraç](https://github.com/AykutSarac) - The foundation that made this enhanced version possible
 - **Open Source Community** - For the amazing libraries and tools
