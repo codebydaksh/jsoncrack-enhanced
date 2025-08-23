@@ -213,7 +213,32 @@ export const MiniMap = ({ visible, onToggle }: MiniMapProps) => {
   }
 
   return (
-    <StyledMiniMapContainer $visible={visible}>
+    <div style={{
+      position: "absolute",
+      top: "60px",
+      right: "10px",
+      width: "200px",
+      height: "150px",
+      zIndex: 99,
+      opacity: visible ? 0.9 : 0,
+      visibility: visible ? "visible" : "hidden",
+      transition: "opacity 0.3s ease, visibility 0.3s ease",
+      pointerEvents: visible ? "auto" : "none",
+    }}>
+      <Card
+        withBorder
+        padding="xs"
+        style={{
+          width: "100%",
+          height: "100%",
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.opacity = "1";
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.opacity = visible ? "0.9" : "0";
+        }}
+      >
       <Group justify="space-between" mb="xs">
         <Group gap="xs">
           <LuMap size={12} />
@@ -238,7 +263,8 @@ export const MiniMap = ({ visible, onToggle }: MiniMapProps) => {
           />
         )}
       </div>
-    </StyledMiniMapContainer>
+      </Card>
+    </div>
   );
 };
 

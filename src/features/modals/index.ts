@@ -1,4 +1,10 @@
 export { APIGeneratorModal } from "./APIGeneratorModal/index";
+export { AdvancedSearchModal } from "./AdvancedSearchModal";
+export { AutoCompleteModal } from "./AutoCompleteModal";
+export { DataComparisonModal } from "./DataComparisonModal";
+export { DataGenerationModal } from "./DataGenerationModal";
+export { ExportTemplatesModal } from "./ExportTemplatesModal";
+export { PerformanceAnalyticsModal } from "./PerformanceAnalyticsModal";
 export { DownloadModal } from "./DownloadModal";
 export { ImportModal } from "./ImportModal";
 export { NodeModal } from "./NodeModal";

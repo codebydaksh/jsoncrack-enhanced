@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import useGraph from "../features/editor/views/GraphView/stores/useGraph";
 import useValidation from "./useValidation";
+import usePerformanceAnalytics from "./usePerformanceAnalytics";
 
 interface JsonActions {
   setJson: (json: string) => void;
@@ -21,6 +22,12 @@ const useJson = create<JsonStates & JsonActions>()((set, get) => ({
   setJson: json => {
     set({ json, loading: false });
     useGraph.getState().setGraph(json);
+    
+    // Track performance for JSON operations
+    const { trackOperation } = usePerformanceAnalytics.getState();
+    if (json.trim()) {
+      trackOperation("setJson", json).catch(console.warn);
+    }
     
     // Trigger validation if enabled
     const { isValidationEnabled, validateData } = useValidation.getState();

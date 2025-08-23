@@ -12,6 +12,9 @@ import { FileMenu } from "./FileMenu";
 import { MemoryMonitor } from "./MemoryMonitor";
 import { ToolsMenu } from "./ToolsMenu";
 import { UndoRedoControl } from "./UndoRedoControl";
+import { AdvancedSearchControl } from "./AdvancedSearchControl";
+import { DataComparisonControl } from "./DataComparisonControl";
+import { PerformanceAnalyticsControl } from "./PerformanceAnalyticsControl";
 import { ViewMenu } from "./ViewMenu";
 import { StyledToolElement } from "./styles";
 
@@ -59,6 +62,9 @@ export const Toolbar = () => {
         <ViewMenu />
         <ToolsMenu />
         <UndoRedoControl />
+        <AdvancedSearchControl />
+        <DataComparisonControl />
+        <PerformanceAnalyticsControl />
         <Button
           component={Link}
           href="https://todiagram.com/editor?utm_source=jsoncrack&utm_medium=toolbar"

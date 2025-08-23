@@ -38,7 +38,7 @@ const CustomNodeWrapper = (nodeProps: NodeProps<NodeData>) => {
   const { isValidationEnabled, getErrorsForPath } = useValidation();
   
   // Get validation errors for this node
-  const validationPath = jsonPathToValidationPath(nodeProps.properties?.path);
+  const validationPath = jsonPathToValidationPath((nodeProps.properties as NodeData)?.path);
   const nodeErrors = isValidationEnabled ? getErrorsForPath(validationPath) : [];
   const hasErrors = nodeErrors.filter(e => e.severity === "error").length > 0;
   const hasWarnings = nodeErrors.filter(e => e.severity === "warning").length > 0;
