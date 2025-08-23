@@ -175,6 +175,9 @@ export const SchemaInsights: React.FC<SchemaInsightsProps> = ({ onClose }) => {
             <Tabs.Tab value="suggestions" leftSection={<TbBulb size={14} />}>
               Suggestions ({currentAnalysis.suggestions.length})
             </Tabs.Tab>
+            <Tabs.Tab value="schema" leftSection={<TbBraces size={14} />}>
+              Schema
+            </Tabs.Tab>
           </Tabs.List>
 
           <Tabs.Panel value="overview" p="md">
@@ -562,6 +565,79 @@ export const SchemaInsights: React.FC<SchemaInsightsProps> = ({ onClose }) => {
                   </Card>
                 ))
               )}
+            </Stack>
+          </Tabs.Panel>
+
+          <Tabs.Panel value="schema" p="md">
+            <Stack gap="md">
+              <Group justify="space-between">
+                <Text fw={500} size="sm">
+                  Generated JSON Schema
+                </Text>
+                <Badge size="xs" color="blue" variant="light">
+                  Draft-07
+                </Badge>
+              </Group>
+
+              <Alert icon={<FiInfo size={16} />} color="blue" variant="light">
+                <Text size="xs">
+                  Auto-generated JSON Schema based on detected patterns, types, and validations.
+                  This schema can be used for validation, documentation, or code generation.
+                </Text>
+              </Alert>
+
+              <Card withBorder>
+                <ScrollArea.Autosize mah={400}>
+                  <Code block>{JSON.stringify(currentAnalysis.generatedSchema, null, 2)}</Code>
+                </ScrollArea.Autosize>
+              </Card>
+
+              {/* Schema Statistics */}
+              <Card withBorder>
+                <Text fw={500} size="sm" mb="xs">
+                  Schema Statistics
+                </Text>
+                <SimpleGrid cols={2} spacing="xs">
+                  <Stack gap={4}>
+                    <Text size="xs" c="dimmed">
+                      Schema Type
+                    </Text>
+                    <Text fw={600} size="sm">
+                      {currentAnalysis.generatedSchema.type || "Mixed"}
+                    </Text>
+                  </Stack>
+                  <Stack gap={4}>
+                    <Text size="xs" c="dimmed">
+                      Properties
+                    </Text>
+                    <Text fw={600} size="sm">
+                      {currentAnalysis.generatedSchema.properties
+                        ? Object.keys(currentAnalysis.generatedSchema.properties).length
+                        : 0}
+                    </Text>
+                  </Stack>
+                  <Stack gap={4}>
+                    <Text size="xs" c="dimmed">
+                      Required Fields
+                    </Text>
+                    <Text fw={600} size="sm">
+                      {currentAnalysis.generatedSchema.required?.length || 0}
+                    </Text>
+                  </Stack>
+                  <Stack gap={4}>
+                    <Text size="xs" c="dimmed">
+                      Has Validations
+                    </Text>
+                    <Text fw={600} size="sm">
+                      {JSON.stringify(currentAnalysis.generatedSchema).includes('"format"') ||
+                      JSON.stringify(currentAnalysis.generatedSchema).includes('"pattern"') ||
+                      JSON.stringify(currentAnalysis.generatedSchema).includes('"enum"')
+                        ? "Yes"
+                        : "No"}
+                    </Text>
+                  </Stack>
+                </SimpleGrid>
+              </Card>
             </Stack>
           </Tabs.Panel>
         </Tabs>

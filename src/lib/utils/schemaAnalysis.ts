@@ -11,6 +11,7 @@ import type {
 import { JSONType, DEFAULT_SCHEMA_CONFIG } from "../../types/schema";
 import { PatternDetectionEngine } from "./patternDetection";
 import { PerformanceAnalysisEngine } from "./performanceAnalysis";
+import { SchemaGenerationEngine } from "./schemaGeneration";
 import { SuggestionGenerationEngine } from "./suggestionGeneration";
 
 export class SchemaAnalysisEngine {
@@ -18,6 +19,7 @@ export class SchemaAnalysisEngine {
   private patternEngine: PatternDetectionEngine;
   private performanceEngine: PerformanceAnalysisEngine;
   private suggestionEngine: SuggestionGenerationEngine;
+  private schemaEngine: SchemaGenerationEngine;
 
   constructor(config: Partial<SchemaAnalysisConfig> = {}) {
     this.config = { ...DEFAULT_SCHEMA_CONFIG, ...config };
@@ -28,6 +30,7 @@ export class SchemaAnalysisEngine {
       this.config.memoryWarningThreshold
     );
     this.suggestionEngine = new SuggestionGenerationEngine();
+    this.schemaEngine = new SchemaGenerationEngine();
   }
 
   /**
@@ -66,11 +69,20 @@ export class SchemaAnalysisEngine {
         suggestions = this.suggestionEngine.generateSuggestions(structure, patterns, performance);
       }
 
+      // Generate comprehensive JSON Schema
+      const generatedSchema = this.schemaEngine.generateSchema(
+        data,
+        structure,
+        patterns,
+        performance
+      );
+
       return {
         structure,
         patterns,
         performance,
         suggestions,
+        generatedSchema,
         timestamp: startTime,
         confidence: this.calculateOverallConfidence(structure, patterns),
       };

@@ -52,21 +52,19 @@ const useSchemaIntelligence = create<SchemaIntelligenceState>((set, get) => ({
       const { engine } = get();
       const partialResult = engine.analyze(data);
 
-      // Now we have complete analysis including suggestions
+      // The analysis result now includes the generated schema
       const result: SchemaAnalysisResult = {
         structure: partialResult.structure!,
-        patterns: partialResult.patterns || [], // Populated from pattern detection
+        patterns: partialResult.patterns || [],
         performance: partialResult.performance || {
-          // Populated from performance analysis
           memoryEstimate: 0,
           largeArrays: [],
           deepNesting: [],
           duplicateData: [],
           optimizationOpportunities: [],
         },
-        suggestions: partialResult.suggestions || [], // Populated from suggestion generation
-        generatedSchema: {
-          // Will be enhanced in Task 7
+        suggestions: partialResult.suggestions || [],
+        generatedSchema: partialResult.generatedSchema || {
           $schema: "http://json-schema.org/draft-07/schema#",
           type: "object",
         },

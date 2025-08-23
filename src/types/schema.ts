@@ -61,19 +61,29 @@ export interface SchemaSuggestion {
 }
 
 export interface JSONSchema {
-  $schema: string;
-  type: string;
-  properties?: Record<string, any>;
+  $schema?: string;
+  type?: string | string[];
+  properties?: Record<string, JSONSchema>;
   required?: string[];
-  additionalProperties?: boolean;
-  items?: JSONSchema;
+  additionalProperties?: boolean | JSONSchema;
+  items?: JSONSchema | JSONSchema[];
+  anyOf?: JSONSchema[];
+  allOf?: JSONSchema[];
+  oneOf?: JSONSchema[];
   format?: string;
   pattern?: string;
   minimum?: number;
   maximum?: number;
   minLength?: number;
   maxLength?: number;
+  minItems?: number;
+  maxItems?: number;
+  uniqueItems?: boolean;
   enum?: any[];
+  const?: any;
+  examples?: any[];
+  description?: string;
+  title?: string;
 }
 
 export interface TypeInconsistency {
