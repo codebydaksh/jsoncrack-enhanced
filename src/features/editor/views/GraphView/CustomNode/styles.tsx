@@ -60,6 +60,8 @@ export const StyledKey = styled.span<{
   $value?: TextColorFn["$value"];
   $hasError?: boolean;
   $hasWarning?: boolean;
+  $hasSchemaSuggestion?: boolean;
+  $suggestionSeverity?: "critical" | "high" | "medium" | "low";
 }>`
   display: inline;
   align-items: center;
@@ -69,17 +71,40 @@ export const StyledKey = styled.span<{
   height: auto;
   line-height: inherit;
   padding: 0; // Remove padding
-  color: ${({ theme, $type, $value = "", $hasError, $hasWarning }) => {
+  color: ${({
+    theme,
+    $type,
+    $value = "",
+    $hasError,
+    $hasWarning,
+    $hasSchemaSuggestion,
+    $suggestionSeverity,
+  }) => {
     if ($hasError) return "#ff6b6b";
     if ($hasWarning) return "#ffd43b";
+    if ($hasSchemaSuggestion) {
+      if ($suggestionSeverity === "critical") return "#e74c3c";
+      if ($suggestionSeverity === "high") return "#f39c12";
+      if ($suggestionSeverity === "medium") return "#3498db";
+      return "#9b59b6";
+    }
     return getTextColor({ $value, $type, theme });
   }};
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  ${({ $hasError, $hasWarning }) => {
+  ${({ $hasError, $hasWarning, $hasSchemaSuggestion, $suggestionSeverity }) => {
     if ($hasError) return "font-weight: 600; text-decoration: underline wavy #ff6b6b;";
     if ($hasWarning) return "font-weight: 600; text-decoration: underline wavy #ffd43b;";
+    if ($hasSchemaSuggestion) {
+      if ($suggestionSeverity === "critical")
+        return "font-weight: 600; text-decoration: underline dotted #e74c3c;";
+      if ($suggestionSeverity === "high")
+        return "font-weight: 600; text-decoration: underline dotted #f39c12;";
+      if ($suggestionSeverity === "medium")
+        return "font-weight: 500; text-decoration: underline dotted #3498db;";
+      return "text-decoration: underline dotted #9b59b6;";
+    }
     return "";
   }}
 `;
@@ -88,6 +113,8 @@ export const StyledRow = styled.span<{
   $value: TextColorFn["$value"];
   $hasError?: boolean;
   $hasWarning?: boolean;
+  $hasSchemaSuggestion?: boolean;
+  $suggestionSeverity?: "critical" | "high" | "medium" | "low";
 }>`
   padding: 3px 10px;
   height: ${NODE_DIMENSIONS.ROW_HEIGHT}px;
@@ -100,11 +127,20 @@ export const StyledRow = styled.span<{
   border-bottom: 1px solid ${({ theme }) => theme.NODE_COLORS.DIVIDER};
   box-sizing: border-box;
   position: relative;
-  ${({ $hasError, $hasWarning }) => {
+  ${({ $hasError, $hasWarning, $hasSchemaSuggestion, $suggestionSeverity }) => {
     if ($hasError)
       return "background-color: rgba(255, 107, 107, 0.1); border-left: 3px solid #ff6b6b;";
     if ($hasWarning)
       return "background-color: rgba(255, 212, 59, 0.1); border-left: 3px solid #ffd43b;";
+    if ($hasSchemaSuggestion) {
+      if ($suggestionSeverity === "critical")
+        return "background-color: rgba(231, 76, 60, 0.1); border-left: 3px solid #e74c3c;";
+      if ($suggestionSeverity === "high")
+        return "background-color: rgba(243, 156, 18, 0.1); border-left: 3px solid #f39c12;";
+      if ($suggestionSeverity === "medium")
+        return "background-color: rgba(52, 152, 219, 0.1); border-left: 3px solid #3498db;";
+      return "background-color: rgba(155, 89, 182, 0.05); border-left: 2px solid #9b59b6;";
+    }
     return "";
   }}
 
@@ -126,6 +162,24 @@ export const StyledValidationIcon = styled.span<{ $severity: "error" | "warning"
   color: ${({ $severity }) => ($severity === "error" ? "#ff6b6b" : "#ffd43b")};
   z-index: 1;
   pointer-events: none;
+`;
+
+export const StyledSchemaIcon = styled.span<{ $severity: "critical" | "high" | "medium" | "low" }>`
+  position: absolute;
+  right: ${({ $severity }) => ($severity === "critical" || $severity === "high" ? "5px" : "8px")};
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: ${({ $severity }) =>
+    $severity === "critical" || $severity === "high" ? "12px" : "10px"};
+  color: ${({ $severity }) => {
+    if ($severity === "critical") return "#e74c3c";
+    if ($severity === "high") return "#f39c12";
+    if ($severity === "medium") return "#3498db";
+    return "#9b59b6";
+  }};
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0.9;
 `;
 
 export const StyledChildrenCount = styled.span`
