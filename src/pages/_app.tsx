@@ -106,7 +106,23 @@ function JsonCrack({ Component, pageProps }: AppProps) {
 
   return (
     <>
-      <NextSeo {...SEO} />
+      <NextSeo 
+        {...SEO} 
+        additionalMetaTags={[
+          {
+            name: "viewport",
+            content: "width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover"
+          },
+          {
+            name: "format-detection",
+            content: "telephone=no"
+          },
+          {
+            name: "mobile-web-app-capable",
+            content: "yes"
+          }
+        ]}
+      />
       <SoftwareAppJsonLd
         name="JSON Crack"
         price="0"
