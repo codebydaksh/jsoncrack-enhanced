@@ -106,13 +106,15 @@ export const HeroSection = () => {
       <StyledHeroSectionBody>
         <Stack flex="1" miw={250} mx="auto" align="center">
           {/* JSON Crack Enhanced branding */}
-          <h1 style={{ 
-            fontSize: '1.5rem', 
-            fontWeight: 'bold', 
-            color: '#115fe6',
-            margin: '0 0 1rem 0',
-            textAlign: 'center'
-          }}>
+          <h1
+            style={{
+              fontSize: "1.5rem",
+              fontWeight: "bold",
+              color: "#115fe6",
+              margin: "0 0 1rem 0",
+              textAlign: "center",
+            }}
+          >
             JSON Crack Enhanced
           </h1>
 

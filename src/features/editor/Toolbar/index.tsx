@@ -93,7 +93,11 @@ export const Toolbar = () => {
         >
           Share
         </Button>
-        <Link href="https://github.com/codebydaksh/jsoncrack-enhanced" rel="noopener" target="_blank">
+        <Link
+          href="https://github.com/codebydaksh/jsoncrack-enhanced"
+          rel="noopener"
+          target="_blank"
+        >
           <StyledToolElement title="GitHub">
             <FaGithub size="18" />
           </StyledToolElement>

@@ -32,31 +32,31 @@
 
 ### **Enhanced Features (New in this Fork)**
 
-* **Advanced Search & Filter**: Powerful search with regex, JSONPath, and multi-field filtering
-* **Data Comparison Tool**: Side-by-side diff viewer for comparing JSON structures
-* **Performance Analytics**: Real-time metrics, parsing time, and memory usage monitoring
-* **Smart Auto-Complete**: Intelligent suggestions based on JSON structure and patterns
-* **Data Generation Tools**: Generate realistic test data, mock APIs, and sample datasets
-* **Advanced Export Templates**: Custom reports, transformations, and multiple output formats
-* **Memory Usage Monitor**: Real-time JSON size and performance tracking
-* **Mini-map Navigation**: Interactive minimap for large graph visualization
-* **Enhanced Sharing**: URL-based data sharing without external servers
-* **Custom Themes**: User-defined color schemes and theme management
-* **API Generator**: Convert JSON to cURL, JavaScript, Python, Postman formats
-* **Smart Validation**: Visual validation feedback with error highlighting
-* **Undo/Redo System**: Comprehensive history management for all operations
-* **Export Enhancements**: PDF, HTML, and advanced export options
+- **Advanced Search & Filter**: Powerful search with regex, JSONPath, and multi-field filtering
+- **Data Comparison Tool**: Side-by-side diff viewer for comparing JSON structures
+- **Performance Analytics**: Real-time metrics, parsing time, and memory usage monitoring
+- **Smart Auto-Complete**: Intelligent suggestions based on JSON structure and patterns
+- **Data Generation Tools**: Generate realistic test data, mock APIs, and sample datasets
+- **Advanced Export Templates**: Custom reports, transformations, and multiple output formats
+- **Memory Usage Monitor**: Real-time JSON size and performance tracking
+- **Mini-map Navigation**: Interactive minimap for large graph visualization
+- **Enhanced Sharing**: URL-based data sharing without external servers
+- **Custom Themes**: User-defined color schemes and theme management
+- **API Generator**: Convert JSON to cURL, JavaScript, Python, Postman formats
+- **Smart Validation**: Visual validation feedback with error highlighting
+- **Undo/Redo System**: Comprehensive history management for all operations
+- **Export Enhancements**: PDF, HTML, and advanced export options
 
 ### **Original Core Features**
 
-* **Visualizer**: Convert JSON, YAML, CSV, XML, TOML into interactive graphs or trees
-* **Convert**: Transform data formats seamlessly (JSON to CSV, XML to JSON, etc.)
-* **Format & Validate**: Beautify and validate JSON, YAML, and CSV
-* **Code Generation**: Generate TypeScript interfaces, Golang structs, and JSON Schema
-* **JSON Schema**: Create schemas, mock data, and validate formats
-* **Advanced Tools**: JWT decoding, data randomization, jq/JSON path queries
-* **Export Images**: Download visualizations as PNG, JPEG, or SVG
-* **Privacy**: All processing is local - no data sent to servers
+- **Visualizer**: Convert JSON, YAML, CSV, XML, TOML into interactive graphs or trees
+- **Convert**: Transform data formats seamlessly (JSON to CSV, XML to JSON, etc.)
+- **Format & Validate**: Beautify and validate JSON, YAML, and CSV
+- **Code Generation**: Generate TypeScript interfaces, Golang structs, and JSON Schema
+- **JSON Schema**: Create schemas, mock data, and validate formats
+- **Advanced Tools**: JWT decoding, data randomization, jq/JSON path queries
+- **Export Images**: Download visualizations as PNG, JPEG, or SVG
+- **Privacy**: All processing is local - no data sent to servers
 
 ### **What Makes This Enhanced?**
 
@@ -74,6 +74,7 @@ All features are fully integrated, production-ready, and maintain the privacy-fi
 ### Built With
 
 **Core Technologies:**
+
 - [Next.js 14.2.28](https://nextjs.org) - React framework for production
 - [React.js 18.3.1](https://reactjs.org) - UI library
 - [TypeScript 5.8.2](https://www.typescriptlang.org) - Type safety
@@ -81,11 +82,13 @@ All features are fully integrated, production-ready, and maintain the privacy-fi
 - [Monaco Editor](https://github.com/suren-atoyan/monaco-react) - Code editing
 
 **Enhanced Features Stack:**
+
 - [Zustand 4.5.7](https://github.com/pmndrs/zustand) - State management
 - [Mantine 7.17.7](https://mantine.dev) - UI components
 - [PNPM 9.1.4](https://pnpm.io) - Package management
 
 **Professional Tools:**
+
 - Advanced search with regex and JSONPath support
 - Real-time performance analytics and monitoring
 - Intelligent data generation and transformation pipelines
@@ -151,7 +154,7 @@ Here is what you need to be able to run JSON Crack Enhanced.
 Once running, you can access all the new professional features through:
 
 - **Toolbar Controls**: Look for new icons in the editor toolbar
-- **Keyboard Shortcuts**: 
+- **Keyboard Shortcuts**:
   - `Ctrl+Shift+S` - Advanced Search
   - `Ctrl+Shift+C` - Data Comparison
   - `Ctrl+Shift+P` - Performance Analytics
@@ -197,26 +200,27 @@ The supported node limit can be changed by editing the `NEXT_PUBLIC_NODE_LIMIT` 
 
 ### Professional Tools Overview
 
-| Feature | Description | Keyboard Shortcut |
-|---------|-------------|------------------|
-| Advanced Search | Regex, JSONPath, multi-field search | `Ctrl+Shift+S` |
-| Data Comparison | Side-by-side diff viewer | `Ctrl+Shift+C` |
-| Performance Analytics | Real-time metrics and monitoring | `Ctrl+Shift+P` |
-| Smart Auto-Complete | Structure-aware suggestions | `Ctrl+Shift+A` |
-| Data Generation | Mock data and test datasets | `Ctrl+Shift+D` |
-| Export Templates | Custom reports and transformations | `Ctrl+Shift+E` |
-| Memory Monitor | Real-time size and performance | Always visible |
-| Mini-map Navigation | Large graph navigation | Auto-enabled |
-| Enhanced Sharing | URL-based data sharing | Integrated |
-| Custom Themes | User-defined color schemes | Theme panel |
-| API Generator | Convert to cURL, Python, etc. | Export menu |
-| Smart Validation | Visual error highlighting | Auto-enabled |
-| Undo/Redo | Comprehensive history | `Ctrl+Z` / `Ctrl+Shift+Z` |
-| Advanced Export | PDF, HTML, multiple formats | Download menu |
+| Feature               | Description                         | Keyboard Shortcut         |
+| --------------------- | ----------------------------------- | ------------------------- |
+| Advanced Search       | Regex, JSONPath, multi-field search | `Ctrl+Shift+S`            |
+| Data Comparison       | Side-by-side diff viewer            | `Ctrl+Shift+C`            |
+| Performance Analytics | Real-time metrics and monitoring    | `Ctrl+Shift+P`            |
+| Smart Auto-Complete   | Structure-aware suggestions         | `Ctrl+Shift+A`            |
+| Data Generation       | Mock data and test datasets         | `Ctrl+Shift+D`            |
+| Export Templates      | Custom reports and transformations  | `Ctrl+Shift+E`            |
+| Memory Monitor        | Real-time size and performance      | Always visible            |
+| Mini-map Navigation   | Large graph navigation              | Auto-enabled              |
+| Enhanced Sharing      | URL-based data sharing              | Integrated                |
+| Custom Themes         | User-defined color schemes          | Theme panel               |
+| API Generator         | Convert to cURL, Python, etc.       | Export menu               |
+| Smart Validation      | Visual error highlighting           | Auto-enabled              |
+| Undo/Redo             | Comprehensive history               | `Ctrl+Z` / `Ctrl+Shift+Z` |
+| Advanced Export       | PDF, HTML, multiple formats         | Download menu             |
 
 ### **Performance & Analytics**
 
 The enhanced version includes comprehensive performance monitoring:
+
 - **Real-time memory usage** tracking
 - **Parse time analytics** for optimization insights
 - **JSON complexity scoring** (1-10 scale)
@@ -226,6 +230,7 @@ The enhanced version includes comprehensive performance monitoring:
 ### **Data Generation Capabilities**
 
 Create realistic test data with built-in templates:
+
 - **User profiles** with realistic personal information
 - **E-commerce products** with pricing and categories
 - **API responses** with pagination and metadata
