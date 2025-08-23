@@ -1,6 +1,7 @@
 import React from "react";
 import styled from "styled-components";
 import type { CustomNodeProps } from ".";
+import type { ValidationError } from "../../../../../store/useValidation";
 import useConfig from "../../../../../store/useConfig";
 import { isContentImage } from "../lib/utils/calculateNodeSize";
 import { TextRenderer } from "./TextRenderer";
@@ -26,11 +27,16 @@ const StyledImage = styled.img`
   background: ${({ theme }) => theme.BACKGROUND_MODIFIER_ACCENT};
 `;
 
-const Node = ({ node, x, y }: CustomNodeProps) => {
+const Node = ({ node, x, y, validationErrors = [] }: CustomNodeProps & { validationErrors?: ValidationError[] }) => {
   const { text, width, height } = node;
   const imagePreviewEnabled = useConfig(state => state.imagePreviewEnabled);
   const isImage = imagePreviewEnabled && isContentImage(JSON.stringify(text[0].value));
   const value = text[0].value;
+  
+  // Check for validation errors on this node
+  const hasErrors = validationErrors.filter(e => e.severity === "error").length > 0;
+  const hasWarnings = validationErrors.filter(e => e.severity === "warning").length > 0;
+  const errorMessages = validationErrors.map(e => e.message).join(', ');
 
   return (
     <Styled.StyledForeignObject
@@ -43,6 +49,11 @@ const Node = ({ node, x, y }: CustomNodeProps) => {
       {isImage ? (
         <StyledImageWrapper>
           <StyledImage src={JSON.stringify(text[0].value)} width="70" height="70" loading="lazy" />
+          {(hasErrors || hasWarnings) && (
+            <Styled.StyledValidationIcon $severity={hasErrors ? "error" : "warning"} style={{ position: 'absolute', top: 5, right: 5 }}>
+              {hasErrors ? "⚠" : "⚡"}
+            </Styled.StyledValidationIcon>
+          )}
         </StyledImageWrapper>
       ) : (
         <StyledTextNodeWrapper
@@ -51,17 +62,31 @@ const Node = ({ node, x, y }: CustomNodeProps) => {
           data-key={JSON.stringify(text)}
           $isParent={false}
         >
-          <Styled.StyledKey $value={value} $type={typeof text[0].value}>
+          <Styled.StyledKey 
+            $value={value} 
+            $type={typeof text[0].value}
+            $hasError={hasErrors}
+            $hasWarning={hasWarnings}
+          >
             <TextRenderer>{value}</TextRenderer>
           </Styled.StyledKey>
+          {(hasErrors || hasWarnings) && (
+            <Styled.StyledValidationIcon $severity={hasErrors ? "error" : "warning"}>
+              {hasErrors ? "⚠" : "⚡"}
+            </Styled.StyledValidationIcon>
+          )}
         </StyledTextNodeWrapper>
       )}
     </Styled.StyledForeignObject>
   );
 };
 
-function propsAreEqual(prev: CustomNodeProps, next: CustomNodeProps) {
-  return prev.node.text === next.node.text && prev.node.width === next.node.width;
+function propsAreEqual(prev: CustomNodeProps & { validationErrors?: ValidationError[] }, next: CustomNodeProps & { validationErrors?: ValidationError[] }) {
+  return (
+    prev.node.text === next.node.text && 
+    prev.node.width === next.node.width &&
+    JSON.stringify(prev.validationErrors) === JSON.stringify(next.validationErrors)
+  );
 }
 
 export const TextNode = React.memo(Node, propsAreEqual);

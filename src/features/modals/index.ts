@@ -1,6 +1,9 @@
+export { APIGeneratorModal } from "./APIGeneratorModal/index";
 export { DownloadModal } from "./DownloadModal";
 export { ImportModal } from "./ImportModal";
 export { NodeModal } from "./NodeModal";
+export { ShareModal } from "./ShareModal";
+export { ThemesModal } from "./ThemesModal";
 export { UpgradeModal } from "./UpgradeModal";
 export { JWTModal } from "./JWTModal";
 export { SchemaModal } from "./SchemaModal";

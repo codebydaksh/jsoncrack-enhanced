@@ -58,6 +58,8 @@ export const StyledForeignObject = styled.foreignObject<{ $isObject?: boolean }>
 export const StyledKey = styled.span<{
   $type: TextColorFn["$type"];
   $value?: TextColorFn["$value"];
+  $hasError?: boolean;
+  $hasWarning?: boolean;
 }>`
   display: inline;
   align-items: center;
@@ -67,13 +69,26 @@ export const StyledKey = styled.span<{
   height: auto;
   line-height: inherit;
   padding: 0; // Remove padding
-  color: ${({ theme, $type, $value = "" }) => getTextColor({ $value, $type, theme })};
+  color: ${({ theme, $type, $value = "", $hasError, $hasWarning }) => {
+    if ($hasError) return "#ff6b6b";
+    if ($hasWarning) return "#ffd43b";
+    return getTextColor({ $value, $type, theme });
+  }};
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  ${({ $hasError, $hasWarning }) => {
+    if ($hasError) return "font-weight: 600; text-decoration: underline wavy #ff6b6b;";
+    if ($hasWarning) return "font-weight: 600; text-decoration: underline wavy #ffd43b;";
+    return "";
+  }}
 `;
 
-export const StyledRow = styled.span<{ $value: TextColorFn["$value"] }>`
+export const StyledRow = styled.span<{ 
+  $value: TextColorFn["$value"];
+  $hasError?: boolean;
+  $hasWarning?: boolean;
+}>`
   padding: 3px 10px;
   height: ${NODE_DIMENSIONS.ROW_HEIGHT}px;
   line-height: 18px;
@@ -84,6 +99,12 @@ export const StyledRow = styled.span<{ $value: TextColorFn["$value"] }>`
   white-space: nowrap;
   border-bottom: 1px solid ${({ theme }) => theme.NODE_COLORS.DIVIDER};
   box-sizing: border-box;
+  position: relative;
+  ${({ $hasError, $hasWarning }) => {
+    if ($hasError) return "background-color: rgba(255, 107, 107, 0.1); border-left: 3px solid #ff6b6b;";
+    if ($hasWarning) return "background-color: rgba(255, 212, 59, 0.1); border-left: 3px solid #ffd43b;";
+    return "";
+  }}
 
   &:last-of-type {
     border-bottom: none;
@@ -92,6 +113,17 @@ export const StyledRow = styled.span<{ $value: TextColorFn["$value"] }>`
   .searched & {
     border-bottom: 1px solid ${({ theme }) => theme.TEXT_POSITIVE};
   }
+`;
+
+export const StyledValidationIcon = styled.span<{ $severity: "error" | "warning" }>`
+  position: absolute;
+  right: 5px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 12px;
+  color: ${({ $severity }) => $severity === "error" ? "#ff6b6b" : "#ffd43b"};
+  z-index: 1;
+  pointer-events: none;
 `;
 
 export const StyledChildrenCount = styled.span`

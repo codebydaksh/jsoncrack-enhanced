@@ -15,6 +15,7 @@ import { BottomBar } from "../features/editor/BottomBar";
 import { FullscreenDropzone } from "../features/editor/FullscreenDropzone";
 import { Toolbar } from "../features/editor/Toolbar";
 import useGraph from "../features/editor/views/GraphView/stores/useGraph";
+import { useSharedData } from "../hooks/useSharedData";
 import useConfig from "../store/useConfig";
 import useFile from "../store/useFile";
 
@@ -77,6 +78,9 @@ const EditorPage = () => {
   const checkEditorSession = useFile(state => state.checkEditorSession);
   const darkmodeEnabled = useConfig(state => state.darkmodeEnabled);
   const fullscreen = useGraph(state => state.fullscreen);
+
+  // Handle shared data from URL parameters
+  useSharedData();
 
   useEffect(() => {
     if (isReady) checkEditorSession(query?.json);

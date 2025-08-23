@@ -8,6 +8,7 @@ import useGraph from "../features/editor/views/GraphView/stores/useGraph";
 import { isIframe } from "../lib/utils/helpers";
 import { contentToJson, jsonToContent } from "../lib/utils/jsonAdapter";
 import useConfig from "./useConfig";
+import useHistory from "./useHistory";
 import useJson from "./useJson";
 
 const defaultJson = JSON.stringify(exampleJson, null, 2);
@@ -67,8 +68,23 @@ const isURL = (value: string) => {
 
 const debouncedUpdateJson = debounce((value: unknown) => {
   useGraph.getState().setLoading(true);
-  useJson.getState().setJson(JSON.stringify(value, null, 2));
+  const jsonString = JSON.stringify(value, null, 2);
+  useJson.getState().setJson(jsonString);
+  
+  // Add to history for undo/redo (debounced to avoid too many history entries)
+  useHistory.getState().pushToHistory(jsonString);
 }, 400);
+
+// Separate debounced function for history tracking to avoid circular updates
+const debouncedAddToHistory = debounce((contents: string) => {
+  try {
+    // Only add valid JSON to history
+    JSON.parse(contents);
+    useHistory.getState().pushToHistory(contents);
+  } catch {
+    // Invalid JSON, don't add to history
+  }
+}, 1000); // Longer delay for history to group rapid changes
 
 const useFile = create<FileStates & JsonActions>()((set, get) => ({
   ...initialStates,
@@ -117,6 +133,11 @@ const useFile = create<FileStates & JsonActions>()((set, get) => ({
         sessionStorage.setItem("content", contents);
         sessionStorage.setItem("format", get().format);
         set({ hasChanges: true });
+        
+        // Add to history for undo/redo (only for user changes, not programmatic)
+        if (hasChanges && contents) {
+          debouncedAddToHistory(contents);
+        }
       }
 
       debouncedUpdateJson(json);
@@ -153,6 +174,10 @@ const useFile = create<FileStates & JsonActions>()((set, get) => ({
     if (sessionContent && !widget) contents = sessionContent;
 
     if (format) set({ format });
+    
+    // Initialize history with the starting content
+    useHistory.getState().initializeHistory(contents);
+    
     get().setContents({ contents, hasChanges: false });
   },
 }));

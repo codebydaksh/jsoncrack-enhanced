@@ -10,6 +10,7 @@ import { useLongPress } from "use-long-press";
 import useConfig from "../../../../store/useConfig";
 import { CustomEdge } from "./CustomEdge";
 import { CustomNode } from "./CustomNode";
+import { MiniMapToggle } from "./MiniMap";
 import { NotSupported } from "./NotSupported";
 import { OptionsMenu } from "./OptionsMenu";
 import { SecureInfo } from "./SecureInfo";
@@ -173,6 +174,7 @@ export const GraphView = ({ isWidget = false }: GraphProps) => {
       <LoadingOverlay visible={debouncedLoading} />
       {!isWidget && <OptionsMenu />}
       {!isWidget && <SecureInfo />}
+      {!isWidget && <MiniMapToggle />}
       <ZoomControl />
       <StyledEditorWrapper
         $widget={isWidget}

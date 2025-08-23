@@ -4,13 +4,16 @@ import { useSessionStorage } from "@mantine/hooks";
 import { event as gaEvent } from "nextjs-google-analytics";
 import { BsCheck2 } from "react-icons/bs";
 import { CgChevronDown } from "react-icons/cg";
+import { MdPalette } from "react-icons/md";
 import { ViewMode } from "../../../enums/viewMode.enum";
 import useConfig from "../../../store/useConfig";
+import { useModal } from "../../../store/useModal";
 import { StyledToolElement } from "./styles";
 
 export const ViewMenu = () => {
   const darkmodeEnabled = useConfig(state => state.darkmodeEnabled);
   const toggleDarkMode = useConfig(state => state.toggleDarkMode);
+  const setVisible = useModal(state => state.setVisible);
   const [viewMode, setViewMode] = useSessionStorage({
     key: "viewMode",
     defaultValue: ViewMode.Graph,
@@ -51,6 +54,15 @@ export const ViewMenu = () => {
           }}
         >
           <Text size="xs">Dark Mode</Text>
+        </Menu.Item>
+        <Menu.Item
+          leftSection={<MdPalette size={14} />}
+          onClick={() => {
+            setVisible("ThemesModal", true);
+            gaEvent("open_themes_modal");
+          }}
+        >
+          <Text size="xs">Custom Themes</Text>
         </Menu.Item>
       </Menu.Dropdown>
     </Menu>

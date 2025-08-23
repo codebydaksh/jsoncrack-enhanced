@@ -5,6 +5,7 @@ import { event as gaEvent } from "nextjs-google-analytics";
 import toast from "react-hot-toast";
 import { CgChevronDown } from "react-icons/cg";
 import { FaRandom } from "react-icons/fa";
+import { FiCode } from "react-icons/fi";
 import { MdFilterListAlt } from "react-icons/md";
 import { SiJsonwebtokens } from "react-icons/si";
 import { VscSearchFuzzy, VscJson, VscGroupByRefType } from "react-icons/vsc";
@@ -83,6 +84,16 @@ export const ToolsMenu = () => {
           }}
         >
           JSON Path
+        </Menu.Item>
+        <Menu.Item
+          fz={12}
+          leftSection={<FiCode />}
+          onClick={() => {
+            setVisible("APIGeneratorModal", true);
+            gaEvent("open_api_generator_modal");
+          }}
+        >
+          Generate API Request
         </Menu.Item>
         <Menu.Divider />
         <Menu.Item

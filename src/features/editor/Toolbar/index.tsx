@@ -9,7 +9,9 @@ import { LuLink } from "react-icons/lu";
 import { JSONCrackLogo } from "../../../layout/JsonCrackLogo";
 import { useModal } from "../../../store/useModal";
 import { FileMenu } from "./FileMenu";
+import { MemoryMonitor } from "./MemoryMonitor";
 import { ToolsMenu } from "./ToolsMenu";
+import { UndoRedoControl } from "./UndoRedoControl";
 import { ViewMenu } from "./ViewMenu";
 import { StyledToolElement } from "./styles";
 
@@ -56,6 +58,7 @@ export const Toolbar = () => {
         <FileMenu />
         <ViewMenu />
         <ToolsMenu />
+        <UndoRedoControl />
         <Button
           component={Link}
           href="https://todiagram.com/editor?utm_source=jsoncrack&utm_medium=toolbar"
@@ -73,13 +76,14 @@ export const Toolbar = () => {
         </Button>
       </Group>
       <Group gap="xs" justify="right" w="100%" style={{ flexWrap: "nowrap" }}>
+        <MemoryMonitor />
         <Button
           color="gray"
           fz="12"
           leftSection={<LuLink />}
           size="compact-sm"
           variant="default"
-          onClick={() => setVisible("UpgradeModal", true)}
+          onClick={() => setVisible("ShareModal", true)}
         >
           Share
         </Button>
