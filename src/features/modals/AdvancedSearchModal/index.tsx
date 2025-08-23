@@ -84,7 +84,7 @@ export const AdvancedSearchModal = ({ opened, onClose }: ModalProps) => {
     } finally {
       setIsSearching(false);
     }
-  }, [searchQuery, searchMode, searchField, caseSensitive, getJson, searchInJson, clearResults]);
+  }, [searchQuery, searchMode, searchField, getJson, searchInJson, clearResults]);
 
   const addNewFilter = () => {
     const newFilter: SearchFilter = {
@@ -320,9 +320,8 @@ export const AdvancedSearchModal = ({ opened, onClose }: ModalProps) => {
                       <Select
                         size="xs"
                         value={filter.type}
-                        onChange={value => {
-                          const newFilter = { ...filter, type: value as SearchFilter["type"] };
-                          // updateFilter(index, newFilter);
+                        onChange={() => {
+                          // updateFilter(index, { ...filter, type: value as SearchFilter["type"] });
                         }}
                         data={[
                           { value: "equals", label: "Equals" },
@@ -338,7 +337,7 @@ export const AdvancedSearchModal = ({ opened, onClose }: ModalProps) => {
                         size="xs"
                         placeholder="Filter value..."
                         value={filter.query}
-                        onChange={e => {
+                        onChange={() => {
                           // updateFilter(index, { query: e.target.value });
                         }}
                         style={{ flex: 1 }}

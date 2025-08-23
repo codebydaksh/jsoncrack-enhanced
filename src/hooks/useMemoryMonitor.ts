@@ -23,7 +23,7 @@ const getPerformanceLevel = (size: number, nodeCount: number): "good" | "warning
   return "good";
 };
 
-const getRecommendations = (level: "good" | "warning" | "critical", size: number): string[] => {
+const getRecommendations = (level: "good" | "warning" | "critical"): string[] => {
   switch (level) {
     case "critical":
       return [
@@ -81,7 +81,7 @@ export const useMemoryMonitor = (): MemoryStats => {
         }
 
         const performanceLevel = getPerformanceLevel(jsonSize, nodeCount);
-        const recommendations = getRecommendations(performanceLevel, jsonSize);
+        const recommendations = getRecommendations(performanceLevel);
 
         setStats({
           jsonSize,

@@ -29,13 +29,11 @@ export const SchemaModal = ({ opened, onClose }: ModalProps) => {
   const setContents = useFile(state => state.setContents);
   const setJsonSchema = useFile(state => state.setJsonSchema);
   const getJson = useJson(state => state.getJson);
-  const setVisible = useModal(state => state.setVisible);
 
   // Validation store
   const {
     isValidationEnabled,
     validationResults,
-    errors,
     setValidationEnabled,
     setSchema: setValidationSchema,
     validateData,

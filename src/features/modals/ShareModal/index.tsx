@@ -32,14 +32,6 @@ const compressForURL = (str: string): string => {
   }
 };
 
-const decompressFromURL = (compressed: string): string => {
-  try {
-    return decodeURIComponent(atob(compressed));
-  } catch {
-    return decodeURIComponent(compressed);
-  }
-};
-
 export const ShareModal = ({ opened, onClose }: ModalProps) => {
   const getJson = useJson(state => state.getJson);
   const [shareURL, setShareURL] = useState("");

@@ -118,7 +118,7 @@ export const AutoCompleteModal = ({ opened, onClose }: ModalProps) => {
     gaEvent("autocomplete_pattern_saved", { pattern });
   };
 
-  const handleDeletePattern = (pattern: string) => {
+  const handleDeletePattern = () => {
     // Note: We'd need to add a delete function to the store
     toast.success("Pattern deleted!");
   };

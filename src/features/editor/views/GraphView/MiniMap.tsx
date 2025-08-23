@@ -6,26 +6,6 @@ import { event as gaEvent } from "nextjs-google-analytics";
 import { LuMap, LuMapPin, LuX } from "react-icons/lu";
 import useGraph from "./stores/useGraph";
 
-const StyledMiniMapContainer = styled(Card)<{ $visible: boolean }>`
-  position: absolute;
-  top: 60px;
-  right: 10px;
-  width: 200px;
-  height: 150px;
-  z-index: 99;
-  opacity: ${({ $visible }) => ($visible ? 0.9 : 0)};
-  visibility: ${({ $visible }) => ($visible ? "visible" : "hidden")};
-  transition:
-    opacity 0.3s ease,
-    visibility 0.3s ease;
-  pointer-events: ${({ $visible }) => ($visible ? "auto" : "none")};
-  border: 1px solid ${({ theme }) => theme.INTERACTIVE_NORMAL};
-
-  &:hover {
-    opacity: 1;
-  }
-`;
-
 const StyledMiniMapCanvas = styled.canvas`
   width: 100%;
   height: 100%;
