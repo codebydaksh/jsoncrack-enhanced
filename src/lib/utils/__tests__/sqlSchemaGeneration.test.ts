@@ -117,8 +117,8 @@ describe("SQL Schema Generation", () => {
     test("should generate basic PostgreSQL schema", async () => {
       const sql = await generateSQLSchema(mockAnalysisResult, mockConfig);
 
-      expect(sql).toContain("CREATE TABLE users");
-      expect(sql).toContain("CREATE TABLE posts");
+      expect(sql).toContain('CREATE TABLE "users"');
+      expect(sql).toContain('CREATE TABLE "posts"');
       expect(sql).toContain("SERIAL");
       expect(sql).toContain("PRIMARY KEY");
       expect(sql).toContain("FOREIGN KEY");
@@ -128,7 +128,7 @@ describe("SQL Schema Generation", () => {
       const mysqlConfig = { ...mockConfig, databaseType: DatabaseType.MySQL };
       const sql = await generateSQLSchema(mockAnalysisResult, mysqlConfig);
 
-      expect(sql).toContain("CREATE TABLE users");
+      expect(sql).toContain("CREATE TABLE `users`");
       expect(sql).toContain("AUTO_INCREMENT");
       expect(sql).toContain("ENGINE=InnoDB");
     });
@@ -137,7 +137,7 @@ describe("SQL Schema Generation", () => {
       const sqlServerConfig = { ...mockConfig, databaseType: DatabaseType.SQLServer };
       const sql = await generateSQLSchema(mockAnalysisResult, sqlServerConfig);
 
-      expect(sql).toContain("CREATE TABLE users");
+      expect(sql).toContain("CREATE TABLE [users]");
       expect(sql).toContain("IDENTITY(1,1)");
       expect(sql).toContain("NVARCHAR");
     });
@@ -146,7 +146,7 @@ describe("SQL Schema Generation", () => {
       const sqliteConfig = { ...mockConfig, databaseType: DatabaseType.SQLite };
       const sql = await generateSQLSchema(mockAnalysisResult, sqliteConfig);
 
-      expect(sql).toContain("CREATE TABLE users");
+      expect(sql).toContain('CREATE TABLE "users"');
       expect(sql).toContain("AUTOINCREMENT");
     });
 
@@ -194,8 +194,8 @@ describe("SQL Schema Generation", () => {
       const configWithPrefix = { ...mockConfig, tablePrefix: "app_" };
       const sql = await generateSQLSchema(mockAnalysisResult, configWithPrefix);
 
-      expect(sql).toContain("CREATE TABLE app_users");
-      expect(sql).toContain("CREATE TABLE app_posts");
+      expect(sql).toContain('CREATE TABLE "app_users"');
+      expect(sql).toContain('CREATE TABLE "app_posts"');
     });
 
     test("should respect naming conventions", async () => {
@@ -394,7 +394,7 @@ describe("SQL Schema Generation", () => {
 
       const sql = await generateSQLSchema(noRelationshipsResult, mockConfig);
 
-      expect(sql).toContain("CREATE TABLE users");
+      expect(sql).toContain('CREATE TABLE "users"');
       expect(sql).not.toContain("FOREIGN KEY");
     });
 

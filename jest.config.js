@@ -8,25 +8,16 @@ const config = {
     '**/*.(test|spec).(ts|tsx|js)',
   ],
   transform: {
-    '^.+\\.(ts|tsx)$': 'ts-jest',
+    '^.+\\.(ts|tsx)$': ['ts-jest', {
+      useESM: false,
+    }],
   },
   collectCoverageFrom: [
     'src/**/*.(ts|tsx)',
     '!src/**/*.d.ts',
   ],
-  moduleNameMapping: {
+  moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
-  },
-  globals: {
-    'ts-jest': {
-      tsconfig: {
-        compilerOptions: {
-          esModuleInterop: true,
-          allowSyntheticDefaultImports: true,
-          skipLibCheck: true,
-        },
-      },
-    },
   },
   setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
 };

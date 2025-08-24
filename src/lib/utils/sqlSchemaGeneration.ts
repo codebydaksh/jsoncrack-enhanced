@@ -258,7 +258,7 @@ class SQLGenerator {
   }
 
   generateCreateTable(table: TableSchema): string {
-    const tableName = this.quoteIdentifier(table.name);
+    const tableName = this.quoteIdentifier(this.getTableName(table.name));
     let sql = `CREATE TABLE ${tableName} (\n`;
 
     // Generate column definitions
@@ -535,19 +535,40 @@ class SQLGenerator {
     return sql;
   }
 
+  /**
+   * Apply table prefix to table name
+   */
+  getTableName(name: string): string {
+    return this.config.tablePrefix ? `${this.config.tablePrefix}${name}` : name;
+  }
+
   quoteIdentifier(identifier: string): string {
     const quote = this.dialect.quotingChar;
     const escape = this.dialect.escapeChar;
 
-    // Escape quotes in identifier
-    const escaped = identifier.replace(new RegExp(quote, "g"), escape + quote);
+    // Properly escape quotes in identifier
+    let escaped: string;
 
-    // For SQL Server, handle both opening and closing brackets
+    // Handle SQL Server bracket escaping properly
     if (this.config.databaseType === DatabaseType.SQLServer) {
+      // For SQL Server, escape ] characters with ]]
+      escaped = identifier.replace(/\]/g, "]]");
       return `[${escaped}]`;
     }
 
+    // For other databases, escape quote characters
+    escaped = identifier.replace(
+      new RegExp(this.escapeRegexSpecialChars(quote), "g"),
+      escape + quote
+    );
     return `${quote}${escaped}${quote}`;
+  }
+
+  /**
+   * Escape special regex characters to prevent regex crashes
+   */
+  escapeRegexSpecialChars(str: string): string {
+    return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   }
 
   formatDefaultValue(value: string, dataType: string): string {
@@ -914,6 +935,31 @@ export async function validateGeneratedSQL(
       }
     }
 
+    // Improved syntax error detection
+    const fullSQL = lines.join("\n");
+
+    // Check for basic SQL syntax issues
+    if (fullSQL.includes("CREATE TABLE")) {
+      // Simple but effective check: look for missing comma in column definitions
+      // Pattern: "NOT NULL\n\s*email" or "UNIQUE\n\s*column_name" etc.
+      if (
+        /\b(NOT\s+NULL|UNIQUE|DEFAULT\s+\S+)\s*\n\s*\w+\s+(VARCHAR|INT|INTEGER|TEXT|SERIAL|BOOLEAN|DATE|TIMESTAMP)/i.test(
+          fullSQL
+        )
+      ) {
+        errors.push("Syntax error: Missing comma between column definitions");
+      }
+
+      // Additional check for missing comma after data types
+      if (
+        /\b(VARCHAR\([^)]+\)|INT|INTEGER|TEXT|SERIAL|BOOLEAN|DATE|TIMESTAMP)\s+[^,\n]*\s*\n\s*\w+\s+(VARCHAR|INT|INTEGER|TEXT|SERIAL|BOOLEAN|DATE|TIMESTAMP)/i.test(
+          fullSQL
+        )
+      ) {
+        errors.push("Syntax error: Missing comma between column definitions");
+      }
+    }
+
     // Check for database-specific issues
     validateDatabaseSpecificSyntax(sql, databaseType, errors, warnings);
 
@@ -1032,6 +1078,16 @@ function validateMySQLSyntax(sql: string, errors: string[], warnings: string[]):
   if (sql.includes("AUTO_INCREMENT") && !sql.includes("PRIMARY KEY")) {
     errors.push("AUTO_INCREMENT columns must be part of a key");
   }
+
+  // Check specifically for ENGINE clause presence in CREATE TABLE statements
+  const createTableStatements = sql.match(/CREATE TABLE[^;]+;/gi);
+  if (createTableStatements) {
+    for (const statement of createTableStatements) {
+      if (!statement.toUpperCase().includes("ENGINE=")) {
+        warnings.push("MySQL CREATE TABLE statement missing ENGINE clause");
+      }
+    }
+  }
 }
 
 function validateSQLServerSyntax(sql: string, errors: string[], warnings: string[]): void {
@@ -1125,6 +1181,48 @@ export async function validateSchemaPerformance(
 
   // Check for missing indexes
   for (const table of analysisResult.tables) {
+    // Check foreign key columns without indexes
+    const fkColumns = table.columns.filter((col: any) => col.isForeignKey);
+    for (const fkCol of fkColumns) {
+      const hasIndex =
+        table.indexes && table.indexes.some((idx: any) => idx.columns.includes(fkCol.name));
+      if (!hasIndex) {
+        recommendations.push({
+          type: "WARNING",
+          category: "INDEXING",
+          message: `Foreign key column ${fkCol.name} in table ${table.name} lacks an index`,
+          impact: "Foreign key queries will be slow without proper indexing",
+          solution: "Add an index on this foreign key column",
+        });
+        performanceScore -= 10;
+      }
+    }
+
+    // Check for searchable columns without indexes
+    const searchableColumns = table.columns.filter(
+      (col: any) =>
+        (col.type.includes("VARCHAR") || col.type.includes("TEXT")) &&
+        (col.name.toLowerCase().includes("name") ||
+          col.name.toLowerCase().includes("title") ||
+          col.name.toLowerCase().includes("description") ||
+          col.name.toLowerCase().includes("email"))
+    );
+
+    for (const searchCol of searchableColumns) {
+      const hasIndex =
+        table.indexes && table.indexes.some((idx: any) => idx.columns.includes(searchCol.name));
+      if (!hasIndex) {
+        recommendations.push({
+          type: "SUGGESTION",
+          category: "INDEXING",
+          message: `Searchable column ${searchCol.name} in table ${table.name} should have an index`,
+          impact: "Text search queries may be slow without indexing",
+          solution: "Consider adding a B-tree or full-text index on this column",
+        });
+        performanceScore -= 5;
+      }
+    }
+
     const largeTextColumns = table.columns.filter(
       (col: any) => col.type.includes("TEXT") || (col.type.includes("VARCHAR") && col.length > 255)
     );
@@ -1241,6 +1339,31 @@ function addDatabaseSpecificRecommendations(
             solution: "Consider GIN indexes on JSON columns",
           });
         }
+
+        // Check for text search opportunities
+        const textColumns = table.columns.filter((col: any) => col.type.includes("TEXT"));
+        if (textColumns.length > 0) {
+          recommendations.push({
+            type: "SUGGESTION",
+            category: "INDEXING",
+            message: `Table ${table.name} has text columns suitable for full-text search`,
+            impact: "Text search performance can be improved",
+            solution: "Consider using PostgreSQL full-text search with GIN indexes",
+          });
+        }
+
+        // Check for UUID columns
+        const uuidColumns = table.columns.filter((col: any) => col.type.includes("UUID"));
+        if (uuidColumns.length > 0) {
+          recommendations.push({
+            type: "SUGGESTION",
+            category: "DATA_TYPES",
+            message: `Table ${table.name} uses UUID columns`,
+            impact: "UUIDs provide better distribution but may impact performance",
+            solution:
+              "Ensure uuid-ossp extension is enabled and consider hash indexes for equality checks",
+          });
+        }
       }
       break;
 
@@ -1253,6 +1376,22 @@ function addDatabaseSpecificRecommendations(
         impact: "Storage engine affects performance characteristics",
         solution: "Use InnoDB for ACID compliance, MyISAM for read-heavy workloads",
       });
+
+      // Check for UTF8MB4 usage
+      for (const table of analysisResult.tables) {
+        const textColumns = table.columns.filter(
+          (col: any) => col.type.includes("VARCHAR") || col.type.includes("TEXT")
+        );
+        if (textColumns.length > 0) {
+          recommendations.push({
+            type: "SUGGESTION",
+            category: "DATA_TYPES",
+            message: `Table ${table.name} has text columns`,
+            impact: "Character set selection affects Unicode support and performance",
+            solution: "Ensure UTF8MB4 charset is used for full Unicode support",
+          });
+        }
+      }
       break;
 
     case DatabaseType.SQLServer:
@@ -1266,6 +1405,49 @@ function addDatabaseSpecificRecommendations(
           impact: "Large tables may benefit from partitioning",
           solution: "Consider table partitioning for improved performance",
         });
+      }
+
+      // Check for NVARCHAR usage
+      for (const table of analysisResult.tables) {
+        const varcharColumns = table.columns.filter((col: any) => col.type.includes("VARCHAR"));
+        if (varcharColumns.length > 0) {
+          recommendations.push({
+            type: "SUGGESTION",
+            category: "DATA_TYPES",
+            message: `Table ${table.name} uses VARCHAR columns`,
+            impact: "VARCHAR may not support full Unicode character set",
+            solution: "Consider using NVARCHAR for Unicode support",
+          });
+        }
+      }
+      break;
+
+    case DatabaseType.SQLite:
+      // Check for foreign key constraints
+      if (analysisResult.relationships && analysisResult.relationships.length > 0) {
+        recommendations.push({
+          type: "SUGGESTION",
+          category: "CONSTRAINTS",
+          message: "Foreign key relationships detected",
+          impact: "SQLite requires explicit enabling of foreign key constraints",
+          solution: "Enable foreign keys with PRAGMA foreign_keys=ON",
+        });
+      }
+
+      // Check for data type optimization
+      for (const table of analysisResult.tables) {
+        const numericColumns = table.columns.filter(
+          (col: any) => col.type.includes("DECIMAL") || col.type.includes("DOUBLE")
+        );
+        if (numericColumns.length > 0) {
+          recommendations.push({
+            type: "SUGGESTION",
+            category: "DATA_TYPES",
+            message: `Table ${table.name} has numeric precision columns`,
+            impact: "SQLite has simplified numeric type system",
+            solution: "Consider using INTEGER or REAL for better performance",
+          });
+        }
       }
       break;
   }
