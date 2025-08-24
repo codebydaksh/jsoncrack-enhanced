@@ -69,7 +69,7 @@ export function analyzeDataTypeFromSamples(samples: any[]): DataTypeAnalysis {
       constraints: [],
       patterns: [],
       samples: [],
-      statistics: createEmptyStatistics()
+      statistics: createEmptyStatistics(),
     };
   }
 
@@ -85,7 +85,7 @@ export function analyzeDataTypeFromSamples(samples: any[]): DataTypeAnalysis {
       constraints: [],
       patterns: [],
       samples,
-      statistics: { ...createEmptyStatistics(), nullCount }
+      statistics: { ...createEmptyStatistics(), nullCount },
     };
   }
 
@@ -93,7 +93,7 @@ export function analyzeDataTypeFromSamples(samples: any[]): DataTypeAnalysis {
   const typeAnalyses = nonNullSamples.map(sample => ({
     value: sample,
     type: detectDataType(sample),
-    patterns: detectPatterns(sample)
+    patterns: detectPatterns(sample),
   }));
 
   // Find the most common type
@@ -103,8 +103,7 @@ export function analyzeDataTypeFromSamples(samples: any[]): DataTypeAnalysis {
     typeFrequency.set(analysis.type, count + 1);
   });
 
-  const mostCommonType = Array.from(typeFrequency.entries())
-    .sort((a, b) => b[1] - a[1])[0][0];
+  const mostCommonType = Array.from(typeFrequency.entries()).sort((a, b) => b[1] - a[1])[0][0];
 
   const confidence = (typeFrequency.get(mostCommonType) || 0) / nonNullSamples.length;
 
@@ -124,7 +123,7 @@ export function analyzeDataTypeFromSamples(samples: any[]): DataTypeAnalysis {
     constraints: sqlTypeInfo.constraints,
     patterns: allPatterns,
     samples,
-    statistics
+    statistics,
   };
 }
 
@@ -142,9 +141,7 @@ function analyzeArrayType(arr: any[]): string {
   }
 
   // Mixed types - check for common patterns
-  const primitiveTypes = uniqueTypes.filter(t => 
-    ["string", "number", "boolean"].includes(t)
-  );
+  const primitiveTypes = uniqueTypes.filter(t => ["string", "number", "boolean"].includes(t));
 
   if (primitiveTypes.length === uniqueTypes.length) {
     return "array<mixed_primitive>";
@@ -172,17 +169,17 @@ function analyzeNumericType(num: number): string {
   // Decimal number - analyze precision
   const str = num.toString();
   const decimalIndex = str.indexOf(".");
-  
+
   if (decimalIndex === -1) {
     return "number"; // Should not happen for non-integers
   }
 
   const decimalPlaces = str.length - decimalIndex - 1;
-  
+
   if (decimalPlaces <= 2) return "decimal_2";
   if (decimalPlaces <= 4) return "decimal_4";
   if (decimalPlaces <= 8) return "decimal_8";
-  
+
   return "double";
 }
 
@@ -245,12 +242,12 @@ function analyzeStringType(str: string): string {
  */
 function analyzeStringLength(str: string): string {
   const len = str.length;
-  
+
   if (len <= 10) return "string_short";
   if (len <= 50) return "string_medium";
   if (len <= 255) return "string_long";
   if (len <= 1000) return "string_very_long";
-  
+
   return "text";
 }
 
@@ -259,9 +256,9 @@ function analyzeStringLength(str: string): string {
  */
 export function detectPatterns(value: any): string[] {
   const patterns: string[] = [];
-  
+
   if (typeof value !== "string") return patterns;
-  
+
   if (isUUID(value)) patterns.push("uuid");
   if (isEmail(value)) patterns.push("email");
   if (isURL(value)) patterns.push("url");
@@ -278,7 +275,7 @@ export function detectPatterns(value: any): string[] {
   if (isCoordinates(value)) patterns.push("coordinates");
   if (isColorCode(value)) patterns.push("color");
   if (isFilePath(value)) patterns.push("file_path");
-  
+
   return patterns;
 }
 
@@ -290,7 +287,8 @@ function isUUID(str: string): boolean {
 }
 
 function isEmail(str: string): boolean {
-  const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
+  const emailRegex =
+    /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
   return emailRegex.test(str);
 }
 
@@ -305,39 +303,39 @@ function isURL(str: string): boolean {
 
 function isDateTime(str: string): boolean {
   if (str.length < 8) return false;
-  
+
   // ISO 8601 formats
   const isoRegex = /^\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}:\d{2}(?:\.\d{3})?(?:Z|[+-]\d{2}:\d{2})?$/;
   if (isoRegex.test(str)) {
     return !isNaN(Date.parse(str));
   }
-  
+
   // Common datetime formats
   const commonFormats = [
     /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/,
     /^\d{2}\/\d{2}\/\d{4} \d{2}:\d{2}:\d{2}$/,
-    /^\d{2}-\d{2}-\d{4} \d{2}:\d{2}:\d{2}$/
+    /^\d{2}-\d{2}-\d{4} \d{2}:\d{2}:\d{2}$/,
   ];
-  
+
   return commonFormats.some(regex => regex.test(str)) && !isNaN(Date.parse(str));
 }
 
 function isDate(str: string): boolean {
   if (str.length < 6) return false;
-  
+
   // ISO date format
   const isoDateRegex = /^\d{4}-\d{2}-\d{2}$/;
   if (isoDateRegex.test(str)) {
     return !isNaN(Date.parse(str));
   }
-  
+
   // Common date formats
   const dateFormats = [
     /^\d{2}\/\d{2}\/\d{4}$/, // MM/DD/YYYY
     /^\d{2}-\d{2}-\d{4}$/, // MM-DD-YYYY
     /^\d{4}\/\d{2}\/\d{2}$/, // YYYY/MM/DD
   ];
-  
+
   return dateFormats.some(regex => regex.test(str)) && !isNaN(Date.parse(str));
 }
 
@@ -349,10 +347,10 @@ function isTime(str: string): boolean {
 function isPhoneNumber(str: string): boolean {
   // Remove common phone number characters
   const cleaned = str.replace(/[\s\-\(\)\+\.]/g, "");
-  
+
   // Check if it's all digits and reasonable length
   if (!/^\d+$/.test(cleaned)) return false;
-  
+
   return cleaned.length >= 10 && cleaned.length <= 15;
 }
 
@@ -367,7 +365,7 @@ function isJSON(str: string): boolean {
 
 function isBase64(str: string): boolean {
   if (str.length < 4 || str.length % 4 !== 0) return false;
-  
+
   const base64Regex = /^[A-Za-z0-9+/]*={0,2}$/;
   return base64Regex.test(str);
 }
@@ -376,15 +374,16 @@ function isHash(str: string): boolean {
   // MD5 (32 chars), SHA1 (40 chars), SHA256 (64 chars), SHA512 (128 chars)
   const hashLengths = [32, 40, 64, 128];
   const hexRegex = /^[a-fA-F0-9]+$/;
-  
+
   return hashLengths.includes(str.length) && hexRegex.test(str);
 }
 
 function isIPAddress(str: string): boolean {
   // IPv4
-  const ipv4Regex = /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
+  const ipv4Regex =
+    /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
   if (ipv4Regex.test(str)) return true;
-  
+
   // IPv6 (simplified)
   const ipv6Regex = /^(?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}$/;
   return ipv6Regex.test(str);
@@ -392,29 +391,29 @@ function isIPAddress(str: string): boolean {
 
 function isCreditCard(str: string): boolean {
   const cleaned = str.replace(/[\s\-]/g, "");
-  
+
   // Luhn algorithm check
   if (!/^\d+$/.test(cleaned) || cleaned.length < 13 || cleaned.length > 19) {
     return false;
   }
-  
+
   let sum = 0;
   let alternate = false;
-  
+
   for (let i = cleaned.length - 1; i >= 0; i--) {
     let digit = parseInt(cleaned.charAt(i), 10);
-    
+
     if (alternate) {
       digit *= 2;
       if (digit > 9) {
         digit = (digit % 10) + 1;
       }
     }
-    
+
     sum += digit;
     alternate = !alternate;
   }
-  
+
   return sum % 10 === 0;
 }
 
@@ -433,7 +432,7 @@ function isColorCode(str: string): boolean {
   // Hex color codes
   const hexColorRegex = /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/;
   if (hexColorRegex.test(str)) return true;
-  
+
   // RGB/RGBA
   const rgbRegex = /^rgba?\(\s?\d{1,3}\s?,\s?\d{1,3}\s?,\s?\d{1,3}\s?(?:,\s?[01]?\.?\d*)?\)$/;
   return rgbRegex.test(str);
@@ -442,16 +441,16 @@ function isColorCode(str: string): boolean {
 function isFilePath(str: string): boolean {
   // Unix/Linux/Mac path
   if (str.startsWith("/") && str.includes("/")) return true;
-  
+
   // Windows path
   if (/^[A-Z]:\\/.test(str) && str.includes("\\")) return true;
-  
+
   // Relative path
   if (str.includes("./") || str.includes("../")) return true;
-  
+
   // File extension check
   if (/\.[a-zA-Z0-9]+$/.test(str) && str.length > 3) return true;
-  
+
   return false;
 }
 
@@ -459,15 +458,15 @@ function isFilePath(str: string): boolean {
  * Generates comprehensive statistics for a dataset
  */
 function generateTypeStatistics(
-  samples: any[], 
-  detectedType: string, 
+  samples: any[],
+  detectedType: string,
   nullCount: number
 ): TypeStatistics {
   const statistics: TypeStatistics = {
     nullCount,
     uniqueCount: 0,
     commonValues: [],
-    distribution: "unknown"
+    distribution: "unknown",
   };
 
   if (samples.length === 0) return statistics;
@@ -495,7 +494,11 @@ function generateTypeStatistics(
     statistics.avgLength = lengths.reduce((a, b) => a + b, 0) / lengths.length;
   }
 
-  if (detectedType.includes("int") || detectedType.includes("decimal") || detectedType === "number") {
+  if (
+    detectedType.includes("int") ||
+    detectedType.includes("decimal") ||
+    detectedType === "number"
+  ) {
     const numericValues = samples.map(s => Number(s)).filter(n => !isNaN(n));
     if (numericValues.length > 0) {
       statistics.minValue = Math.min(...numericValues);
@@ -523,8 +526,8 @@ function generateTypeStatistics(
  * Determines the appropriate SQL type based on detected type and statistics
  */
 function determineSQLType(
-  detectedType: string, 
-  samples: any[], 
+  detectedType: string,
+  samples: any[],
   statistics: TypeStatistics
 ): { sqlType: string; constraints: string[] } {
   const constraints: string[] = [];
@@ -621,7 +624,7 @@ function createEmptyStatistics(): TypeStatistics {
     nullCount: 0,
     uniqueCount: 0,
     commonValues: [],
-    distribution: "unknown"
+    distribution: "unknown",
   };
 }
 
@@ -639,25 +642,23 @@ export function analyzeEnumPossibilities(samples: any[]): {
 
   const nonNullSamples = samples.filter(s => s !== null && s !== undefined);
   const uniqueValues = Array.from(new Set(nonNullSamples));
-  
+
   // Consider as enum if:
   // 1. Less than 20 unique values
   // 2. Unique values are less than 50% of total samples
   // 3. All values are strings or numbers
-  
+
   const uniqueRatio = uniqueValues.length / nonNullSamples.length;
-  const isStringOrNumber = uniqueValues.every(v => 
-    typeof v === "string" || typeof v === "number"
-  );
-  
+  const isStringOrNumber = uniqueValues.every(v => typeof v === "string" || typeof v === "number");
+
   if (uniqueValues.length <= 20 && uniqueRatio < 0.5 && isStringOrNumber) {
     const confidence = Math.max(0.1, 1 - uniqueRatio);
     return {
       isEnum: true,
       enumValues: uniqueValues.map(v => String(v)),
-      confidence
+      confidence,
     };
   }
-  
+
   return { isEnum: false, enumValues: [], confidence: 0 };
 }

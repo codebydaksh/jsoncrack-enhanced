@@ -9,11 +9,9 @@ import {
   Grid,
   RingProgress,
   Center,
-  Tooltip,
   Paper,
-  Divider
 } from "@mantine/core";
-import { 
+import {
   FiDatabase,
   FiGrid,
   FiKey,
@@ -21,17 +19,15 @@ import {
   FiBarChart,
   FiActivity,
   FiTrendingUp,
-  FiShield
+  FiShield,
 } from "react-icons/fi";
-import { SchemaAnalysisResult } from "../../../store/useSQLSchema";
+import type { SchemaAnalysisResult } from "../../../store/useSQLSchema";
 
 interface SchemaStatisticsProps {
   analysisResult: SchemaAnalysisResult;
 }
 
-export const SchemaStatistics: React.FC<SchemaStatisticsProps> = ({
-  analysisResult
-}) => {
+export const SchemaStatistics: React.FC<SchemaStatisticsProps> = ({ analysisResult }) => {
   const { tables, relationships, estimatedPerformance } = analysisResult;
 
   // Calculate various statistics
@@ -39,7 +35,7 @@ export const SchemaStatistics: React.FC<SchemaStatisticsProps> = ({
   const totalPrimaryKeys = tables.filter(table => table.primaryKey).length;
   const totalForeignKeys = tables.reduce((sum, table) => sum + (table.foreignKeys?.length || 0), 0);
   const totalIndexes = tables.reduce((sum, table) => sum + (table.indexes?.length || 0), 0);
-  
+
   const avgColumnsPerTable = Math.round(totalColumns / tables.length);
   const normalizedTables = relationships.length;
   const normalizationRatio = tables.length > 1 ? (normalizedTables / (tables.length - 1)) * 100 : 0;
@@ -48,7 +44,7 @@ export const SchemaStatistics: React.FC<SchemaStatisticsProps> = ({
   const dataTypeDistribution = new Map<string, number>();
   tables.forEach(table => {
     table.columns.forEach(column => {
-      const baseType = column.type.split('(')[0]; // Remove length specifiers
+      const baseType = column.type.split("(")[0]; // Remove length specifiers
       const count = dataTypeDistribution.get(baseType) || 0;
       dataTypeDistribution.set(baseType, count + 1);
     });
@@ -61,10 +57,14 @@ export const SchemaStatistics: React.FC<SchemaStatisticsProps> = ({
   // Complexity assessment
   const getComplexityColor = (complexity: string): string => {
     switch (complexity) {
-      case "LOW": return "green";
-      case "MEDIUM": return "yellow";
-      case "HIGH": return "red";
-      default: return "gray";
+      case "LOW":
+        return "green";
+      case "MEDIUM":
+        return "yellow";
+      case "HIGH":
+        return "red";
+      default:
+        return "gray";
     }
   };
 
@@ -87,7 +87,9 @@ export const SchemaStatistics: React.FC<SchemaStatisticsProps> = ({
                 {tables.length}
               </Badge>
             </Group>
-            <Text size="sm" fw={500}>Tables Generated</Text>
+            <Text size="sm" fw={500}>
+              Tables Generated
+            </Text>
             <Text size="xs" c="dimmed">
               Avg {avgColumnsPerTable} columns per table
             </Text>
@@ -102,7 +104,9 @@ export const SchemaStatistics: React.FC<SchemaStatisticsProps> = ({
                 {totalColumns}
               </Badge>
             </Group>
-            <Text size="sm" fw={500}>Total Columns</Text>
+            <Text size="sm" fw={500}>
+              Total Columns
+            </Text>
             <Text size="xs" c="dimmed">
               Across all tables
             </Text>
@@ -117,7 +121,9 @@ export const SchemaStatistics: React.FC<SchemaStatisticsProps> = ({
                 {relationships.length}
               </Badge>
             </Group>
-            <Text size="sm" fw={500}>Relationships</Text>
+            <Text size="sm" fw={500}>
+              Relationships
+            </Text>
             <Text size="xs" c="dimmed">
               Foreign key references
             </Text>
@@ -132,7 +138,9 @@ export const SchemaStatistics: React.FC<SchemaStatisticsProps> = ({
                 {totalPrimaryKeys}
               </Badge>
             </Group>
-            <Text size="sm" fw={500}>Primary Keys</Text>
+            <Text size="sm" fw={500}>
+              Primary Keys
+            </Text>
             <Text size="xs" c="dimmed">
               Table identifiers
             </Text>
@@ -144,7 +152,9 @@ export const SchemaStatistics: React.FC<SchemaStatisticsProps> = ({
       <Card withBorder>
         <Group mb="md">
           <FiActivity size={20} />
-          <Text size="sm" fw={500}>Performance Metrics</Text>
+          <Text size="sm" fw={500}>
+            Performance Metrics
+          </Text>
         </Group>
 
         <Grid>
@@ -153,14 +163,18 @@ export const SchemaStatistics: React.FC<SchemaStatisticsProps> = ({
               <RingProgress
                 size={120}
                 thickness={12}
-                sections={[{
-                  value: estimatedPerformance.indexEfficiency,
-                  color: getPerformanceColor(estimatedPerformance.indexEfficiency)
-                }]}
+                sections={[
+                  {
+                    value: estimatedPerformance.indexEfficiency,
+                    color: getPerformanceColor(estimatedPerformance.indexEfficiency),
+                  },
+                ]}
                 label={
                   <Center>
                     <Stack align="center" gap={0}>
-                      <Text size="xs" c="dimmed">Index</Text>
+                      <Text size="xs" c="dimmed">
+                        Index
+                      </Text>
                       <Text size="sm" fw={600}>
                         {estimatedPerformance.indexEfficiency}%
                       </Text>
@@ -179,14 +193,18 @@ export const SchemaStatistics: React.FC<SchemaStatisticsProps> = ({
               <RingProgress
                 size={120}
                 thickness={12}
-                sections={[{
-                  value: estimatedPerformance.normalizationScore,
-                  color: getPerformanceColor(estimatedPerformance.normalizationScore)
-                }]}
+                sections={[
+                  {
+                    value: estimatedPerformance.normalizationScore,
+                    color: getPerformanceColor(estimatedPerformance.normalizationScore),
+                  },
+                ]}
                 label={
                   <Center>
                     <Stack align="center" gap={0}>
-                      <Text size="xs" c="dimmed">Normal</Text>
+                      <Text size="xs" c="dimmed">
+                        Normal
+                      </Text>
                       <Text size="sm" fw={600}>
                         {estimatedPerformance.normalizationScore}%
                       </Text>
@@ -203,28 +221,42 @@ export const SchemaStatistics: React.FC<SchemaStatisticsProps> = ({
           <Grid.Col span={{ base: 12, lg: 4 }}>
             <Stack justify="center" h="100%">
               <Group justify="apart">
-                <Text size="xs" c="dimmed">Query Complexity:</Text>
-                <Badge 
-                  variant="light" 
+                <Text size="xs" c="dimmed">
+                  Query Complexity:
+                </Text>
+                <Badge
+                  variant="light"
                   color={getComplexityColor(estimatedPerformance.queryComplexity)}
                 >
                   {estimatedPerformance.queryComplexity}
                 </Badge>
               </Group>
-              
+
               <Group justify="apart">
-                <Text size="xs" c="dimmed">Estimated Size:</Text>
-                <Text size="xs" fw={500}>{estimatedPerformance.estimatedSize}</Text>
+                <Text size="xs" c="dimmed">
+                  Estimated Size:
+                </Text>
+                <Text size="xs" fw={500}>
+                  {estimatedPerformance.estimatedSize}
+                </Text>
               </Group>
-              
+
               <Group justify="apart">
-                <Text size="xs" c="dimmed">Foreign Keys:</Text>
-                <Text size="xs" fw={500}>{totalForeignKeys}</Text>
+                <Text size="xs" c="dimmed">
+                  Foreign Keys:
+                </Text>
+                <Text size="xs" fw={500}>
+                  {totalForeignKeys}
+                </Text>
               </Group>
-              
+
               <Group justify="apart">
-                <Text size="xs" c="dimmed">Indexes:</Text>
-                <Text size="xs" fw={500}>{totalIndexes}</Text>
+                <Text size="xs" c="dimmed">
+                  Indexes:
+                </Text>
+                <Text size="xs" fw={500}>
+                  {totalIndexes}
+                </Text>
               </Group>
             </Stack>
           </Grid.Col>
@@ -235,7 +267,9 @@ export const SchemaStatistics: React.FC<SchemaStatisticsProps> = ({
       <Card withBorder>
         <Group mb="md">
           <FiBarChart size={20} />
-          <Text size="sm" fw={500}>Data Type Distribution</Text>
+          <Text size="sm" fw={500}>
+            Data Type Distribution
+          </Text>
         </Group>
 
         <Stack gap="sm">
@@ -247,16 +281,15 @@ export const SchemaStatistics: React.FC<SchemaStatisticsProps> = ({
                   <Badge variant="light" size="sm" style={{ minWidth: 80 }}>
                     {dataType}
                   </Badge>
-                  <Progress
-                    value={percentage}
-                    style={{ flex: 1 }}
-                    size="sm"
-                    color="blue"
-                  />
+                  <Progress value={percentage} style={{ flex: 1 }} size="sm" color="blue" />
                 </Group>
                 <Group gap="xs">
-                  <Text size="xs" c="dimmed">{count}</Text>
-                  <Text size="xs" c="dimmed">({Math.round(percentage)}%)</Text>
+                  <Text size="xs" c="dimmed">
+                    {count}
+                  </Text>
+                  <Text size="xs" c="dimmed">
+                    ({Math.round(percentage)}%)
+                  </Text>
                 </Group>
               </Group>
             );
@@ -268,7 +301,9 @@ export const SchemaStatistics: React.FC<SchemaStatisticsProps> = ({
       <Card withBorder>
         <Group mb="md">
           <FiShield size={20} />
-          <Text size="sm" fw={500}>Schema Health Indicators</Text>
+          <Text size="sm" fw={500}>
+            Schema Health Indicators
+          </Text>
         </Group>
 
         <Grid>
@@ -280,7 +315,9 @@ export const SchemaStatistics: React.FC<SchemaStatisticsProps> = ({
                   {Math.round((totalPrimaryKeys / tables.length) * 100)}%
                 </Badge>
               </Group>
-              <Text size="xs" c="dimmed">Tables with primary keys</Text>
+              <Text size="xs" c="dimmed">
+                Tables with primary keys
+              </Text>
             </Paper>
           </Grid.Col>
 
@@ -292,7 +329,9 @@ export const SchemaStatistics: React.FC<SchemaStatisticsProps> = ({
                   {Math.round(normalizationRatio)}%
                 </Badge>
               </Group>
-              <Text size="xs" c="dimmed">Normalization ratio</Text>
+              <Text size="xs" c="dimmed">
+                Normalization ratio
+              </Text>
             </Paper>
           </Grid.Col>
 
@@ -305,7 +344,9 @@ export const SchemaStatistics: React.FC<SchemaStatisticsProps> = ({
                     {totalIndexes}
                   </Badge>
                 </Group>
-                <Text size="xs" c="dimmed">Performance indexes</Text>
+                <Text size="xs" c="dimmed">
+                  Performance indexes
+                </Text>
               </Paper>
             </Grid.Col>
           )}
@@ -318,7 +359,9 @@ export const SchemaStatistics: React.FC<SchemaStatisticsProps> = ({
                   {totalForeignKeys}
                 </Badge>
               </Group>
-              <Text size="xs" c="dimmed">Foreign key constraints</Text>
+              <Text size="xs" c="dimmed">
+                Foreign key constraints
+              </Text>
             </Paper>
           </Grid.Col>
         </Grid>
@@ -328,34 +371,36 @@ export const SchemaStatistics: React.FC<SchemaStatisticsProps> = ({
       <Card withBorder bg="var(--mantine-color-gray-0)">
         <Group mb="sm">
           <FiTrendingUp size={16} />
-          <Text size="sm" fw={500}>Quick Insights</Text>
+          <Text size="sm" fw={500}>
+            Quick Insights
+          </Text>
         </Group>
-        
+
         <Stack gap="xs">
           {estimatedPerformance.indexEfficiency < 50 && (
             <Text size="xs" c="orange">
               • Consider adding more indexes for better query performance
             </Text>
           )}
-          
+
           {relationships.length === 0 && (
             <Text size="xs" c="blue">
               • Schema appears to be denormalized - all data in single table structure
             </Text>
           )}
-          
+
           {totalPrimaryKeys < tables.length && (
             <Text size="xs" c="red">
               • Some tables are missing primary keys - this may cause issues
             </Text>
           )}
-          
+
           {estimatedPerformance.normalizationScore > 80 && (
             <Text size="xs" c="green">
               • Well-normalized schema structure detected
             </Text>
           )}
-          
+
           {avgColumnsPerTable > 20 && (
             <Text size="xs" c="yellow">
               • Tables have many columns - consider further normalization

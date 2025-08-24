@@ -2,14 +2,14 @@ import { create } from "zustand";
 
 export enum DatabaseType {
   PostgreSQL = "postgresql",
-  MySQL = "mysql", 
+  MySQL = "mysql",
   SQLServer = "sqlserver",
   SQLite = "sqlite",
 }
 
 export enum NormalizationLevel {
   First = "1NF",
-  Second = "2NF", 
+  Second = "2NF",
   Third = "3NF",
   Denormalized = "denormalized",
 }
@@ -147,34 +147,28 @@ const initialState: SQLSchemaState = {
 
 const useSQLSchema = create<SQLSchemaState & SQLSchemaActions>()((set, get) => ({
   ...initialState,
-  
-  setConfig: (configUpdate) =>
-    set((state) => ({
+
+  setConfig: configUpdate =>
+    set(state => ({
       config: { ...state.config, ...configUpdate },
       error: null, // Clear errors when config changes
     })),
 
-  setAnalysisResult: (result) =>
-    set({ analysisResult: result, error: null }),
+  setAnalysisResult: result => set({ analysisResult: result, error: null }),
 
-  setGeneratedSQL: (sql) =>
-    set({ generatedSQL: sql, error: null }),
+  setGeneratedSQL: sql => set({ generatedSQL: sql, error: null }),
 
-  setIsGenerating: (generating) =>
-    set({ isGenerating: generating }),
+  setIsGenerating: generating => set({ isGenerating: generating }),
 
-  setError: (error) =>
-    set({ error, isGenerating: false }),
+  setError: error => set({ error, isGenerating: false }),
 
-  setPreviewMode: (mode) =>
-    set({ previewMode: mode }),
+  setPreviewMode: mode => set({ previewMode: mode }),
 
-  setSelectedTable: (table) =>
-    set({ selectedTable: table }),
+  setSelectedTable: table => set({ selectedTable: table }),
 
   generateSchema: async (jsonData: string) => {
     const { config, setIsGenerating, setError, setAnalysisResult, setGeneratedSQL } = get();
-    
+
     setIsGenerating(true);
     setError(null);
 
@@ -182,16 +176,16 @@ const useSQLSchema = create<SQLSchemaState & SQLSchemaActions>()((set, get) => (
       // Import the schema analysis utilities
       const { analyzeJSONStructure } = await import("../lib/utils/sqlSchemaAnalysis");
       const { generateSQLSchema } = await import("../lib/utils/sqlSchemaGeneration");
-      
+
       // Parse JSON data
       const parsedData = JSON.parse(jsonData);
-      
+
       // Analyze the JSON structure
       const analysisResult = await analyzeJSONStructure(parsedData, config);
-      
+
       // Generate SQL schema
       const sql = await generateSQLSchema(analysisResult, config);
-      
+
       setAnalysisResult(analysisResult);
       setGeneratedSQL(sql);
     } catch (error) {

@@ -8,22 +8,13 @@ import {
   ScrollArea,
   Table,
   Tooltip,
-  ActionIcon,
-  Flex,
   Grid,
   Paper,
   Divider,
-  Box
+  Box,
 } from "@mantine/core";
-import { 
-  FiKey, 
-  FiLink2, 
-  FiGrid,
-  FiCheck,
-  FiX,
-  FiInfo
-} from "react-icons/fi";
-import { TableSchema, ColumnSchema } from "../../../store/useSQLSchema";
+import { FiKey, FiLink2, FiGrid, FiCheck, FiX, FiInfo } from "react-icons/fi";
+import type { TableSchema, ColumnSchema } from "../../../store/useSQLSchema";
 
 interface TableVisualizationProps {
   tables: TableSchema[];
@@ -34,12 +25,14 @@ interface TableVisualizationProps {
 export const TableVisualization: React.FC<TableVisualizationProps> = ({
   tables,
   selectedTable,
-  onTableSelect
+  onTableSelect,
 }) => {
   if (!tables || tables.length === 0) {
     return (
       <Card withBorder>
-        <Text c="dimmed" ta="center">No tables generated yet.</Text>
+        <Text c="dimmed" ta="center">
+          No tables generated yet.
+        </Text>
       </Card>
     );
   }
@@ -52,7 +45,7 @@ export const TableVisualization: React.FC<TableVisualizationProps> = ({
         </Tooltip>
       );
     }
-    
+
     if (column.isForeignKey) {
       return (
         <Tooltip label="Foreign Key">
@@ -60,10 +53,8 @@ export const TableVisualization: React.FC<TableVisualizationProps> = ({
         </Tooltip>
       );
     }
-    
-    return (
-      <FiKey size={14} color="var(--mantine-color-gray-4)" style={{opacity: 0.3}} />
-    );
+
+    return <FiKey size={14} color="var(--mantine-color-gray-4)" style={{ opacity: 0.3 }} />;
   };
 
   const getDataTypeBadgeColor = (dataType: string): string => {
@@ -84,7 +75,7 @@ export const TableVisualization: React.FC<TableVisualizationProps> = ({
       shadow={selectedTable === table.name ? "md" : "xs"}
       style={{
         cursor: onTableSelect ? "pointer" : "default",
-        borderColor: selectedTable === table.name ? "var(--mantine-color-blue-4)" : undefined
+        borderColor: selectedTable === table.name ? "var(--mantine-color-blue-4)" : undefined,
       }}
       onClick={() => onTableSelect?.(table.name)}
     >
@@ -92,20 +83,22 @@ export const TableVisualization: React.FC<TableVisualizationProps> = ({
       <Group justify="apart" mb="md">
         <Group>
           <FiGrid size={20} color="var(--mantine-color-blue-6)" />
-          <Text size="lg" fw={600}>{table.name}</Text>
+          <Text size="lg" fw={600}>
+            {table.name}
+          </Text>
         </Group>
-        
+
         <Group gap="xs">
           <Badge variant="light" size="sm" color="blue">
             {table.columns.length} columns
           </Badge>
-          
+
           {table.primaryKey && (
             <Badge variant="light" size="sm" color="yellow">
               PK: {table.primaryKey}
             </Badge>
           )}
-          
+
           {table.foreignKeys && table.foreignKeys.length > 0 && (
             <Badge variant="light" size="sm" color="green">
               {table.foreignKeys.length} FK{table.foreignKeys.length > 1 ? "s" : ""}
@@ -127,22 +120,16 @@ export const TableVisualization: React.FC<TableVisualizationProps> = ({
             </Table.Tr>
           </Table.Thead>
           <Table.Tbody>
-            {table.columns.map((column, index) => (
-              <Table.Tr key={`${table.name}-${column.name}-${index}`}>
-                <Table.Td>
-                  {renderColumnIcon(column)}
-                </Table.Td>
+            {table.columns.map(column => (
+              <Table.Tr key={`${table.name}-${column.name}`}>
+                <Table.Td>{renderColumnIcon(column)}</Table.Td>
                 <Table.Td>
                   <Text size="sm" fw={column.isPrimaryKey ? 600 : 400}>
                     {column.name}
                   </Text>
                 </Table.Td>
                 <Table.Td>
-                  <Badge 
-                    variant="light" 
-                    size="xs" 
-                    color={getDataTypeBadgeColor(column.type)}
-                  >
+                  <Badge variant="light" size="xs" color={getDataTypeBadgeColor(column.type)}>
                     {column.type}
                   </Badge>
                 </Table.Td>
@@ -165,7 +152,9 @@ export const TableVisualization: React.FC<TableVisualizationProps> = ({
                       ))}
                     </Group>
                   ) : (
-                    <Text size="xs" c="dimmed">None</Text>
+                    <Text size="xs" c="dimmed">
+                      None
+                    </Text>
                   )}
                 </Table.Td>
               </Table.Tr>
@@ -178,11 +167,13 @@ export const TableVisualization: React.FC<TableVisualizationProps> = ({
       {(table.indexes || table.foreignKeys) && (
         <>
           <Divider my="md" />
-          
+
           {/* Foreign Keys */}
           {table.foreignKeys && table.foreignKeys.length > 0 && (
             <Box mb="md">
-              <Text size="xs" fw={500} mb="xs">Foreign Key References:</Text>
+              <Text size="xs" fw={500} mb="xs">
+                Foreign Key References:
+              </Text>
               <Stack gap="xs">
                 {table.foreignKeys.map((fk, index) => (
                   <Paper key={index} p="xs" bg="var(--mantine-color-gray-0)" withBorder>
@@ -206,16 +197,19 @@ export const TableVisualization: React.FC<TableVisualizationProps> = ({
           {/* Indexes */}
           {table.indexes && table.indexes.length > 0 && (
             <Box>
-              <Text size="xs" fw={500} mb="xs">Indexes:</Text>
+              <Text size="xs" fw={500} mb="xs">
+                Indexes:
+              </Text>
               <Group gap="xs" wrap="wrap">
                 {table.indexes.map((index, idx) => (
-                  <Badge 
-                    key={idx} 
-                    variant="light" 
-                    size="xs" 
+                  <Badge
+                    key={idx}
+                    variant="light"
+                    size="xs"
                     color={index.unique ? "orange" : "blue"}
                   >
-                    {index.unique && "UNIQUE "}{index.name}
+                    {index.unique && "UNIQUE "}
+                    {index.name}
                   </Badge>
                 ))}
               </Group>
@@ -231,7 +225,9 @@ export const TableVisualization: React.FC<TableVisualizationProps> = ({
           <Box>
             <Group mb="xs">
               <FiInfo size={14} />
-              <Text size="xs" fw={500}>Column Comments:</Text>
+              <Text size="xs" fw={500}>
+                Column Comments:
+              </Text>
             </Group>
             <Stack gap="xs">
               {table.columns
@@ -239,7 +235,10 @@ export const TableVisualization: React.FC<TableVisualizationProps> = ({
                 .map((col, index) => (
                   <Paper key={index} p="xs" bg="var(--mantine-color-blue-0)" withBorder>
                     <Text size="xs">
-                      <Text component="span" fw={500}>{col.name}:</Text> {col.comment}
+                      <Text component="span" fw={500}>
+                        {col.name}:
+                      </Text>{" "}
+                      {col.comment}
                     </Text>
                   </Paper>
                 ))}
@@ -255,20 +254,30 @@ export const TableVisualization: React.FC<TableVisualizationProps> = ({
       {/* Tables Overview */}
       <Card withBorder bg="var(--mantine-color-gray-0)">
         <Group justify="apart">
-          <Text size="sm" fw={500}>Database Schema Overview</Text>
+          <Text size="sm" fw={500}>
+            Database Schema Overview
+          </Text>
           <Group gap="lg">
             <Group gap="xs">
-              <Text size="xs" c="dimmed">Tables:</Text>
-              <Badge variant="light" color="blue">{tables.length}</Badge>
+              <Text size="xs" c="dimmed">
+                Tables:
+              </Text>
+              <Badge variant="light" color="blue">
+                {tables.length}
+              </Badge>
             </Group>
             <Group gap="xs">
-              <Text size="xs" c="dimmed">Total Columns:</Text>
+              <Text size="xs" c="dimmed">
+                Total Columns:
+              </Text>
               <Badge variant="light" color="green">
                 {tables.reduce((sum, table) => sum + table.columns.length, 0)}
               </Badge>
             </Group>
             <Group gap="xs">
-              <Text size="xs" c="dimmed">Foreign Keys:</Text>
+              <Text size="xs" c="dimmed">
+                Foreign Keys:
+              </Text>
               <Badge variant="light" color="orange">
                 {tables.reduce((sum, table) => sum + (table.foreignKeys?.length || 0), 0)}
               </Badge>
@@ -279,7 +288,7 @@ export const TableVisualization: React.FC<TableVisualizationProps> = ({
 
       {/* Table Grid */}
       <Grid>
-        {tables.map((table, index) => (
+        {tables.map(table => (
           <Grid.Col key={table.name} span={{ base: 12, lg: 6 }}>
             {renderTable(table)}
           </Grid.Col>
@@ -288,7 +297,9 @@ export const TableVisualization: React.FC<TableVisualizationProps> = ({
 
       {/* Legend */}
       <Card withBorder bg="var(--mantine-color-gray-0)">
-        <Text size="xs" fw={500} mb="xs">Legend:</Text>
+        <Text size="xs" fw={500} mb="xs">
+          Legend:
+        </Text>
         <Group gap="lg">
           <Group gap="xs">
             <FiKey size={14} color="var(--mantine-color-yellow-6)" />
