@@ -8,7 +8,7 @@ import { FaRandom } from "react-icons/fa";
 import { FiCode } from "react-icons/fi";
 import { MdFilterListAlt } from "react-icons/md";
 import { SiJsonwebtokens } from "react-icons/si";
-import { VscSearchFuzzy, VscJson, VscGroupByRefType } from "react-icons/vsc";
+import { VscSearchFuzzy, VscJson, VscGroupByRefType, VscDatabase } from "react-icons/vsc";
 import { jsonToContent } from "../../../lib/utils/jsonAdapter";
 import useFile from "../../../store/useFile";
 import useJson from "../../../store/useJson";
@@ -115,6 +115,16 @@ export const ToolsMenu = () => {
           }}
         >
           Generate Type
+        </Menu.Item>
+        <Menu.Item
+          fz={12}
+          leftSection={<VscDatabase />}
+          onClick={() => {
+            setVisible("SQLSchemaModal", true);
+            gaEvent("open_sql_schema_modal");
+          }}
+        >
+          Generate SQL Schema
         </Menu.Item>
         <Menu.Item fz={12} leftSection={<FaRandom />} onClick={randomizeData}>
           Randomize Data
