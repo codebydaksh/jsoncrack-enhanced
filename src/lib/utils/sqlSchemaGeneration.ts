@@ -976,30 +976,296 @@ function validateDatabaseSpecificSyntax(
 ): void {
   switch (databaseType) {
     case DatabaseType.PostgreSQL:
-      // Check for UUID usage without extension
-      if (sql.includes("UUID") && !sql.includes('CREATE EXTENSION IF NOT EXISTS "uuid-ossp"')) {
-        warnings.push("UUID type used but uuid-ossp extension not enabled");
+      validatePostgreSQLSyntax(sql, errors, warnings);
+      break;
+    case DatabaseType.MySQL:
+      validateMySQLSyntax(sql, errors, warnings);
+      break;
+    case DatabaseType.SQLServer:
+      validateSQLServerSyntax(sql, errors, warnings);
+      break;
+    case DatabaseType.SQLite:
+      validateSQLiteSyntax(sql, errors, warnings);
+      break;
+  }
+}
+
+function validatePostgreSQLSyntax(sql: string, errors: string[], warnings: string[]): void {
+  // Check for UUID usage without extension
+  if (sql.includes("UUID") && !sql.includes('CREATE EXTENSION IF NOT EXISTS "uuid-ossp"')) {
+    warnings.push("UUID type used but uuid-ossp extension not enabled");
+  }
+
+  // Check for JSON columns without GIN indexes
+  if (sql.includes("JSON") && !sql.includes("USING gin")) {
+    warnings.push("JSON columns should have GIN indexes for better performance");
+  }
+
+  // Check for text search without full-text indexes
+  if (sql.includes("TEXT") && sql.toLowerCase().includes("search")) {
+    warnings.push("Consider using full-text search indexes for TEXT columns");
+  }
+
+  // Check for proper sequence usage
+  if (sql.includes("SERIAL") && sql.includes("BIGSERIAL")) {
+    warnings.push("Mix of SERIAL and BIGSERIAL types - ensure consistency");
+  }
+}
+
+function validateMySQLSyntax(sql: string, errors: string[], warnings: string[]): void {
+  // Check for storage engine specification
+  if (sql.includes("CREATE TABLE") && !sql.includes("ENGINE=")) {
+    warnings.push("No storage engine specified, defaulting to InnoDB");
+  }
+
+  // Check for character set specification
+  if (sql.includes("CREATE TABLE") && !sql.includes("CHARSET=")) {
+    warnings.push("No character set specified, consider UTF8MB4 for full Unicode support");
+  }
+
+  // Check for proper index length on TEXT columns
+  if (sql.includes("TEXT") && sql.includes("INDEX")) {
+    warnings.push("TEXT columns in indexes should specify key length");
+  }
+
+  // Check for proper AUTO_INCREMENT usage
+  if (sql.includes("AUTO_INCREMENT") && !sql.includes("PRIMARY KEY")) {
+    errors.push("AUTO_INCREMENT columns must be part of a key");
+  }
+}
+
+function validateSQLServerSyntax(sql: string, errors: string[], warnings: string[]): void {
+  // Check for NVARCHAR usage for Unicode support
+  if (sql.includes("VARCHAR(") && !sql.includes("NVARCHAR(")) {
+    warnings.push("Consider using NVARCHAR for Unicode support");
+  }
+
+  // Check for proper IDENTITY usage
+  if (sql.includes("IDENTITY") && !sql.includes("IDENTITY(1,1)")) {
+    warnings.push("IDENTITY should specify seed and increment values");
+  }
+
+  // Check for clustered index
+  if (sql.includes("CREATE TABLE") && !sql.includes("CLUSTERED")) {
+    warnings.push("Consider specifying clustered index for better performance");
+  }
+
+  // Check for proper datetime usage
+  if (sql.includes("DATETIME") && !sql.includes("DATETIME2")) {
+    warnings.push("Consider using DATETIME2 for better precision and range");
+  }
+}
+
+function validateSQLiteSyntax(sql: string, errors: string[], warnings: string[]): void {
+  // Check for foreign key support
+  if (sql.includes("FOREIGN KEY") && !sql.includes("PRAGMA foreign_keys=ON")) {
+    warnings.push("Foreign key constraints require PRAGMA foreign_keys=ON");
+  }
+
+  // Check for proper data types
+  if (sql.includes("VARCHAR")) {
+    warnings.push(
+      "SQLite doesn't enforce VARCHAR length, consider using TEXT with CHECK constraints"
+    );
+  }
+
+  // Check for unsupported features
+  if (sql.includes("AUTO_INCREMENT")) {
+    errors.push("SQLite uses AUTOINCREMENT, not AUTO_INCREMENT");
+  }
+
+  // Check for proper index creation
+  if (sql.includes("CREATE INDEX") && !sql.includes("IF NOT EXISTS")) {
+    warnings.push("Consider using IF NOT EXISTS for index creation");
+  }
+}
+
+/**
+ * Enhanced schema validation with performance analysis
+ */
+export async function validateSchemaPerformance(
+  analysisResult: any,
+  databaseType: DatabaseType
+): Promise<{
+  performanceScore: number;
+  recommendations: Array<{
+    type: "CRITICAL" | "WARNING" | "SUGGESTION";
+    category: "INDEXING" | "NORMALIZATION" | "DATA_TYPES" | "CONSTRAINTS" | "PARTITIONING";
+    message: string;
+    impact: string;
+    solution: string;
+  }>;
+  metrics: {
+    tableCount: number;
+    columnCount: number;
+    indexCount: number;
+    relationshipCount: number;
+    estimatedSize: string;
+    queryComplexity: "LOW" | "MEDIUM" | "HIGH";
+  };
+}> {
+  const recommendations: any[] = [];
+  let performanceScore = 100;
+
+  // Analyze table structure
+  const metrics = {
+    tableCount: analysisResult.tables.length,
+    columnCount: analysisResult.tables.reduce(
+      (sum: number, table: any) => sum + table.columns.length,
+      0
+    ),
+    indexCount: analysisResult.tables.reduce(
+      (sum: number, table: any) => sum + (table.indexes?.length || 0),
+      0
+    ),
+    relationshipCount: analysisResult.relationships?.length || 0,
+    estimatedSize: estimateSchemaSize(analysisResult),
+    queryComplexity: assessQueryComplexity(analysisResult),
+  };
+
+  // Check for missing indexes
+  for (const table of analysisResult.tables) {
+    const largeTextColumns = table.columns.filter(
+      (col: any) => col.type.includes("TEXT") || (col.type.includes("VARCHAR") && col.length > 255)
+    );
+
+    if (largeTextColumns.length > 0 && (!table.indexes || table.indexes.length === 0)) {
+      recommendations.push({
+        type: "WARNING",
+        category: "INDEXING",
+        message: `Table ${table.name} has large text columns but no indexes`,
+        impact: "Queries on this table may be slow",
+        solution: "Add appropriate indexes or use full-text search",
+      });
+      performanceScore -= 10;
+    }
+
+    // Check for too many columns (denormalization warning)
+    if (table.columns.length > 30) {
+      recommendations.push({
+        type: "WARNING",
+        category: "NORMALIZATION",
+        message: `Table ${table.name} has ${table.columns.length} columns`,
+        impact: "May indicate poor normalization, affecting maintainability",
+        solution: "Consider breaking into related tables",
+      });
+      performanceScore -= 5;
+    }
+
+    // Check for missing primary key
+    const hasPrimaryKey = table.columns.some((col: any) => col.isPrimaryKey);
+    if (!hasPrimaryKey) {
+      recommendations.push({
+        type: "CRITICAL",
+        category: "CONSTRAINTS",
+        message: `Table ${table.name} lacks a primary key`,
+        impact: "Severely impacts performance and replication",
+        solution: "Add a primary key column (preferably auto-incrementing)",
+      });
+      performanceScore -= 20;
+    }
+  }
+
+  // Check for complex relationships
+  if (metrics.relationshipCount > metrics.tableCount * 2) {
+    recommendations.push({
+      type: "SUGGESTION",
+      category: "NORMALIZATION",
+      message: "High number of relationships detected",
+      impact: "Complex joins may impact query performance",
+      solution: "Consider denormalizing frequently accessed data",
+    });
+    performanceScore -= 5;
+  }
+
+  // Database-specific recommendations
+  addDatabaseSpecificRecommendations(analysisResult, databaseType, recommendations);
+
+  return {
+    performanceScore: Math.max(0, performanceScore),
+    recommendations,
+    metrics,
+  };
+}
+
+function estimateSchemaSize(analysisResult: any): string {
+  let totalSize = 0;
+
+  for (const table of analysisResult.tables) {
+    let tableSize = 0;
+    for (const column of table.columns) {
+      if (column.type.includes("INT")) tableSize += 4;
+      else if (column.type.includes("BIGINT")) tableSize += 8;
+      else if (column.type.includes("VARCHAR")) tableSize += parseInt(column.length || "255");
+      else if (column.type.includes("TEXT"))
+        tableSize += 1000; // Estimate
+      else if (column.type.includes("TIMESTAMP")) tableSize += 8;
+      else tableSize += 50; // Default estimate
+    }
+    totalSize += tableSize * 1000; // Estimate 1000 rows per table
+  }
+
+  if (totalSize < 1024) return `${totalSize} bytes`;
+  if (totalSize < 1024 * 1024) return `${Math.round(totalSize / 1024)} KB`;
+  return `${Math.round(totalSize / (1024 * 1024))} MB`;
+}
+
+function assessQueryComplexity(analysisResult: any): "LOW" | "MEDIUM" | "HIGH" {
+  const tableCount = analysisResult.tables.length;
+  const relationshipCount = analysisResult.relationships?.length || 0;
+  const avgColumnsPerTable =
+    analysisResult.tables.reduce((sum: number, table: any) => sum + table.columns.length, 0) /
+    tableCount;
+
+  if (tableCount <= 5 && relationshipCount <= 5 && avgColumnsPerTable <= 10) return "LOW";
+  if (tableCount <= 15 && relationshipCount <= 20 && avgColumnsPerTable <= 20) return "MEDIUM";
+  return "HIGH";
+}
+
+function addDatabaseSpecificRecommendations(
+  analysisResult: any,
+  databaseType: DatabaseType,
+  recommendations: any[]
+): void {
+  switch (databaseType) {
+    case DatabaseType.PostgreSQL:
+      // Check for JSON column optimization
+      for (const table of analysisResult.tables) {
+        const jsonColumns = table.columns.filter((col: any) => col.type.includes("JSON"));
+        if (jsonColumns.length > 0) {
+          recommendations.push({
+            type: "SUGGESTION",
+            category: "INDEXING",
+            message: `Table ${table.name} has JSON columns`,
+            impact: "JSON queries can be slow without proper indexing",
+            solution: "Consider GIN indexes on JSON columns",
+          });
+        }
       }
       break;
 
     case DatabaseType.MySQL:
-      // Check for storage engine specification
-      if (sql.includes("CREATE TABLE") && !sql.includes("ENGINE=")) {
-        warnings.push("No storage engine specified, defaulting to InnoDB");
-      }
+      // Check for storage engine recommendations
+      recommendations.push({
+        type: "SUGGESTION",
+        category: "DATA_TYPES",
+        message: "Consider storage engine selection",
+        impact: "Storage engine affects performance characteristics",
+        solution: "Use InnoDB for ACID compliance, MyISAM for read-heavy workloads",
+      });
       break;
 
     case DatabaseType.SQLServer:
-      // Check for NVARCHAR usage for Unicode support
-      if (sql.includes("VARCHAR(") && !sql.includes("NVARCHAR(")) {
-        warnings.push("Consider using NVARCHAR for Unicode support");
-      }
-      break;
-
-    case DatabaseType.SQLite:
-      // Check for foreign key support
-      if (sql.includes("FOREIGN KEY") && !sql.includes("PRAGMA foreign_keys=ON")) {
-        warnings.push("Foreign key constraints require PRAGMA foreign_keys=ON");
+      // Check for partitioning opportunities
+      const largeTables = analysisResult.tables.filter((table: any) => table.columns.length > 20);
+      if (largeTables.length > 0) {
+        recommendations.push({
+          type: "SUGGESTION",
+          category: "PARTITIONING",
+          message: "Large tables detected",
+          impact: "Large tables may benefit from partitioning",
+          solution: "Consider table partitioning for improved performance",
+        });
       }
       break;
   }

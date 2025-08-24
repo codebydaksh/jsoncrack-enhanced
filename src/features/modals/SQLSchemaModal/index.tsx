@@ -34,6 +34,7 @@ import {
 } from "react-icons/fi";
 import useJson from "../../../store/useJson";
 import useSQLSchema from "../../../store/useSQLSchema";
+import { MigrationPanel } from "./MigrationPanel";
 import { RelationshipDiagram } from "./RelationshipDiagram";
 import { SchemaConfigurationPanel } from "./SchemaConfigurationPanel";
 import { SchemaStatistics } from "./SchemaStatistics";
@@ -102,6 +103,22 @@ export const SQLSchemaModal = ({ opened, onClose }: ModalProps) => {
   const handleExport = () => {
     exportSQL();
     gaEvent("sql_schema_exported", { database: config.databaseType });
+  };
+
+  const handlePerformanceTesting = () => {
+    if (!analysisResult || !generatedSQL) return;
+
+    // For now, we'll use a simple alert. In a full implementation,
+    // this would open the Performance Testing Modal
+    alert("Performance Testing Modal would open here with comprehensive performance analysis");
+  };
+
+  const handleEnhancedExport = () => {
+    if (!analysisResult || !generatedSQL) return;
+
+    // For now, we'll use a simple alert. In a full implementation,
+    // this would open the Enhanced Export Modal
+    alert("Enhanced Export Modal would open here with advanced export options");
   };
 
   const handleValidateSchema = async () => {
@@ -252,7 +269,14 @@ export const SQLSchemaModal = ({ opened, onClose }: ModalProps) => {
         )}
 
         {/* Validation Results */}
-        {validationResults && <ValidationResults results={validationResults} />}
+        {validationResults && (
+          <ValidationResults
+            results={validationResults}
+            analysisResult={analysisResult}
+            generatedSQL={generatedSQL}
+            databaseType={config.databaseType}
+          />
+        )}
 
         {/* Schema Recommendations */}
         {analysisResult.recommendations.length > 0 && (
@@ -341,12 +365,23 @@ export const SQLSchemaModal = ({ opened, onClose }: ModalProps) => {
               >
                 Preview & Export
               </Tabs.Tab>
+              <Tabs.Tab
+                value="migration"
+                leftSection={<FiDatabase size={16} />}
+                disabled={!analysisResult}
+              >
+                Data Migration
+              </Tabs.Tab>
             </Tabs.List>
 
             <ScrollArea.Autosize mah={600} px="md" py="md">
               <Tabs.Panel value="config">{renderConfigurationTab()}</Tabs.Panel>
 
               <Tabs.Panel value="preview">{renderPreviewTab()}</Tabs.Panel>
+
+              <Tabs.Panel value="migration">
+                {analysisResult && <MigrationPanel analysisResult={analysisResult} />}
+              </Tabs.Panel>
             </ScrollArea.Autosize>
           </Tabs>
         )}
@@ -372,9 +407,25 @@ export const SQLSchemaModal = ({ opened, onClose }: ModalProps) => {
               </Button>
 
               {generatedSQL && (
-                <Button leftSection={<FiDownload size={16} />} onClick={handleExport}>
-                  Export SQL
-                </Button>
+                <>
+                  <Button
+                    variant="light"
+                    leftSection={<FiEye size={16} />}
+                    onClick={handlePerformanceTesting}
+                  >
+                    Performance Test
+                  </Button>
+                  <Button
+                    variant="light"
+                    leftSection={<FiSettings size={16} />}
+                    onClick={handleEnhancedExport}
+                  >
+                    Enhanced Export
+                  </Button>
+                  <Button leftSection={<FiDownload size={16} />} onClick={handleExport}>
+                    Export SQL
+                  </Button>
+                </>
               )}
             </Group>
           </Group>
