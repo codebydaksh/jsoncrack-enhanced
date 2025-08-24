@@ -2,6 +2,8 @@ import { detectDataType } from "./dataTypeInference";
 import { 
   TableSchema, 
   ColumnSchema, 
+  ForeignKeySchema,
+  IndexSchema,
   SchemaAnalysisResult, 
   SQLSchemaConfig,
   RelationshipInfo,
@@ -241,17 +243,20 @@ async function analyzeField(key: string, value: any, config: SQLSchemaConfig): P
   const sqlType = inferSQLType(value, detectedType);
   const patterns = detectPatterns(value);
   
+  // Enhanced nullable detection for arrays
+  const nullable = analyzeNullability(samples, isArray);
+  
   return {
     name: key,
     type: detectedType,
     sqlType,
-    nullable: value === null || value === undefined,
+    nullable,
     samples,
     isArray,
     isObject,
     arrayItemType,
     objectSchema,
-    constraints: generateConstraints(value, detectedType),
+    constraints: generateAdvancedConstraints(value, detectedType, key, samples),
     isUnique: detectUniqueness(key, value),
     isPrimaryKeyCandidate: detectPrimaryKeyCandidate(key, value, detectedType),
     isForeignKeyCandidate: detectForeignKeyCandidate(key, value, detectedType),
@@ -346,34 +351,117 @@ function detectPatterns(value: any): string[] {
 }
 
 /**
- * Generates constraints for a field based on its value and type
+ * Analyzes nullability patterns in data samples
  */
-function generateConstraints(value: any, detectedType: string): string[] {
-  const constraints: string[] = [];
+function analyzeNullability(samples: any[], isArray: boolean): boolean {
+  if (samples.length === 0) return true;
   
-  if (value === null || value === undefined) {
-    // Field can be null
-    return constraints;
+  // If any sample is null/undefined, field is nullable
+  const hasNulls = samples.some(sample => sample === null || sample === undefined);
+  
+  if (isArray) {
+    // For arrays, also check if any array items are null
+    const hasNullItems = samples.some(arr => {
+      if (Array.isArray(arr)) {
+        return arr.some(item => item === null || item === undefined);
+      }
+      return false;
+    });
+    
+    return hasNulls || hasNullItems;
   }
   
-  // Add NOT NULL constraint for non-nullable fields
-  constraints.push("NOT NULL");
+  // Additional heuristics for nullable detection
+  // If we have multiple samples and some are empty strings, might be nullable
+  if (samples.length > 1) {
+    const hasEmptyStrings = samples.some(sample => sample === "");
+    const hasUndefined = samples.some(sample => sample === undefined);
+    
+    if (hasEmptyStrings || hasUndefined) {
+      return true;
+    }
+  }
   
-  // Add specific constraints based on type
-  switch (detectedType) {
-    case "email":
-      constraints.push("CHECK (value LIKE '%@%.%')");
-      break;
+  return hasNulls;
+}
+
+/**
+ * Generates advanced constraints for a field based on comprehensive analysis
+ */
+function generateAdvancedConstraints(value: any, detectedType: string, fieldName: string, samples: any[]): string[] {
+  const constraints: string[] = [];
+  
+  // Analyze nullability from samples
+  const isNullable = analyzeNullability(samples, Array.isArray(value));
+  
+  if (!isNullable) {
+    constraints.push("NOT NULL");
+  }
+  
+  // Add specific constraints based on field name and type
+  const fieldLower = fieldName.toLowerCase();
+  
+  // Email constraints
+  if (detectedType === "email" || fieldLower.includes("email")) {
+    constraints.push("CHECK (value LIKE '%@%.%' AND value NOT LIKE '%@%@%')");
+  }
+  
+  // URL constraints
+  if (detectedType === "url" || fieldLower.includes("url") || fieldLower.includes("link")) {
+    constraints.push("CHECK (value LIKE 'http%://%')");
+  }
+  
+  // Positive number constraints for financial fields
+  if (detectedType === "number" && 
+      (fieldLower.includes("price") || fieldLower.includes("amount") || 
+       fieldLower.includes("cost") || fieldLower.includes("fee"))) {
+    constraints.push("CHECK (value >= 0)");
+  }
+  
+  // Age constraints
+  if (fieldLower.includes("age") && detectedType === "number") {
+    constraints.push("CHECK (value >= 0 AND value <= 150)");
+  }
+  
+  // Status/enum constraints
+  if (fieldLower.includes("status") || fieldLower.includes("state")) {
+    const uniqueValues = Array.from(new Set(samples.filter(s => s !== null && s !== undefined)));
+    if (uniqueValues.length <= 10 && uniqueValues.length > 1) {
+      const valueList = uniqueValues.map(v => `'${v}'`).join(", ");
+      constraints.push(`CHECK (value IN (${valueList}))`);
+    }
+  }
+  
+  // Length constraints for strings
+  if (typeof value === "string" && detectedType === "string") {
+    const maxLength = Math.max(...samples
+      .filter(s => typeof s === "string")
+      .map(s => s.length));
     
-    case "url":
-      constraints.push("CHECK (value LIKE 'http%://%')");
-      break;
-    
-    case "number":
-      if (typeof value === "number" && value >= 0) {
-        constraints.push("CHECK (value >= 0)");
+    if (maxLength > 0) {
+      // Ensure minimum reasonable length for certain fields
+      if (fieldLower.includes("name") && maxLength < 2) {
+        constraints.push("CHECK (LENGTH(value) >= 1)");
       }
-      break;
+      if (fieldLower.includes("description") && maxLength < 10) {
+        constraints.push("CHECK (LENGTH(value) >= 5)");
+      }
+    }
+  }
+  
+  // UUID format validation
+  if (detectedType === "uuid") {
+    constraints.push("CHECK (value ~ '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$')");
+  }
+  
+  // Date range constraints
+  if (detectedType === "date" || fieldLower.includes("date") || fieldLower.includes("time")) {
+    if (fieldLower.includes("birth") || fieldLower.includes("born")) {
+      constraints.push("CHECK (value <= CURRENT_DATE)");
+    }
+    if (fieldLower.includes("created") || fieldLower.includes("updated")) {
+      constraints.push("CHECK (value <= CURRENT_TIMESTAMP)");
+    }
   }
   
   return constraints;
@@ -514,15 +602,35 @@ async function generateTableSchemas(
   const tables: TableSchema[] = [];
   
   for (const tableDef of tableDefinitions) {
-    const columns: ColumnSchema[] = tableDef.fields.map(field => ({
-      name: field.name,
-      type: field.sqlType,
-      nullable: field.nullable,
-      isPrimaryKey: field.isPrimaryKeyCandidate,
-      isForeignKey: field.isForeignKeyCandidate,
-      constraints: field.constraints,
-      comment: generateFieldComment(field)
-    }));
+    const columns: ColumnSchema[] = [];
+    
+    // Convert fields to columns with enhanced analysis
+    for (const field of tableDef.fields) {
+      // Skip nested objects that should be separate tables
+      if (field.isObject && config.normalizationLevel !== NormalizationLevel.Denormalized) {
+        continue;
+      }
+      
+      const column: ColumnSchema = {
+        name: field.name,
+        type: field.sqlType,
+        nullable: field.nullable,
+        isPrimaryKey: field.isPrimaryKeyCandidate,
+        isForeignKey: field.isForeignKeyCandidate,
+        constraints: field.constraints,
+        comment: generateColumnComment(field)
+      };
+      
+      // Add default values for certain types
+      if (!field.nullable && !field.isPrimaryKeyCandidate) {
+        const defaultValue = generateDefaultValue(field.sqlType, field.type);
+        if (defaultValue) {
+          column.defaultValue = defaultValue;
+        }
+      }
+      
+      columns.push(column);
+    }
     
     // Ensure at least one primary key
     const primaryKeyColumn = columns.find(col => col.isPrimaryKey);
@@ -533,15 +641,33 @@ async function generateTableSchemas(
         type: "SERIAL",
         nullable: false,
         isPrimaryKey: true,
-        constraints: ["PRIMARY KEY"],
+        constraints: ["NOT NULL"],
         comment: "Auto-generated primary key"
+      });
+    }
+    
+    // Add foreign key column for child tables
+    if (tableDef.parentTable) {
+      const parentIdColumn = formatColumnName(
+        `${tableDef.parentTable}_id`,
+        config.namingConvention
+      );
+      
+      columns.push({
+        name: parentIdColumn,
+        type: "INTEGER",
+        nullable: false,
+        isForeignKey: true,
+        constraints: ["NOT NULL"]
       });
     }
     
     const table: TableSchema = {
       name: config.tablePrefix ? `${config.tablePrefix}${tableDef.name}` : tableDef.name,
       columns,
-      primaryKey: columns.find(col => col.isPrimaryKey)?.name
+      primaryKey: columns.find(col => col.isPrimaryKey)?.name,
+      foreignKeys: generateForeignKeys(tableDef, columns, config),
+      indexes: generateTableIndexes(columns, tableDef)
     };
     
     tables.push(table);
@@ -572,6 +698,52 @@ function generateFieldComment(field: JSONFieldAnalysis): string {
 }
 
 /**
+ * Enhanced version that includes constraint information
+ */
+function generateColumnComment(field: JSONFieldAnalysis): string {
+  const parts: string[] = [];
+  
+  if (field.patterns.length > 0) {
+    parts.push(`Patterns: ${field.patterns.join(", ")}`);
+  }
+  
+  if (field.isArray) {
+    parts.push(`Array of ${field.arrayItemType || "mixed"} values`);
+  }
+  
+  if (field.estimatedLength) {
+    parts.push(`Max length: ${field.estimatedLength}`);
+  }
+  
+  if (field.isUnique) {
+    parts.push("Unique values detected");
+  }
+  
+  if (field.constraints.length > 0) {
+    parts.push(`Constraints: ${field.constraints.join(", ")}`);
+  }
+  
+  return parts.join(". ") || "Generated from JSON analysis";
+}
+
+/**
+ * Generates appropriate default values for columns
+ */
+function generateDefaultValue(sqlType: string, detectedType: string): string | undefined {
+  // Only set defaults for certain types to avoid issues
+  if (sqlType.includes("BOOLEAN")) {
+    return "FALSE";
+  }
+  
+  if (sqlType.includes("TIMESTAMP") && detectedType === "date") {
+    return "CURRENT_TIMESTAMP";
+  }
+  
+  // Don't set defaults for most other types to maintain data integrity
+  return undefined;
+}
+
+/**
  * Detects relationships between tables
  */
 async function detectRelationships(
@@ -592,6 +764,103 @@ async function detectRelationships(
   }
   
   return relationships;
+}
+
+/**
+ * Generates foreign key constraints for a table
+ */
+function generateForeignKeys(
+  tableDef: TableDefinition,
+  columns: ColumnSchema[],
+  config: SQLSchemaConfig
+): ForeignKeySchema[] {
+  const foreignKeys: ForeignKeySchema[] = [];
+  
+  // Add foreign key for parent table relationship
+  if (tableDef.parentTable) {
+    const parentIdColumn = formatColumnName(
+      `${tableDef.parentTable}_id`,
+      config.namingConvention
+    );
+    
+    foreignKeys.push({
+      columnName: parentIdColumn,
+      referencedTable: tableDef.parentTable,
+      referencedColumn: "id",
+      onDelete: "CASCADE",
+      onUpdate: "CASCADE"
+    });
+  }
+  
+  // Add foreign keys for detected foreign key columns
+  for (const column of columns) {
+    if (column.isForeignKey && column.name.endsWith("_id") && column.name !== "id") {
+      const referencedTable = column.name.replace("_id", "");
+      
+      foreignKeys.push({
+        columnName: column.name,
+        referencedTable: formatTableName(referencedTable, config.namingConvention),
+        referencedColumn: "id",
+        onDelete: "RESTRICT",
+        onUpdate: "CASCADE"
+      });
+    }
+  }
+  
+  return foreignKeys;
+}
+
+/**
+ * Generates indexes for a table based on column analysis
+ */
+function generateTableIndexes(
+  columns: ColumnSchema[],
+  tableDef: TableDefinition
+): IndexSchema[] {
+  const indexes: IndexSchema[] = [];
+  
+  // Index foreign key columns
+  const foreignKeyColumns = columns.filter(col => col.isForeignKey);
+  for (const col of foreignKeyColumns) {
+    indexes.push({
+      name: `idx_${tableDef.name}_${col.name}`,
+      columns: [col.name],
+      unique: false,
+      type: "BTREE"
+    });
+  }
+  
+  // Index unique columns (non-primary key)
+  const uniqueColumns = columns.filter(col => 
+    col.constraints?.includes("UNIQUE") && !col.isPrimaryKey
+  );
+  for (const col of uniqueColumns) {
+    indexes.push({
+      name: `idx_${tableDef.name}_${col.name}_unique`,
+      columns: [col.name],
+      unique: true,
+      type: "BTREE"
+    });
+  }
+  
+  // Index commonly searched columns
+  const searchableColumns = columns.filter(col => {
+    const name = col.name.toLowerCase();
+    return name.includes("name") || name.includes("title") || 
+           name.includes("email") || name.includes("username") ||
+           col.type.includes("VARCHAR");
+  });
+  
+  for (const col of searchableColumns.slice(0, 3)) { // Limit to avoid too many indexes
+    indexes.push({
+      name: `idx_${tableDef.name}_${col.name}_search`,
+      columns: [col.name],
+      unique: false,
+      type: "BTREE"
+    });
+  }
+  
+  return indexes;
 }
 
 /**

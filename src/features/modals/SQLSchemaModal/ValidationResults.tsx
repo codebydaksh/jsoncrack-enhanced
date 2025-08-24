@@ -20,7 +20,7 @@ import {
   FiX,
   FiInfo,
   FiChevronDown,
-  FiBug,
+  FiAlertCircle,
   FiShield
 } from "react-icons/fi";
 
@@ -73,7 +73,7 @@ export const ValidationResults: React.FC<ValidationResultsProps> = ({
       <Paper key={index} p="sm" withBorder bg={`var(--mantine-color-${type === "error" ? "red" : "orange"}-0)`}>
         <Group align="flex-start">
           {type === "error" ? (
-            <FiBug size={16} color="var(--mantine-color-red-6)" style={{ marginTop: 2 }} />
+            <FiAlertCircle size={16} color="var(--mantine-color-red-6)" style={{ marginTop: 2 }} />
           ) : (
             <FiAlertTriangle size={16} color="var(--mantine-color-orange-6)" style={{ marginTop: 2 }} />
           )}

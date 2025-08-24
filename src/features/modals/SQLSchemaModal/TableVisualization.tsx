@@ -18,7 +18,7 @@ import {
 import { 
   FiKey, 
   FiLink2, 
-  FiGrid3x3,
+  FiGrid,
   FiCheck,
   FiX,
   FiInfo
@@ -91,7 +91,7 @@ export const TableVisualization: React.FC<TableVisualizationProps> = ({
       {/* Table Header */}
       <Group justify="apart" mb="md">
         <Group>
-          <FiGrid3x3 size={20} color="var(--mantine-color-blue-6)" />
+          <FiGrid size={20} color="var(--mantine-color-blue-6)" />
           <Text size="lg" fw={600}>{table.name}</Text>
         </Group>
         
@@ -116,7 +116,7 @@ export const TableVisualization: React.FC<TableVisualizationProps> = ({
 
       {/* Columns Table */}
       <ScrollArea.Autosize mah={300}>
-        <Table striped highlightOnHover fontSize="sm">
+        <Table striped highlightOnHover>
           <Table.Thead>
             <Table.Tr>
               <Table.Th style={{ width: "30px" }}></Table.Th>

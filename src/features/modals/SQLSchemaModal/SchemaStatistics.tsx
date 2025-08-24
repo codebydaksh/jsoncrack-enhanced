@@ -15,7 +15,7 @@ import {
 } from "@mantine/core";
 import { 
   FiDatabase,
-  FiGrid3x3,
+  FiGrid,
   FiKey,
   FiLink2,
   FiBarChart,
@@ -82,7 +82,7 @@ export const SchemaStatistics: React.FC<SchemaStatisticsProps> = ({
         <Grid.Col span={{ base: 12, sm: 6, lg: 3 }}>
           <Card withBorder h="100%">
             <Group justify="apart" mb="xs">
-              <FiGrid3x3 size={20} color="var(--mantine-color-blue-6)" />
+              <FiGrid size={20} color="var(--mantine-color-blue-6)" />
               <Badge variant="light" color="blue" size="lg">
                 {tables.length}
               </Badge>

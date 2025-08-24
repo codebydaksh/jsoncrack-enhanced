@@ -352,6 +352,10 @@ class SQLGenerator {
           }
         }
       }
+      
+      // Generate advanced constraints based on data type and patterns
+      const advancedConstraints = this.generateAdvancedConstraints(column);
+      constraints.push(...advancedConstraints);
     }
     
     return constraints;
@@ -412,26 +416,56 @@ class SQLGenerator {
         sql += "\n";
       }
       
+      // Generate performance indexes based on data types and patterns
+      const performanceIndexes = this.generatePerformanceIndexes(table);
+      for (const index of performanceIndexes) {
+        sql += this.generateCreateIndex(index.name, table.name, index.columns, index.unique, index.type);
+        sql += "\n";
+      }
+      
       // Add custom indexes from table schema
       if (table.indexes) {
         for (const index of table.indexes) {
-          sql += this.generateCreateIndex(index.name, table.name, index.columns, index.unique);
+          sql += this.generateCreateIndex(index.name, table.name, index.columns, index.unique, index.type);
           sql += "\n";
         }
+      }
+      
+      // Generate composite indexes for commonly queried column combinations
+      const compositeIndexes = this.generateCompositeIndexes(table, relationships);
+      for (const index of compositeIndexes) {
+        sql += this.generateCreateIndex(index.name, table.name, index.columns, index.unique);
+        sql += "\n";
       }
     }
     
     return sql;
   }
 
-  generateCreateIndex(name: string, tableName: string, columns: string[], unique: boolean): string {
+  generateCreateIndex(name: string, tableName: string, columns: string[], unique: boolean, type?: string): string {
     const indexName = this.quoteIdentifier(name);
     const table = this.quoteIdentifier(tableName);
     const cols = columns.map(col => this.quoteIdentifier(col)).join(', ');
     
     const uniqueKeyword = unique ? "UNIQUE " : "";
+    let indexTypeClause = "";
     
-    return `CREATE ${uniqueKeyword}INDEX ${indexName} ON ${table} (${cols});`;
+    // Add index type if supported by the database
+    if (type && this.supportsIndexType(type)) {
+      switch (this.config.databaseType) {
+        case DatabaseType.PostgreSQL:
+          indexTypeClause = ` USING ${type}`;
+          break;
+        case DatabaseType.MySQL:
+          indexTypeClause = ` USING ${type}`;
+          break;
+        default:
+          // SQL Server and SQLite don't support explicit index types in the same way
+          break;
+      }
+    }
+    
+    return `CREATE ${uniqueKeyword}INDEX ${indexName} ON ${table} (${cols})${indexTypeClause};`;
   }
 
   generateTableOptions(): string {
@@ -537,6 +571,261 @@ class SQLGenerator {
 
   isAutoIncrementType(dataType: string): boolean {
     return dataType.includes("SERIAL") || dataType.includes("IDENTITY") || dataType.includes("AUTOINCREMENT");
+  }
+
+  /**
+   * Generate advanced constraints based on data type analysis
+   */
+  generateAdvancedConstraints(column: ColumnSchema): string[] {
+    const constraints: string[] = [];
+    const colName = this.quoteIdentifier(column.name);
+    
+    // Email validation constraint
+    if (column.type.includes('email') || column.comment?.includes('email')) {
+      if (this.dialect.supportsCheck) {
+        const constraintName = `chk_${column.name}_email`;
+        let emailRegex = "";
+        
+        switch (this.config.databaseType) {
+          case DatabaseType.PostgreSQL:
+            emailRegex = `${colName} ~ '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$'`;
+            break;
+          case DatabaseType.MySQL:
+            emailRegex = `${colName} REGEXP '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$'`;
+            break;
+          case DatabaseType.SQLServer:
+            // SQL Server uses LIKE for basic email validation
+            emailRegex = `${colName} LIKE '%_@_%.__%' AND ${colName} NOT LIKE '%@%@%'`;
+            break;
+          default:
+            // Basic check for other databases
+            emailRegex = `${colName} LIKE '%@%.%'`;
+            break;
+        }
+        
+        if (emailRegex) {
+          constraints.push(`CONSTRAINT ${this.quoteIdentifier(constraintName)} CHECK (${emailRegex})`);
+        }
+      }
+    }
+    
+    // URL validation constraint
+    if (column.type.includes('url') || column.comment?.includes('url')) {
+      if (this.dialect.supportsCheck) {
+        const constraintName = `chk_${column.name}_url`;
+        let urlCheck = "";
+        
+        switch (this.config.databaseType) {
+          case DatabaseType.PostgreSQL:
+            urlCheck = `${colName} ~ '^https?://[^\\s/$.?#].[^\\s]*$'`;
+            break;
+          case DatabaseType.MySQL:
+            urlCheck = `${colName} REGEXP '^https?://[^[:space:]/$.?#].[^[:space:]]*$'`;
+            break;
+          default:
+            urlCheck = `${colName} LIKE 'http://%' OR ${colName} LIKE 'https://%'`;
+            break;
+        }
+        
+        constraints.push(`CONSTRAINT ${this.quoteIdentifier(constraintName)} CHECK (${urlCheck})`);
+      }
+    }
+    
+    // Phone number validation
+    if (column.type.includes('phone') || column.name.toLowerCase().includes('phone')) {
+      if (this.dialect.supportsCheck) {
+        const constraintName = `chk_${column.name}_phone`;
+        // Basic phone number validation (digits, spaces, dashes, parentheses)
+        let phoneCheck = "";
+        
+        switch (this.config.databaseType) {
+          case DatabaseType.PostgreSQL:
+          case DatabaseType.MySQL:
+            phoneCheck = `LENGTH(REGEXP_REPLACE(${colName}, '[^0-9]', '', 'g')) >= 10`;
+            break;
+          default:
+            phoneCheck = `LEN(${colName}) >= 10`;
+            break;
+        }
+        
+        constraints.push(`CONSTRAINT ${this.quoteIdentifier(constraintName)} CHECK (${phoneCheck})`);
+      }
+    }
+    
+    // Positive number constraints for numeric types
+    if (column.type.includes('INT') || column.type.includes('DECIMAL')) {
+      if (column.name.toLowerCase().includes('price') || 
+          column.name.toLowerCase().includes('amount') || 
+          column.name.toLowerCase().includes('cost')) {
+        const constraintName = `chk_${column.name}_positive`;
+        constraints.push(`CONSTRAINT ${this.quoteIdentifier(constraintName)} CHECK (${colName} >= 0)`);
+      }
+    }
+    
+    // Date range constraints
+    if (column.type.includes('DATE') || column.type.includes('TIMESTAMP')) {
+      if (column.name.toLowerCase().includes('birth') || column.name.toLowerCase().includes('created')) {
+        const constraintName = `chk_${column.name}_valid_date`;
+        let dateCheck = "";
+        
+        switch (this.config.databaseType) {
+          case DatabaseType.PostgreSQL:
+            dateCheck = `${colName} <= CURRENT_DATE`;
+            break;
+          case DatabaseType.MySQL:
+            dateCheck = `${colName} <= CURDATE()`;
+            break;
+          case DatabaseType.SQLServer:
+            dateCheck = `${colName} <= GETDATE()`;
+            break;
+          case DatabaseType.SQLite:
+            dateCheck = `${colName} <= date('now')`;
+            break;
+        }
+        
+        if (dateCheck) {
+          constraints.push(`CONSTRAINT ${this.quoteIdentifier(constraintName)} CHECK (${dateCheck})`);
+        }
+      }
+    }
+    
+    return constraints;
+  }
+
+  /**
+   * Generate performance-oriented indexes based on data patterns
+   */
+  generatePerformanceIndexes(table: TableSchema): Array<{name: string, columns: string[], unique: boolean, type?: string}> {
+    const indexes: Array<{name: string, columns: string[], unique: boolean, type?: string}> = [];
+    
+    // Index timestamp columns for time-based queries
+    const timestampColumns = table.columns.filter(col => 
+      col.type.includes('TIMESTAMP') || col.type.includes('DATE') ||
+      col.name.toLowerCase().includes('created') || 
+      col.name.toLowerCase().includes('updated') ||
+      col.name.toLowerCase().includes('modified')
+    );
+    
+    for (const col of timestampColumns) {
+      indexes.push({
+        name: `idx_${table.name}_${col.name}_perf`,
+        columns: [col.name],
+        unique: false,
+        type: 'BTREE'
+      });
+    }
+    
+    // Index text columns that might be searched frequently
+    const searchableColumns = table.columns.filter(col => 
+      (col.type.includes('VARCHAR') || col.type.includes('TEXT')) &&
+      (col.name.toLowerCase().includes('name') || 
+       col.name.toLowerCase().includes('title') ||
+       col.name.toLowerCase().includes('description'))
+    );
+    
+    for (const col of searchableColumns) {
+      // Use GIN index for PostgreSQL text search
+      const indexType = this.config.databaseType === DatabaseType.PostgreSQL ? 'GIN' : 'BTREE';
+      
+      indexes.push({
+        name: `idx_${table.name}_${col.name}_search`,
+        columns: [col.name],
+        unique: false,
+        type: indexType
+      });
+    }
+    
+    // Index JSON columns for PostgreSQL
+    if (this.config.databaseType === DatabaseType.PostgreSQL) {
+      const jsonColumns = table.columns.filter(col => col.type.includes('JSON'));
+      for (const col of jsonColumns) {
+        indexes.push({
+          name: `idx_${table.name}_${col.name}_gin`,
+          columns: [col.name],
+          unique: false,
+          type: 'GIN'
+        });
+      }
+    }
+    
+    return indexes;
+  }
+
+  /**
+   * Generate composite indexes for commonly queried column combinations
+   */
+  generateCompositeIndexes(table: TableSchema, relationships: RelationshipInfo[]): Array<{name: string, columns: string[], unique: boolean}> {
+    const indexes: Array<{name: string, columns: string[], unique: boolean}> = [];
+    
+    // Create composite indexes for foreign key + timestamp combinations
+    const fkColumns = table.columns.filter(col => col.isForeignKey);
+    const timestampColumns = table.columns.filter(col => 
+      col.type.includes('TIMESTAMP') || col.type.includes('DATE')
+    );
+    
+    for (const fkCol of fkColumns) {
+      for (const tsCol of timestampColumns) {
+        indexes.push({
+          name: `idx_${table.name}_${fkCol.name}_${tsCol.name}`,
+          columns: [fkCol.name, tsCol.name],
+          unique: false
+        });
+      }
+    }
+    
+    // Create composite indexes for status + date combinations
+    const statusColumns = table.columns.filter(col => 
+      col.name.toLowerCase().includes('status') || 
+      col.name.toLowerCase().includes('state') ||
+      col.name.toLowerCase().includes('active')
+    );
+    
+    for (const statusCol of statusColumns) {
+      for (const tsCol of timestampColumns) {
+        indexes.push({
+          name: `idx_${table.name}_${statusCol.name}_${tsCol.name}`,
+          columns: [statusCol.name, tsCol.name],
+          unique: false
+        });
+      }
+    }
+    
+    // Create unique composite indexes for natural keys
+    const nameColumns = table.columns.filter(col => 
+      col.name.toLowerCase().includes('name') || 
+      col.name.toLowerCase().includes('code') ||
+      col.name.toLowerCase().includes('email')
+    );
+    
+    if (nameColumns.length >= 2) {
+      // Create composite unique index for first two name-like columns
+      const firstTwo = nameColumns.slice(0, 2);
+      indexes.push({
+        name: `idx_${table.name}_${firstTwo.map(c => c.name).join('_')}_unique`,
+        columns: firstTwo.map(c => c.name),
+        unique: true
+      });
+    }
+    
+    return indexes;
+  }
+
+  /**
+   * Check if database supports specific index type
+   */
+  supportsIndexType(type: string): boolean {
+    switch (this.config.databaseType) {
+      case DatabaseType.PostgreSQL:
+        return ['BTREE', 'HASH', 'GIN', 'GIST'].includes(type);
+      case DatabaseType.MySQL:
+        return ['BTREE', 'HASH'].includes(type);
+      case DatabaseType.SQLServer:
+        return false; // SQL Server uses different syntax
+      case DatabaseType.SQLite:
+        return false; // SQLite doesn't support explicit index types
+      default:
+        return false;
+    }
   }
 }
 

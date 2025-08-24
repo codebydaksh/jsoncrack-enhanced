@@ -17,7 +17,7 @@ import {
 import { 
   FiArrowRight, 
   FiGitCommit,
-  FiGrid3x3,
+  FiGrid,
   FiCircle,
   FiInfo,
   FiZoomIn
@@ -115,7 +115,7 @@ export const RelationshipDiagram: React.FC<RelationshipDiagramProps> = ({
             {/* Source Table */}
             <Paper p="sm" bg="var(--mantine-color-blue-0)" withBorder style={{ flex: 1 }}>
               <Group justify="center">
-                <FiGrid3x3 size={16} />
+                <FiGrid size={16} />
                 <Text size="sm" fw={500} ta="center">
                   {relationship.sourceTable}
                 </Text>
@@ -133,7 +133,7 @@ export const RelationshipDiagram: React.FC<RelationshipDiagramProps> = ({
             {/* Target Table */}
             <Paper p="sm" bg="var(--mantine-color-green-0)" withBorder style={{ flex: 1 }}>
               <Group justify="center">
-                <FiGrid3x3 size={16} />
+                <FiGrid size={16} />
                 <Text size="sm" fw={500} ta="center">
                   {relationship.targetTable}
                 </Text>
