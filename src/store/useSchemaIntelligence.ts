@@ -1,7 +1,9 @@
 import debounce from "lodash.debounce";
 import { create } from "zustand";
 import { SchemaAnalysisEngine } from "../lib/utils/schemaAnalysis";
-import type { SchemaAnalysisResult, SchemaAnalysisConfig } from "../types/schema";
+import { SuggestionValidator } from "../lib/utils/suggestionValidation";
+import type { SuggestionApplication } from "../lib/utils/suggestionValidation";
+import type { SchemaAnalysisResult, SchemaAnalysisConfig, SchemaSuggestion } from "../types/schema";
 import { DEFAULT_SCHEMA_CONFIG } from "../types/schema";
 
 interface SchemaIntelligenceState {
@@ -31,8 +33,12 @@ interface SchemaIntelligenceState {
   toggleInsights: () => void;
   toggleRealTime: () => void;
   selectSuggestion: (id: string | null) => void;
-  applySuggestion: (id: string) => void;
+  applySuggestion: (id: string) => Promise<SuggestionApplication>;
   dismissSuggestion: (id: string) => void;
+  previewSuggestion: (
+    suggestion: SchemaSuggestion,
+    jsonData: any
+  ) => { before: any; after: any; changes: string[] };
   clearAnalysis: () => void;
   resetSuggestionActions: () => void;
 }
@@ -148,11 +154,37 @@ const useSchemaIntelligence = create<SchemaIntelligenceState>((set, get) => ({
     set({ selectedSuggestionId: id });
   },
 
-  applySuggestion: (id: string) => {
-    set(state => ({
-      appliedSuggestions: [...state.appliedSuggestions, id],
-      selectedSuggestionId: null,
-    }));
+  applySuggestion: async (id: string) => {
+    const { currentAnalysis } = get();
+    if (!currentAnalysis) {
+      throw new Error("No analysis available");
+    }
+
+    const suggestion = currentAnalysis.suggestions.find(s => s.id === id);
+    if (!suggestion) {
+      throw new Error("Suggestion not found");
+    }
+
+    // For now, we'll use a simple JSON structure for validation
+    // In a real application, this would come from the current JSON data
+    const mockJsonData = {}; // This should be the actual JSON data being analyzed
+
+    try {
+      const result = await SuggestionValidator.applySuggestion(suggestion, mockJsonData);
+
+      if (result.success) {
+        set(state => ({
+          appliedSuggestions: [...state.appliedSuggestions, id],
+          selectedSuggestionId: null,
+        }));
+      }
+
+      return result;
+    } catch (error) {
+      throw new Error(
+        `Failed to apply suggestion: ${error instanceof Error ? error.message : "Unknown error"}`
+      );
+    }
   },
 
   dismissSuggestion: (id: string) => {
@@ -160,6 +192,10 @@ const useSchemaIntelligence = create<SchemaIntelligenceState>((set, get) => ({
       dismissedSuggestions: [...state.dismissedSuggestions, id],
       selectedSuggestionId: null,
     }));
+  },
+
+  previewSuggestion: (suggestion: SchemaSuggestion, jsonData: any) => {
+    return SuggestionValidator.previewSuggestion(suggestion, jsonData);
   },
 
   clearAnalysis: () => {

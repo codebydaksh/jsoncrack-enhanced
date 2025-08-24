@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import useSchemaIntelligence from "./useSchemaIntelligence";
 
 interface ValidationError {
   path: string;
@@ -27,6 +28,7 @@ interface ValidationActions {
   setErrors: (errors: ValidationError[]) => void;
   setIsValidating: (validating: boolean) => void;
   validateData: (jsonData: string) => Promise<void>;
+  validateWithSchemaIntelligence: (jsonData: string) => Promise<void>;
   clearValidation: () => void;
   getErrorsForPath: (path: string) => ValidationError[];
 }
@@ -232,6 +234,82 @@ const useValidation = create<ValidationState & ValidationActions>((set, get) => 
 
       set({
         errors,
+        validationResults: {
+          isValid: errorCount === 0,
+          errorCount,
+          warningCount,
+        },
+        isValidating: false,
+      });
+    } catch (error) {
+      // JSON parsing error
+      set({
+        errors: [
+          {
+            path: "$",
+            message: "Invalid JSON format",
+            severity: "error",
+            schemaPath: "$",
+          },
+        ],
+        validationResults: {
+          isValid: false,
+          errorCount: 1,
+          warningCount: 0,
+        },
+        isValidating: false,
+      });
+    }
+  },
+
+  validateWithSchemaIntelligence: async (jsonData: string) => {
+    const { isValidationEnabled } = get();
+
+    if (!isValidationEnabled) {
+      return;
+    }
+
+    set({ isValidating: true });
+
+    try {
+      const data = JSON.parse(jsonData);
+
+      // Get schema intelligence analysis
+      const schemaIntelligence = useSchemaIntelligence.getState();
+      await schemaIntelligence.analyzeData(data);
+
+      const analysis = schemaIntelligence.currentAnalysis;
+      if (!analysis) {
+        set({ isValidating: false });
+        return;
+      }
+
+      // Use generated schema for validation if no schema is set
+      let { schema } = get();
+      if (!schema && analysis.generatedSchema) {
+        schema = analysis.generatedSchema;
+        set({ schema });
+      }
+
+      // Combine traditional validation with schema intelligence suggestions
+      const validationErrors = schema ? validateJsonSchema(data, schema) : [];
+
+      // Convert high-priority suggestions to validation warnings
+      const suggestionWarnings: ValidationError[] = analysis.suggestions
+        .filter(suggestion => suggestion.severity === "critical" || suggestion.severity === "high")
+        .map(suggestion => ({
+          path: suggestion.field || "$",
+          message: `Schema Intelligence: ${suggestion.description}`,
+          severity: suggestion.severity === "critical" ? "error" : ("warning" as const),
+          schemaPath: suggestion.field || "$",
+        }));
+
+      const allErrors = [...validationErrors, ...suggestionWarnings];
+      const errorCount = allErrors.filter(e => e.severity === "error").length;
+      const warningCount = allErrors.filter(e => e.severity === "warning").length;
+
+      set({
+        errors: allErrors,
         validationResults: {
           isValid: errorCount === 0,
           errorCount,
