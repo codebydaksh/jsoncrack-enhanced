@@ -10,6 +10,13 @@ const config = {
   output: "export",
   reactStrictMode: false,
   productionBrowserSourceMaps: true,
+  trailingSlash: true,
+  images: {
+    unoptimized: true
+  },
+  // Add GitHub Pages specific configuration
+  basePath: process.env.NODE_ENV === 'production' ? '/jsoncrack-enhanced' : '',
+  assetPrefix: process.env.NODE_ENV === 'production' ? '/jsoncrack-enhanced/' : '',
   compiler: {
     styledComponents: true,
   },
@@ -17,18 +24,15 @@ const config = {
     config.resolve.fallback = { fs: false };
     config.output.webassemblyModuleFilename = "static/wasm/[modulehash].wasm";
     config.experiments = { asyncWebAssembly: true, layers: true };
-
     if (!isServer) {
       config.output.environment = { ...config.output.environment, asyncFunction: true };
     }
-
     return config;
   },
 };
 
 const configExport = () => {
   if (process.env.ANALYZE === "true") return withBundleAnalyzer(config);
-
   if (process.env.GITHUB_REPOSITORY === "AykutSarac/jsoncrack.com") {
     return withSentryConfig(
       config,
@@ -45,7 +49,6 @@ const configExport = () => {
       }
     );
   }
-
   return config;
 };
 
